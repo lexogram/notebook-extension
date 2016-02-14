@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2
+
+, "name": "Lexogram NoteBook"
+, "description": "Make and share notes on the web pages you visit in a language you are learning."
+, "version": "1.0"
+
+, "browser_action": {
+    "default_icon": "img/icon19sw.png"
+  , "default_popup": "html/popup.html"
+  }
+
+, "icons": {
+    "16": "img/icon16sw.png"
+  , "48": "img/icon48s.png"
+  , "128": "img/icon128s.png"
+  }
+
+, "permissions": [
+    "activeTab"
+  ]
+}
