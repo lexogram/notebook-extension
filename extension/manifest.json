@@ -5,9 +5,11 @@
 , "manifest_version": 2
 
 , "browser_action": {
-    "default_title": "Select Text"
+    "default_title": "Learn a new language" // tooltip
   , "default_icon": "img/icon19sw.png"
   , "default_popup": "html/popup.html"
+  , "badgeText": "Lexo"
+  , "badgeBackgroundColor": "#069"
   }
 
 , "icons": {
