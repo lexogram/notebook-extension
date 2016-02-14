@@ -1,12 +1,12 @@
 {
-  "manifest_version": 2
-
-, "name": "Lexogram NoteBook"
+  "name": "Lexogram NoteBook"
 , "description": "Make and share notes on the web pages you visit in a language you are learning."
 , "version": "1.0"
+, "manifest_version": 2
 
 , "browser_action": {
-    "default_icon": "img/icon19sw.png"
+    "default_title": "Select Text"
+  , "default_icon": "img/icon19sw.png"
   , "default_popup": "html/popup.html"
   }
 
@@ -18,5 +18,16 @@
 
 , "permissions": [
     "activeTab"
+  , "tabs"
+  , "<all_urls>"
   ]
+
+, "content_scripts": [ {
+    "matches": ["<all_urls>"]
+  , "js": [
+      "js/select.js"
+    ]
+  , "run_at": "document_start"
+  , "all_frames": true
+  } ]
 }
