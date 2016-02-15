@@ -7,9 +7,7 @@
 , "browser_action": {
     "default_title": "Learn a new language" // tooltip
   , "default_icon": "img/icon19sw.png"
-  , "default_popup": "html/popup.html"
-  , "badgeText": "Lexo"
-  , "badgeBackgroundColor": "#069"
+  , "default_popup": "html/settings.html"
   }
 
 , "icons": {
@@ -27,8 +25,11 @@
 , "content_scripts": [ {
     "matches": ["<all_urls>"]
   , "js": [
-      "js/select.js"
+      "js//lx_content.js"
     ]
+
+    // files are injected immediately after the DOM is complete
+    // but before subresources like images and frames have loaded. 
   , "run_at": "document_start"
   , "all_frames": true
   } ]

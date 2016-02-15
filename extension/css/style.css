@@ -1,14 +1,8 @@
 body { 
-width: 248px;
+  width: 248px;
 }
-textarea {
-width: 240px;
-height: 120px;
-}
-p {
+* {
 -webkit-touch-callout: none;
 -webkit-user-select: none;
 user-select: none;
-margin: 0;
-color: #999;
 }
