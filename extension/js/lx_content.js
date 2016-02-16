@@ -1,19 +1,38 @@
 "use strict"
 
-// This script is injected into the current page and executed as soon
-// as possible, before the DOM is ready
-;(function (){
+// This script is injected into the every page visited by the user
+// and is executed on document_end after the DOM is ready.
+// 
+;(function lx_content(){
+  // Listen to messages from the background script
   chrome.extension.onMessage.addListener(dispatchMessage)
+
+  var restorePadding   // "0px" or similar
+  var bodyPadding = {} // { top: "0px", ... }
+  var body             // document body
+  var notebookElement  // article element | undefined
+  var edge             // "top" | "right" | "bottom" | "left"
+  var edgeSizes        // { horizontal: "Xpx", vertical: "Ypx" }
+
+  ;(function getInitialBodyPadding(){
+    var style = window.getComputedStyle(document.body)
+    restorePadding = style.padding
+
+    bodyPadding.top = style.paddingTop
+    bodyPadding.right = style.paddingRight
+    bodyPadding.bottom = style.paddingBottom
+    bodyPadding.left = style.paddingLeft
+  })()
 
   function dispatchMessage(request, sender, callback) {
     var response = {}
 
     switch (request.method) {
-      case "getPageData":
-        response = getPageData()
+      case "getNoteBookStatus":
+        getNoteBookStatus(response)
       break
-      case "showNoteBook":
-        response.data = showNoteBook(request)
+      case "openNoteBook":
+        response.data = openNoteBook(request)
       break
       case "hideNoteBook":
         response.data = hideNoteBook(request)
@@ -23,47 +42,72 @@
     callback(response)
   }
   
-  function getPageData() {
-    var pageData = {}
-    var style = window.getComputedStyle(document.body)
-    var paddings = pageData.paddings = {}
-
-    paddings.top = style.paddingTop
-    paddings.right = style.paddingRight
-    paddings.bottom = style.paddingBottom
-    paddings.left = style.paddingLeft
-
-    pageData.pageSize = {
-      width: window.innerWidth
-    , height:  window.innerHeight
-    }
-
-    return pageData
+  function getNoteBookStatus(response) {
+    notebookElement = document.querySelector("#lx-notebook")
+    // undefined | article element
+    response.open = !!notebookElement
   }
 
-  function showNoteBook(request) {
-    var body = document.body
-    var inset = document.querySelector("#inset")
-    var css = request.css
+  function openNoteBook(request) {
+    // { placing: {
+    //     edge: <top | right | bottom | left>
+    //   , size: { 
+    //       vertical: "Xpx"}
+    //     , horizontal: "Ypx"
+    //     }
+    //   }
+    // , html: html
+    // }
+    // notebookElement is falsy when this is called
 
-    body.style.padding = request.padding // "0px 0px 0px 0px"
+    body = document.body
+    edge = request.placing.edge
+    edgeSizes = request.placing.edgeSizes
 
-    if (!inset) {
-      inset = document.createElement("h1")
-      inset.id = "inset"
-      inset.innerHTML = "NoteBook"
-      body.appendChild(inset)
-    }
+    notebookElement = document.createElement("div")
+    notebookElement.innerHTML = request.html
+    notebookElement = notebookElement.children[0]
 
-    inset.removeAttribute("style")
+    positionNoteBook()
+    body.appendChild(notebookElement)
 
-    for (var key in css) {
-      if (css.hasOwnProperty(key)) {
-        inset.style[key] = css[key]
+    initializeInteractions()
+ 
+    return "openNoteBook complete"
+  }
+
+  function positionNoteBook() {
+    var sides = ["top", "right", "bottom", "left"]
+    var padding = ""
+    var cssText = ""
+    var size
+    var className
+
+    sides.forEach(function setPadding(side) {
+      if (side === edge) {
+        cssText += side+":0;"
+
+        if (["top", "bottom"].indexOf(side) < 0) {
+          className = "vertical"
+          cssText += "width:"
+        } else {
+          cssText += "height:"
+          className = "horizontal"
+        }
+
+        size = edgeSizes[className]
+        cssText += size +";"
+
+      } else {
+        size = bodyPadding[side]
       }
-    }
 
-    return "showNoteBook complete"
+      padding += size + " "
+    })
+
+    notebookElement.className = className
+    notebookElement.style.cssText = cssText
+    body.style.padding = padding.trim() // "0px 0px 0px 0px"
   }
 
   function hideNoteBook(request) {
@@ -75,7 +119,11 @@
 
     return "hideNoteBook complete"
   }
+
+  function initializeInteractions() {
+  }
 })()
+
 
 
 

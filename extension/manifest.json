@@ -7,7 +7,10 @@
 , "browser_action": {
     "default_title": "Learn a new language" // tooltip
   , "default_icon": "img/icon19sw.png"
-  , "default_popup": "html/settings.html"
+  }
+
+, "background" : {
+    "scripts" : ["js//background.js"]
   }
 
 , "icons": {
@@ -27,10 +30,13 @@
   , "js": [
       "js//lx_content.js"
     ]
+  , "css": [ 
+      "css//lx-content.css"
+    ]
 
-    // files are injected immediately after the DOM is complete
-    // but before subresources like images and frames have loaded. 
-  , "run_at": "document_start"
+    // Files are injected and run after the DOM is complete but
+    // before subresources like images and frames have loaded. 
+  , "run_at": "document_end"
   , "all_frames": true
   } ]
 }
