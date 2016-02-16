@@ -1,0 +1,20 @@
+Method to retrieve selection from main page and send it to View object.
+
+View object to recognize HTML elements and make them interactive.
+
+Connection with Meteor.
+
+Initial testing
+===============
+Create a collection for the only user.
+Fields:
+* url
+* phrase
+* context
+* user_id
+* lang co-DE
+* notes
+
+Save data to MongoDB
+
+When user selects a word in MongoDB, return the previously saved notes
