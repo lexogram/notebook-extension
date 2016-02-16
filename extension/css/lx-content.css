@@ -20,25 +20,32 @@
   margin: 0;
 }
 
-.lx-set-position {
+#lx-notebook h1 { /*simulate a toolbar*/
+  background-color: #ccf;
+  margin: 0;
+  padding: 4px;
+}
+
+#lx-set-position {
   position: absolute;
   width: 36px;
   height: 36px;
   right: 0;
   top: 3px; /*below hr*/
 }
-.lx-set-position div {
+#lx-set-position div {
   position: absolute;
   background-color: #006;
   opacity: 0.2;
   cursor: pointer;
 }
-.lx-set-position div:not(.selected):hover {
+#lx-set-position div:not(.selected):hover {
   opacity: 0.5;
 }
-.lx-set-position .selected {
+#lx-set-position .selected {
   opacity: 0.8;
-  cursor: default;
+  /*cursor: default;*/
+  pointer-events: none;
 }
 
 #lx-top,
@@ -63,7 +70,7 @@
 #lx-left {
   left: 0;
 }
-#lx-close {
+div#lx-close {
   width: 50%;
   height: 50%;
   left: 25%;
@@ -76,7 +83,7 @@
   color: #009;
 }
 #lx-close:hover {
-  color: #900;
+  color: #c00;
 }
 .no-select { 
   -webkit-touch-callout: none;

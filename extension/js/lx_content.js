@@ -67,10 +67,9 @@
     notebookElement = document.createElement("div")
     notebookElement.innerHTML = request.html
     notebookElement = notebookElement.children[0]
-
-    positionNoteBook()
     body.appendChild(notebookElement)
 
+    positionNoteBook()
     initializeInteractions()
  
     return "openNoteBook complete"
@@ -108,19 +107,52 @@
     notebookElement.className = className
     notebookElement.style.cssText = cssText
     body.style.padding = padding.trim() // "0px 0px 0px 0px"
-  }
 
-  function hideNoteBook(request) {
-    var body = document.body  
-    var inset = document.querySelector("#inset")
-
-    body.removeChild(inset)
-    body.style.padding = request.padding
-
-    return "hideNoteBook complete"
+    showPosition()
   }
 
   function initializeInteractions() {
+    var positionElement = document.querySelector("#lx-set-position")
+    positionElement.addEventListener("click", setPosition, false)
+  }
+
+  function setPosition(event) {
+    var action = event.target.id.match(/lx-(\w+)/)
+    if (!action) { return } else { action = action[1] }
+    // top | right | bottom | left | close
+    
+    if (action === "close") {
+      closeNoteBook()
+    } else {
+      edge = action
+      positionNoteBook()
+    }
+  }
+
+  function showPosition() {
+    var sides = ["top", "right", "bottom", "left"]
+    var side
+      , id
+      , div
+
+    for (var ii in sides) {
+      side = sides[ii]
+      id = "#lx-" + side
+      div = document.querySelector(id)
+
+      if (side === edge) {
+        div.classList.add("selected")
+      } else {       
+        div.classList.remove("selected")
+      }
+    }
+  }
+
+  function closeNoteBook() {
+    body.removeChild(notebookElement)
+    body.style.padding = restorePadding
+
+    // TODO: break the connection with the server cleanly
   }
 })()
 

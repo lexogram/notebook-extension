@@ -24,9 +24,7 @@
     function callback(response) {
       if (!response.open) {
         getPlacing()
-        getHTML()
-      } else {
-        speak("already open")
+        getHTML() // will call openNoteBook() on callback
       }
     }
 
