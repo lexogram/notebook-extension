@@ -12,6 +12,7 @@
   var body             // document body
   var notebookElement  // article element | undefined
   var edge             // "top" | "right" | "bottom" | "left"
+  var edges = ["top", "right", "bottom", "left"]
   var edgeSizes        // { horizontal: "Xpx", vertical: "Ypx" }
 
   ;(function getInitialBodyPadding(){
@@ -39,7 +40,9 @@
       break
     }
 
-    callback(response)
+    if (callback) {
+      callback(response)
+    }
   }
   
   function getNoteBookStatus(response) {
@@ -76,13 +79,12 @@
   }
 
   function positionNoteBook() {
-    var sides = ["top", "right", "bottom", "left"]
     var padding = ""
     var cssText = ""
     var size
     var className
 
-    sides.forEach(function setPadding(side) {
+    edges.forEach(function setPadding(side) {
       if (side === edge) {
         cssText += side+":0;"
 
@@ -118,25 +120,35 @@
 
   function setPosition(event) {
     var action = event.target.id.match(/lx-(\w+)/)
+    var message
+
     if (!action) { return } else { action = action[1] }
     // top | right | bottom | left | close
     
     if (action === "close") {
-      closeNoteBook()
-    } else {
-      edge = action
-      positionNoteBook()
+      return closeNoteBook()
+    } else if (edges.indexOf(action) < 0) {
+      console.log(event.target.id)
+      return
     }
+
+    edge = action
+    positionNoteBook()
+
+    message = { 
+      method: "saveEdge"
+    , edge: edge
+    }
+    chrome.runtime.sendMessage(message)
   }
 
   function showPosition() {
-    var sides = ["top", "right", "bottom", "left"]
     var side
       , id
       , div
 
-    for (var ii in sides) {
-      side = sides[ii]
+    for (var ii in edges) {
+      side = edges[ii]
       id = "#lx-" + side
       div = document.querySelector(id)
 

@@ -2,6 +2,25 @@
 
 ;(function noteBookSettings(){
   chrome.browserAction.onClicked.addListener(activateExtension)
+  chrome.runtime.onMessage.addListener(incomingMessage)
+
+  var placing
+
+  function incomingMessage(request, sender, callback) {
+    var tab = sender.tab // undefined if message is from extension
+    var url = tab ? tab.url : ""
+    var response = {}
+
+    switch (request.method) {
+      case "saveEdge":
+        response = saveEdge(request.edge)
+      break
+    }
+
+    if (callback) {
+      callback(response)
+    }
+  }
 
   var id // set in initializeNoteBook()
   var query = {
@@ -18,8 +37,7 @@
     id = tabs[0].id
     
     var message = { method: "getNoteBookStatus" }
-    var placing
-      , html
+    var html
 
     function callback(response) {
       if (!response.open) {
@@ -38,7 +56,6 @@
         , vertical: "200px"
         }
       }
-      var keys = Object.keys(defaults)
 
       try {
         placing = localStorage.getItem("placing")
@@ -48,7 +65,7 @@
       if (!placing) {       
         placing = defaults
       } else {
-        for (var key in keys) {
+        for (var key in defaults) {
           if (!placing[key]) {
             placing[key] = defaults[key]
           }
@@ -82,6 +99,14 @@
 
       chrome.tabs.sendMessage(id, message, callback)
     }
+  }
+
+  function saveEdge(edge) {
+    // Trust edge to be top|right|bottom|left
+    placing.edge = edge
+    localStorage.setItem("placing", JSON.stringify(placing))
+
+    return placing
   }
 
   function speak(phrase) {
