@@ -1,7 +1,0 @@
-User clicks on Extension Button. If the NoteBook is open... what happens? The NoteBook is closed (with a confirm prompt)?
-
-If the NoteBook is not open, then:
-* Read from localStorage which edge the NoteBook should be shown
-* Read the size for that edge (horizontal or vertical)
-* Inject the HTML, CSS and JS into the main page
-* Set the CSS to place the NoteBook on the appropriate edge with the given size

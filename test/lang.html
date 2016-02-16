@@ -1,0 +1,61 @@
+<html lang=en>
+<div lang="th">
+  <p id="test1">ไทย</p>
+</div>
+<p id="test2">Implicitly English</p>
+<div lang="en-CA">
+  <p id="test3">As Canadian as possible under the circumstances</p>
+</div>
+<p lang="en-AU"id="test4">Explictly Aussie</p>
+</html>
+
+<script>
+"use strict"
+
+function getLang(element) {
+  var lang = element.getAttribute("lang")
+
+  if (!lang) {
+    var elements
+      , languages
+      , language
+      , ii
+      , selector
+
+    // Find all elements with an explicit lang attribute
+    elements = [].slice.call(document.querySelectorAll("*[lang]"))
+
+    // Determine which languages are present
+    languages = []
+    for (ii in elements) {
+      lang = elements[ii].getAttribute("lang")
+      if (languages.indexOf(lang) < 0) {
+        languages.push(lang)
+      }
+    }
+
+    lang = "" // reset
+
+    for (ii in languages) {
+      language = languages[ii]
+      selector = ":lang(" + language + ")"
+      elements = [].slice.call(document.querySelectorAll(selector))
+
+      if (elements.indexOf(element) > -1) {
+        if (lang.length < language.length) {
+          lang = language
+        }
+      }
+    }
+  }
+
+  return lang
+}
+
+var result =  getLang(document.querySelector("#test1")) + " "
+result += getLang(document.querySelector("#test2")) + " "
+result += getLang(document.querySelector("#test3")) + " "
+result += getLang(document.querySelector("#test4"))
+
+alert (result)
+</script>

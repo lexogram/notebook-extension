@@ -1,0 +1,55 @@
+User selects a chunk to study
+Chunk is extended to include complete phrase
+=> regex to select whole phrase depends on language and script
+
+Parent phrase shown in separate <p>
+User can "select" (highlight) individual chunks in the parent phrase (by adding span elements to cloned parent)
+Selected text is now shown as "this is ... selected"
+Separate field to create a lemma-tized version: "<subject> ... selected" 
+
+Extract an expression that will allow the original selection to be reselected if a different user visits the page.
+
+Create database query:
+* time
+* selected words
+* language
+* userID
+* url (could be used to detect subject matter)
+* priority (depends on which tab is open: definition, translation, synonyms...)
+
+Database streams response, starting with the priority
+
+Show database response
+
+User adds personal notes
+
+
+In my case, I want to translate text and save it sentence by sentence (or possibly by paragraph). I want to get:
+* a reminder of where I saw each word before
+
+I want to
+* See each sentence, one at a time
+* Write my translation, without using any help, if possible
+* See a Google translation of the whole sentence as a starting point
+* Edit my translation
+* Save my translation automatically when I move to the next sentence
+* Be able to return to a sentence I translated before and correct it
+* Share my whole translation with someone, who does not need the fine-grained detail that I needed
+
+If I am reading a text that I understand quite well, I may just want to collapse the notebook until I need to check a word.
+
+* Select the word
+* Sentence is included
+* Database is queried
+* Information shown
+* Action
+  - Check the definition which seems most accurate
+  - Implicitly indicate that I am familiar with the word
+
+If I do this for only a few words in the page, I am implicitly indicating that the other words make sense.
+
+I open the NoteBook on a given page. This implies that the page interests me. The url/content is sent to the database. If the URL only is sent, then my bandwidth is not used unnecessarily: the server can get the page, independently.
+
+I have to open the NoteBook explicitly for each page I want to use it with, even if the NoteBook itself is displayed in another window.
+
+Click anywhere to select that word in that sentence.

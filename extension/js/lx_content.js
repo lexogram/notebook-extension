@@ -14,6 +14,8 @@
   var edge             // "top" | "right" | "bottom" | "left"
   var edges = ["top", "right", "bottom", "left"]
   var edgeSizes        // { horizontal: "Xpx", vertical: "Ypx" }
+  var selection 
+  var selectedText = ""// text selected on main page
 
   ;(function getInitialBodyPadding(){
     var style = window.getComputedStyle(document.body)
@@ -82,21 +84,21 @@
     var padding = ""
     var cssText = ""
     var size
-    var className
+    var orientation
 
     edges.forEach(function setPadding(side) {
       if (side === edge) {
         cssText += side+":0;"
 
         if (["top", "bottom"].indexOf(side) < 0) {
-          className = "vertical"
+          orientation = "vertical"
           cssText += "width:"
         } else {
           cssText += "height:"
-          className = "horizontal"
+          orientation = "horizontal"
         }
 
-        size = edgeSizes[className]
+        size = edgeSizes[orientation]
         cssText += size +";"
 
       } else {
@@ -106,9 +108,9 @@
       padding += size + " "
     })
 
-    notebookElement.className = className
+    notebookElement.className = edge
     notebookElement.style.cssText = cssText
-    body.style.padding = padding.trim() // "0px 0px 0px 0px"
+    body.style.padding = padding.trim()
 
     showPosition()
   }
@@ -116,6 +118,9 @@
   function initializeInteractions() {
     var positionElement = document.querySelector("#lx-set-position")
     positionElement.addEventListener("click", setPosition, false)
+
+    body.addEventListener("mouseup", checkSelection, false)
+    body.addEventListener("keyup", checkSelection, false)
   }
 
   function setPosition(event) {
@@ -128,8 +133,7 @@
     if (action === "close") {
       return closeNoteBook()
     } else if (edges.indexOf(action) < 0) {
-      console.log(event.target.id)
-      return
+      return // should never happen
     }
 
     edge = action
@@ -164,7 +168,35 @@
     body.removeChild(notebookElement)
     body.style.padding = restorePadding
 
+    body.removeEventListener("mouseup", checkSelection, false)
+    body.removeEventListener("keyup", checkSelection, false)
+
     // TODO: break the connection with the server cleanly
+  }
+
+  function checkSelection(event) {
+    selection = document.getSelection() // contains location data
+
+    // Exclude any selection which starts or ends in the NoteBook
+    var parent = selection.baseNode
+    while (parent = parent.parentNode) {
+      if (parent === notebookElement) {       
+        return
+      }
+    }
+    parent = selection.extentNode
+    while (parent = parent.parentNode) {
+      if (parent === notebookElement) {        
+        return
+      }
+    }
+
+    var text = selection.toString()
+    if (selectedText !== text) {
+      selectedText = text
+    }
+
+    document.querySelector("#lx-selection").innerHTML = selectedText
   }
 })()
 

@@ -4,34 +4,76 @@
   position: fixed;
   margin: 0;
 }
-#lx-notebook.horizontal {
+
+/* EDGE */
+#lx-notebook.top,
+#lx-notebook.bottom {
   width:100%;
   left: 0;
 }
-#lx-notebook.vertical {
+#lx-notebook.left,
+#lx-notebook.right {
   height:100%;
   top:0;
 }
 
-#lx-notebook hr {
-  height: 3px;
+/* RESIZER */
+#lx-resizer {
   background-color: #006;
-  border: none;
-  margin: 0;
+  position: absolute;
+}
+.left #lx-resizer,
+.right #lx-resizer {
+  height: 100%;
+  width: 2px;
+}
+.top #lx-resizer,
+.bottom #lx-resizer {
+  height: 2px;
+  width: 100%;
+}
+.top #lx-resizer {
+  bottom: 0;
+}
+.right #lx-resizer {
+  left: 0;
+}
+.bottom #lx-resizer {
+  top: 0;
+}
+.left #lx-resizer {
+  right: 0;
 }
 
-#lx-notebook h1 { /*simulate a toolbar*/
+/* TOOLBAR */
+#lx-toolbar {
+  position: absolute;
   background-color: #ccf;
+  height: 36px;
+  width: 100%;
+}
+.bottom #lx-toolbar {
+  top: 2px; /* space for the resizer at the top */
+}
+.right #lx-toolbar,
+.left #lx-toolbar { /* space for the resizer */
+  width: calc(100% - 2px);
+}
+.right #lx-toolbar { /* space for the resizer */
+  left: 2px;
+}
+#lx-toolbar h1 {
   margin: 0;
   padding: 4px;
 }
 
+/* TOOLBAR : EDGE SETTER */
 #lx-set-position {
   position: absolute;
   width: 36px;
   height: 36px;
   right: 0;
-  top: 3px; /*below hr*/
+  top: 0;
   pointer-events: none; /*no action on enclosing div*/
 }
 #lx-set-position div {
@@ -88,6 +130,27 @@ div#lx-close {
 #lx-close:hover {
   color: #c00;
 }
+
+#lx-body {
+  position: absolute;
+  top: 36px;
+  width: 100%;
+  height: calc(100% - 36px);
+  overflow: auto;
+}
+
+/* SELECTION */
+#lx-selection {
+  border: 1px solid #bbb;
+  border-right-color: #ddd;
+  border-bottom-color: #ddd;
+  max-height: 5em;
+  background-color: #ccc;
+  color: #000;
+  margin: 0.5em;
+  overflow: auto;
+}
+
 .no-select { 
   -webkit-touch-callout: none;
   -webkit-user-select: none;
