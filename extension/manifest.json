@@ -5,12 +5,12 @@
 , "manifest_version": 2
 
 , "browser_action": {
-    "default_title": "Learn a new language" // tooltip
+    "default_title": "Live a new language" // tooltip
   , "default_icon": "img/icon19sw.png"
   }
 
 , "background" : {
-    "scripts" : ["js//background.js"]
+    "scripts" : ["js/background.js"]
   }
 
 , "icons": {
@@ -28,10 +28,10 @@
 , "content_scripts": [ {
     "matches": ["<all_urls>"]
   , "js": [
-      "js//lx_content.js"
+      "js/lx_content.js"
     ]
   , "css": [ 
-      "css//lx-content.css"
+      "css/lx-content.css"
     ]
 
     // Files are injected and run after the DOM is complete but

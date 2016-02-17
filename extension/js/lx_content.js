@@ -179,13 +179,13 @@
 
     // Exclude any selection which starts or ends in the NoteBook
     var parent = selection.baseNode
-    while (parent = parent.parentNode) {
+    while (parent && (parent = parent.parentNode)) {
       if (parent === notebookElement) {       
         return
       }
     }
     parent = selection.extentNode
-    while (parent = parent.parentNode) {
+    while (parent && (parent = parent.parentNode)) {
       if (parent === notebookElement) {        
         return
       }

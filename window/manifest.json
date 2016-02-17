@@ -1,0 +1,49 @@
+{
+  "name": "Window"
+, "description": "Open a new window"
+, "version": "1.0"
+, "manifest_version": 2
+
+, "browser_action": {
+    "default_title": "Open the window" // tooltip
+  , "default_icon": "img/icon38r.png"
+  }
+
+, "background" : {
+    // Scripts are loaded in the order given
+    // Pages may be loaded, and their content scripts triggered, in
+    // an interleaved manner.
+    "scripts" : [
+      "js/lexogram.js"
+    , "js/tab_tracker.js"
+    , "js/text_tracker.js"
+    , "js/background.js"]
+  }
+
+, "icons": {
+    "16": "img/icon38r.png"
+  , "48": "img/icon38r.png"
+  , "128": "img/icon38r.png"
+  }
+
+, "permissions": [
+    "activeTab"
+  , "tabs"
+  , "<all_urls>"
+  ]
+
+, "content_scripts": [ {
+    "matches": ["<all_urls>"]
+  , "js": [
+      "js/lx_content.js"
+    ]
+  // , "css": [ 
+  //     "css/lx-content.css"
+  //   ]
+
+    // Files are injected and run after the DOM is complete but
+    // before subresources like images and frames have loaded. 
+  , "run_at": "document_end"
+  , "all_frames": true
+  } ]
+}
