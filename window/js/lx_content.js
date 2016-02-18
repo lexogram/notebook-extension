@@ -5,19 +5,27 @@
 // 
 ;(function lx_content(){
   // Listen to messages from the background script
-  speak(pageName())
+  //speak(pageName())
 
   chrome.extension.onMessage.addListener(dispatchMessage)
 
   function dispatchMessage(request, sender, callback) {
-    speak("dispatching")
-    console.log(request, sender, callback)
+    var method
 
-    var response = {
-      method: request.method
+    //speak("dispatching")
+    //console.log(request, sender, callback)
+
+    if (typeof request === "string") {
+      method = request
+    } else {
+      method = request.method
     }
 
-    switch (request.method) {
+    var response = {
+      method: method
+    }
+
+    switch (method) {
       case "connect":
         connect(response)
       break
@@ -29,8 +37,9 @@
   }
 
   function connect(response) {
-    speak(pageName() + " connected")
+    //speak(pageName() + " connected")
     response.data = "connected"
+    response.url = "connected"
   }
 
   function pageName() {

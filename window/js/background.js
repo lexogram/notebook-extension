@@ -1,52 +1,35 @@
 "use strict"
 
-;(function loaded(lx){
+;(function background(lx){
   // Triggered when browser is launched or extension is reloded
   lx.speak(
-    "notebook loaded" +
+    "background loaded" +
     (!!chrome.browserAction ? "" : " browserAction missing")
   )
 
   var tabTracker
-
-  var active_ids = []
-  var active_id
-  var baseToTab = chrome.tabs.sendMessage
+  var notebook
+  var manager
 
   chrome.browserAction.onClicked.addListener(useExtension)
-  chrome.runtime.onMessage.addListener(tabToBase)
 
   function useExtension() {
-    tabTracker = lx.getInstance("TabTracker")
-    tabTracker.initialize()
+    var dependencies
 
-    // var getActiveTab = {
-    //   active: true
-    // , windowId: chrome.windows.WINDOW_ID_CURRENT
-    // }
-    // chrome.tabs.query(getActiveTab, saveTabID)
+    if (!manager) {
+      manager = lx.getInstance("Manager")
+      tabTracker = lx.getInstance("TabTracker")
+      notebook = lx.getInstance("Notebook")
 
-    // function saveTabID (tabs) {
-    //   if (!tabs.length) {
-    //     console.log("Tabs is empty if run from the debugger window.")
-    //     return
-    //   }
-    //   active_id = tabs[0].id
-    //   active_ids.push(active_id)
+      dependencies = {
+        manager: manager
+      , tabTracker: tabTracker
+      , notebook: notebook
+      }
 
-    //   var message = {
-    //     method: "connect"
-    //   }
-    //   baseToTab(active_id, message, defaultCallback)
-    // }
-  }
-
-  function tabToBase(a,b,c) {
-    console.log(a,b,c)
-    var a = 0
-  }
-
-  function defaultCallback(response) {
-    console.log(response)
+      manager.initialize(dependencies)
+      tabTracker.initialize(dependencies)
+      notebook.initialize(dependencies)
+    }
   }
 })(lexogram)

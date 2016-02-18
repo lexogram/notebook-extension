@@ -1,20 +1,25 @@
+"use strict"
+
 ;(function tab_tracker(lx) {
   //lx.speak("tab tracker")
 
   lx.addConstructor(TabTracker)
 
-  function TabTracker () {
+  function TabTracker () {}
+
+  /** Use a separate initialize() method so that all prototype
+   *  methods have been attached to the new object.
+   */
+  TabTracker.prototype.initialize = function initialize(dependencies) {
     //lx.speak("initializing tab tracker")
-
-    this.open_tabs = []
-    this.url_map = {}
-    this.active_tab = undefined
-  }
-
-
-  TabTracker.prototype.initialize = function initialize() {
     var that = this
 
+    this.manager     = dependencies.manager
+    this.open_tabs   = []
+    this.url_map     = {}
+    this.active_tab  = undefined // set in tabActivated()
+    this.notebook_id = undefined // set in registerNotebook
+ 
     chrome.tabs.onCreated.addListener(function (tab_data) {
       that.tabCreated.call(that, tab_data)
     })
@@ -51,7 +56,7 @@
 
       that.tabActivated( { tabId: that.active_tab })
 
-      console.log("initialized:", that.active_tab, that.open_tabs, that.url_map)
+      //console.log("initialized:", that.active_tab, that.open_tabs, that.url_map)
     }
   }
 
@@ -76,15 +81,18 @@
     , windowId: 24
     }
   */
+    var tab_id = tab_data.id
 
-    if ( this.open_tabs.indexOf(tab_data.id) < 0 ) {
-      this.open_tabs.unshift(tab_data.id)
+    if ( tab_id === this.notebook_id ) {
+      return // ignore the notebook tab
+    } else if ( this.open_tabs.indexOf(tab_id) < 0 ) {
+      this.open_tabs.unshift(tab_id)
     } else {
-      lx.speak("tab created with duplicate id: " + tab_data.id)
+      lx.speak("tab created with duplicate id: " + tab_id)
       console.log(this.open_tabs)
     }
 
-    console.log("tabCreated", tab_data, this.open_tabs)
+    //console.log("tabCreated", tab_data, this.open_tabs)
   }
 
   TabTracker.prototype.tabActivated = function tabActivated(tab_data) {
@@ -99,7 +107,9 @@
     var tab_id = tab_data.tabId
     var index = this.open_tabs.indexOf(tab_id) 
 
-    if (index < 0) {
+    if ( tab_id === this.notebook_id ) {
+      return // ignore the notebook tab
+    } else if (index < 0) {
       lx.speak("tab activated with unknown ID: " + tab_id)
       console.log(tab_data)
       console.log(this.open_tabs)
@@ -111,7 +121,20 @@
       this.active_tab = tab_id
     }
 
-    console.log("tabActivated", tab_id, this.open_tabs)
+    //console.log("tabActivated", tab_id, this.open_tabs)
+
+    var message = {
+      method: "connect"
+    }
+    var options = {
+      frameId: 0 // main document only, not any iFrames
+    }
+    chrome.tabs.sendMessage(
+      this.active_tab
+    , "connect"
+    , options
+    , defaultCallback
+    )
   }
 
   TabTracker.prototype.tabUpdated = function tabUpdated(
@@ -125,14 +148,16 @@
     // or { status: "complete" }
     // tab_data = <as tabCreated>
 
-    if (tab_info.status === "loading") {
+    if ( tab_id === this.notebook_id ) {
+      return // ignore the notebook tab
+    } else if (tab_info.status === "loading") {
       this.url_map[tab_id] = tab_info.url
       if ( this.open_tabs.indexOf(tab_data.id) < 0 ) {
         this.open_tabs.unshift(tab_data.id)
       }
     }
 
-    console.log("tabUpdated", tab_id, tab_info, this.url_map)
+    //console.log("tabUpdated", tab_id, tab_info, this.url_map)
   }
 
   TabTracker.prototype.tabRemoved = function tabRemoved(
@@ -143,6 +168,10 @@
     // , windowId: <integer>
     // }
       
+    if ( tab_id === this.notebook_id ) {
+      return this.notebookClosed()
+    }
+
     var index = this.open_tabs.indexOf(tab_id)
     if (index < 0) {
       // The contents of this tab are not being tracked
@@ -162,6 +191,14 @@
     }
 
     // Clean up connection with Meteor
-    console.log("tabRemoved", tab_id, this.open_tabs, this.active_tab)
+    //console.log("tabRemoved", tab_id, this.open_tabs, this.active_tab)
+  }
+
+  TabTracker.prototype.registerNotebook = function register(tab_id) {
+    this.notebook_id = tab_id
+  }
+
+  function defaultCallback(response) {
+    console.log(response)
   }
 })(lexogram)
