@@ -53,3 +53,5 @@ I open the NoteBook on a given page. This implies that the page interests me. Th
 I have to open the NoteBook explicitly for each page I want to use it with, even if the NoteBook itself is displayed in another window.
 
 Click anywhere to select that word in that sentence.
+——————
+Send the text of the current page to the Notebook window.

@@ -5,20 +5,23 @@
 
   lx.addConstructor(TabTracker)
 
-  function TabTracker () {}
+  var that
+
+  function TabTracker () {
+    that = this
+  }
 
   /** Use a separate initialize() method so that all prototype
    *  methods have been attached to the new object.
    */
   TabTracker.prototype.initialize = function initialize(dependencies) {
     //lx.speak("initializing tab tracker")
-    var that = this
-
-    this.manager     = dependencies.manager
+ 
+    this.popup       = dependencies.popup
     this.open_tabs   = []
     this.url_map     = {}
     this.active_tab  = undefined // set in tabActivated()
-    this.notebook_id = undefined // set in registerNotebook
+    this.popup_id    = undefined // set in registerPopup
  
     chrome.tabs.onCreated.addListener(function (tab_data) {
       that.tabCreated.call(that, tab_data)
@@ -27,12 +30,12 @@
     chrome.tabs.onActivated.addListener(function (tab_data) {        that.tabActivated.call(that, tab_data)
     })
 
-    chrome.tabs.onUpdated.addListener(function (tab_id, tab_info, tab_data) {
-      that.tabUpdated.call(that, tab_id, tab_info, tab_data)
+    chrome.tabs.onUpdated.addListener(function (tabId, tab_info, tab_data) {
+      that.tabUpdated.call(that, tabId, tab_info, tab_data)
     })
 
-    chrome.tabs.onRemoved.addListener(function (tab_id, window_data) {
-      that.tabRemoved.call(that, tab_id, window_data)
+    chrome.tabs.onRemoved.addListener(function (tabId, window_data) {
+      that.tabRemoved.call(that, tabId, window_data)
     })
 
     // Get all open tabs, and for each inform the tabTracker of its
@@ -41,16 +44,16 @@
 
     function initializeTabs(tabs) {
        var tab
-         , tab_id
+         , tabId
            
       for (var ii in tabs) {
         tab = tabs[ii]
-        tab_id = tab.id
-        that.open_tabs.unshift(tab_id)
-        that.url_map[tab_id] = tab.url
+        tabId = tab.id
+        that.open_tabs.unshift(tabId)
+        that.url_map[tabId] = tab.url
 
         if (tab.active) {
-          that.active_tab = tab_id
+          that.active_tab = tabId
         }
       }
 
@@ -81,14 +84,14 @@
     , windowId: 24
     }
   */
-    var tab_id = tab_data.id
+    var tabId = tab_data.id
 
-    if ( tab_id === this.notebook_id ) {
-      return // ignore the notebook tab
-    } else if ( this.open_tabs.indexOf(tab_id) < 0 ) {
-      this.open_tabs.unshift(tab_id)
+    if ( tabId === this.popup_id ) {
+      return // ignore the popup tab
+    } else if ( this.open_tabs.indexOf(tabId) < 0 ) {
+      this.open_tabs.unshift(tabId)
     } else {
-      lx.speak("tab created with duplicate id: " + tab_id)
+      lx.speak("tab created with duplicate id: " + tabId)
       console.log(this.open_tabs)
     }
 
@@ -104,42 +107,48 @@
     */ 
     // Fires when the active tab in a window changes. Note that the tab's URL may not be set at the time this event fired, but you can listen to onUpdated events to be notified when a URL is set.
    
-    var tab_id = tab_data.tabId
-    var index = this.open_tabs.indexOf(tab_id) 
+    var tabId = tab_data.tabId
+    var index = this.open_tabs.indexOf(tabId) 
 
-    if ( tab_id === this.notebook_id ) {
-      return // ignore the notebook tab
+    if (!this.popup_id || tabId === this.popup_id ) {
+      return // ignore the popup tab, which may not have registerd yet
     } else if (index < 0) {
-      lx.speak("tab activated with unknown ID: " + tab_id)
+      lx.speak("tab activated with unknown ID: " + tabId)
       console.log(tab_data)
       console.log(this.open_tabs)
     } else {
-      // Shift tab_id to the end of this.open_tabs, so that they are 
+      // Shift tabId to the start of this.open_tabs, so that they are 
       // stored with the most recent first.
       this.open_tabs.splice(index, 1)
-      this.open_tabs.unshift(tab_id)
-      this.active_tab = tab_id
+      this.open_tabs.unshift(tabId)
+      this.active_tab = tabId
     }
 
-    //console.log("tabActivated", tab_id, this.open_tabs)
+    //console.log("tabActivated", tabId, this.open_tabs)
 
-    var message = {
-      method: "connect"
-    }
+    var message = "getFullText"
     var options = {
       frameId: 0 // main document only, not any iFrames
     }
+
+// lx.speak("send getFullText to active tab " + this.active_tab)
+// chrome.tabs.get(
+//   this.active_tab
+// , function (tab) {
+//     console.log("url for active tab: ",tab.url);
+// })
+
     chrome.tabs.sendMessage(
       this.active_tab
-    , "connect"
+    , message
     , options
-    , defaultCallback
+    , sendFullTextToNotebook
     )
   }
 
   TabTracker.prototype.tabUpdated = function tabUpdated(
-    tab_id, tab_info, tab_data) {
-    // tab_id = <integer>
+    tabId, tab_info, tab_data) {
+    // tabId = <integer>
     // tab_info = { favIconUrl: <url> } // should be ignored
     // or {
     //   status: "loading"
@@ -148,31 +157,31 @@
     // or { status: "complete" }
     // tab_data = <as tabCreated>
 
-    if ( tab_id === this.notebook_id ) {
-      return // ignore the notebook tab
+    if ( tabId === this.popup_id ) {
+      return // ignore the popup tab
     } else if (tab_info.status === "loading") {
-      this.url_map[tab_id] = tab_info.url
+      this.url_map[tabId] = tab_info.url
       if ( this.open_tabs.indexOf(tab_data.id) < 0 ) {
         this.open_tabs.unshift(tab_data.id)
       }
     }
 
-    //console.log("tabUpdated", tab_id, tab_info, this.url_map)
+    //console.log("tabUpdated", tabId, tab_info, this.url_map)
   }
 
   TabTracker.prototype.tabRemoved = function tabRemoved(
-    tab_id, window_data) {
-    // tab_id = <integer>
+    tabId, window_data) {
+    // tabId = <integer>
     // window_data = {
     //   isWindowClosing: <boolean>
     // , windowId: <integer>
     // }
       
-    if ( tab_id === this.notebook_id ) {
-      return this.notebookClosed()
+    if ( tabId === this.popup_id ) {
+      return this.popupClosed()
     }
 
-    var index = this.open_tabs.indexOf(tab_id)
+    var index = this.open_tabs.indexOf(tabId)
     if (index < 0) {
       // The contents of this tab are not being tracked
       return
@@ -180,7 +189,7 @@
 
     this.open_tabs.splice(index, 1)
 
-    if (this.active_tab === tab_id) {
+    if (this.active_tab === tabId) {
       // Special case:
       // The tab whose text is currently on display is closing
       if (this.open_tabs.length) {
@@ -191,14 +200,45 @@
     }
 
     // Clean up connection with Meteor
-    //console.log("tabRemoved", tab_id, this.open_tabs, this.active_tab)
+    //console.log("tabRemoved", tabId, this.open_tabs, this.active_tab)
   }
 
-  TabTracker.prototype.registerNotebook = function register(tab_id) {
-    this.notebook_id = tab_id
+  TabTracker.prototype.registerPopup = function register(tabId) {
+    this.popup_id = tabId
+    var index = this.open_tabs.indexOf(tabId)
+    if (index > -1) {
+      this.open_tabs.splice(index, 1)
+    }
+
+    if (tabId === this.active_tab) {
+      // Choose the most recently created
+      tabId = this.open_tabs[0]
+    } else {
+      tabId = this.active_tab
+    }
+
+    // Now that the popup window's id is known, we can activate the
+    // topmost tab
+    this.tabActivated( { tabId: tabId })
   }
 
   function defaultCallback(response) {
     console.log(response)
+  }
+
+  function sendFullTextToNotebook(response) {
+    // { data: <full text string> }
+    if (!response) {
+      // lx_context.js is not attached to the active page. This is
+      // probably a page like chrome://extensions/, during debugging
+      // lx.speak("no text to send to notebook. stopping")
+      return
+    }
+
+    // lx.speak("sendFullTextToNotebook")
+    console.log(response)
+
+    response.method = "showFullText"
+    that.popup.tellNotebook( response )
   }
 })(lexogram)

@@ -2,34 +2,34 @@
 
 ;(function background(lx){
   // Triggered when browser is launched or extension is reloded
-  lx.speak(
-    "background loaded" +
-    (!!chrome.browserAction ? "" : " browserAction missing")
-  )
+  // lx.speak(
+  //   "background loaded" +
+  //   (!!chrome.browserAction ? "" : " browserAction missing")
+  // )
 
   var tabTracker
-  var notebook
-  var manager
+  var popup
+  //var manager
 
   chrome.browserAction.onClicked.addListener(useExtension)
 
   function useExtension() {
     var dependencies
 
-    if (!manager) {
-      manager = lx.getInstance("Manager")
+    if (!tabTracker) {
+      //manager = lx.getInstance("Manager")
       tabTracker = lx.getInstance("TabTracker")
-      notebook = lx.getInstance("Notebook")
+      popup = lx.getInstance("Popup")
 
       dependencies = {
-        manager: manager
-      , tabTracker: tabTracker
-      , notebook: notebook
+        tabTracker: tabTracker
+      //, manager: manager
+      , popup: popup
       }
 
-      manager.initialize(dependencies)
+      //manager.initialize(dependencies)
       tabTracker.initialize(dependencies)
-      notebook.initialize(dependencies)
+      popup.initialize(dependencies)
     }
   }
 })(lexogram)

@@ -12,7 +12,6 @@
   function dispatchMessage(request, sender, callback) {
     var method
 
-    //speak("dispatching")
     //console.log(request, sender, callback)
 
     if (typeof request === "string") {
@@ -25,9 +24,14 @@
       method: method
     }
 
+    // speak("dispatching " + method)
+
     switch (method) {
       case "connect":
         connect(response)
+      break
+      case "getFullText":
+        getFullText(response)
       break
     }
 
@@ -40,6 +44,11 @@
     //speak(pageName() + " connected")
     response.data = "connected"
     response.url = "connected"
+  }
+
+  function getFullText(response) {
+    // speak(pageName() + " getFullText")
+    response.data = document.body.innerText
   }
 
   function pageName() {

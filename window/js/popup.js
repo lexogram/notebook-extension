@@ -1,22 +1,22 @@
 "use strict"
 
-;(function notebook(lx) {
-  //lx.speak("notebook")
+;(function popup(lx) {
+  //lx.speak("popup")
 
-  lx.addConstructor(Notebook)
+  lx.addConstructor(Popup)
 
-  function Notebook () {
-    //lx.speak("initializing notebook")
+  var that
+  var URL = chrome.extension.getURL("html/lx-content.html")
+
+  function Popup () {
+    //lx.speak("initializing popup")
+    that = this
   }
 
   /** Use a separate initialize() method so that all prototype
    *  methods have been attached to the new object.
    */
-  
-  
-  Notebook.prototype.initialize = function initialize(dependencies) {
-    var that = this
-    var url = chrome.extension.getURL("html/lx-content.html")
+  Popup.prototype.initialize = function initialize(dependencies) {
     var width = 300
     var top = 0
     var rect = {
@@ -26,27 +26,27 @@
     , height: screen.availHeight - top
     }
     var options = {
-      url: url
+      url: URL
   //, tabId
     , left: rect.left
     , top: rect.top
     , width: rect.width
     , height: rect.height
-  //, focused: true
+    , focused: false
   //, incognito: false
     , type: "popup" //"normal"|"detached_panel"|"panel"//<experimental
   //, state: "normal" //"minimized"|"maximized"|"fullscreen"|"docked"
     }
 
     this.tabTracker = dependencies.tabTracker 
-    this.tab_id = undefined // set in windowCreated()
+    this.tabId = undefined // set in windowCreated()
 
     chrome.windows.create(options, function callback(window_data) {
       that.windowCreated.call(that, window_data)
     })
   }
   
-  Notebook.prototype.windowCreated = function windowCreated(window_data) {
+  Popup.prototype.windowCreated = function windowCreated(window_data) {
   /*
     window_data = {
       alwaysOnTop: false
@@ -82,12 +82,13 @@
     }
   */
 
-    //lx.speak("notebook window created")
-    this.tab_id = window_data.tabs[0].id
-    this.tabTracker.registerNotebook(this.tab_id)
+    //lx.speak("Popup window created")
+    this.tabId = window_data.tabs[0].id
+    this.tabTracker.registerPopup(this.tabId)
   }
 
-  Notebook.prototype.xx = function xx(tab_data) {
+  Popup.prototype.tellNotebook = function tellNotebook(message) {
+    chrome.tabs.sendMessage(this.tabId, message)
   }
 
   

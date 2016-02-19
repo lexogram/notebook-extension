@@ -18,7 +18,7 @@
     , "js/manager.js"
     , "js/tab_tracker.js"
     , "js/text_tracker.js"
-    , "js/notebook.js"
+    , "js/popup.js"
     , "js/background.js"]
   }
 

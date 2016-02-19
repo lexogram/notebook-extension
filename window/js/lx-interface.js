@@ -1,2 +1,0 @@
-;(function createInterfaceObject(lx){
-})(lx)

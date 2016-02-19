@@ -1,3 +1,3 @@
 ;(function text_tracker(lx) {
-  lx.speak("text tracker")
+  // lx.speak("text tracker")
 })(lexogram)
