@@ -34,7 +34,7 @@
     , height: rect.height
     , focused: false
   //, incognito: false
-    , type: "popup" //"normal"|"detached_panel"|"panel"//<experimental
+    , type: "popup"//"normal"|"detached_panel"|"panel"//<experimental
   //, state: "normal" //"minimized"|"maximized"|"fullscreen"|"docked"
     }
 

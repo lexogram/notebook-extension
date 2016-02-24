@@ -1,0 +1,240 @@
+LAUNCH
+======
+initializing undefined       64779 {url: undefined}
+-- activated 13              64800 {tabId: 13}
+created      lx-content.html 64819 {
+              active: false
+                audible: false
+              height: 0
+              highlighted: false
+                id: 23
+                incognito: false
+                index: 0
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              status: "loading"
+              title: ""
+                url: "...lx-content.html"
+              width: 0
+                windowId: 22
+              }
+activated    23             64870 {tabId: 23, windowId: 22}
+   activated 13             65100 {tabId: 13}
+updated      lx-content.html 65536 {
+              active: true
+                audible: false
+              height: 755
+              highlighted: true
+                id: 23
+                incognito: false
+                index: 0
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              = status: "loading"
+              title: "...lx-content.html"
+                url: "...lx-content.html"
+              width: 300
+                windowId: 22
+              }
+updated      lx-content.html 65550 {
+              = active: true
+                audible: false
+              = height: 755
+              = highlighted: true
+                id: 23
+                incognito: false
+                index: 0
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              status: "complete"
+              title: "Open Window"
+                url: ".../lx-content.html"
+              = width: 300
+                windowId: 22
+              }
+
+NEW TAB
+=======
+created  10798 {
+              active: false
+                audible: false
+              height: 0
+              highlighted: false
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                openerTabId: 13
+                pinned: false
+                selected: true
+              status: "loading"
+              title: "New Tab"
+                url: "chrome://newtab/"
+                width: 0
+                windowId: 10}
+activated 25 10952 {tabId: 25, windowId: 10}
+updated  13707 Object {
+              active: true
+                audible: false
+              height: 682
+              highlighted: true
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                openerTabId: 13
+                pinned: false
+                selected: true
+              = status: "loading"
+              = title: "New Tab"
+                url: "chrome://newtab/"
+              width: 998
+                windowId: 10}
+updated  13830 {
+              = active: true
+                audible: false
+              = height: 682
+              = highlighted: true
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                openerTabId: 13
+                pinned: false
+                selected: true
+              = status: "loading"
+              = title: "New Tab"
+                url: "chrome://newtab/"
+              = width: 998
+                windowId: 10}
+updated  14054 {
+              = active: true
+                audible: false
+              + favIconUrl: "https://www.google.ca/favicon.ico"
+              = height: 682
+              = highlighted: true
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                openerTabId: 13
+                pinned: false
+                selected: true
+              status: "complete"
+              = title: "New Tab"
+                url: "chrome://newtab/"
+              = width: 998
+                windowId: 10}
+
+CHANGE URL
+==========
+updated free-learning 11449 {
+              active: true
+                audible: false
+              height: 682
+              highlighted: true
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              status: "loading"
+              title: ".../free-learning"
+                url: ".../free-learning"
+              width: 998
+                windowId: 10}
+updated free-learning 13642 {
+              = active: true
+                audible: false
+              = height: 682
+              = highlighted: true
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              = status: "loading"
+              title: "Free Learning | PACKT Books"
+                url: "https://www.packtpub.com/packt/offers/free-learning"
+              = width: 998
+                windowId: 10}
+updated free-learning 24632 {
+              = active: true
+                audible: false
+              + favIconUrl: ".../favicon.ico"
+              = height: 682
+              = highlighted: true
+                id: 25
+                incognito: false
+                index: 4
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              status: "complete"
+              = title: "Free Learning | PACKT Books"
+                url: "https://www.packtpub.com/packt/offers/free-learning"
+              = width: 998
+                windowId: 10}
+
+CHANGE TAB
+==========
+activated undefined 35442 {tabId: 13, windowId: 10}
+
+RELOAD
+======
+updated test.html 92809 {
+                active: true
+                audible: false
+                height: 682
+                highlighted: true
+                id: 13
+                incognito: false
+                index: 1
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              status: "loading"
+                title: "dev.lexogram.com/test.html"
+                url: "http://dev.lexogram.com/test.html"
+                width: 998
+                windowId: 10
+updated test.html 94334 {
+                active: true
+                audible: false
+              + favIconUrl: "http://dev.lexogram.com/favicon.ico"
+                height: 682
+                highlighted: true
+                id: 13
+                incognito: false
+                index: 1
+                muted: false
+                mutedCause: ""
+                pinned: false
+                selected: true
+              status: "complete"
+              title: "Ipsum Test"
+                url: "http://dev.lexogram.com/test.html"
+                width: 998
+                windowId: 10
+}
+
+CLOSE TAB
+=========
+removed                   { tabID: <closingId> }
+activated undefined 78345 {tabId: 17, windowId: 10}

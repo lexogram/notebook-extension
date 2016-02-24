@@ -1,0 +1,11 @@
+{
+  "name": "get-words-in-file",
+  "version": "1.0.0",
+  "description": "Creates a list of unique words in a given file, reads in a file of words ordered by frequency, then returns the index of the least common word in the original file.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Newton",
+  "license": "ISC"
+}

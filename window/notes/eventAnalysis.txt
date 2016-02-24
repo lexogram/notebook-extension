@@ -1,0 +1,24 @@
+ACTIVATED may mean
+* immediately after launch: active tab    - { tabId: only }
+* change of tab (after active tab closed) - { tabId: *, windowId: * }
+=> updateNotebook
+
+# after popup window opens - url_map[tabData.tabId].starts("chrome-")
+# after new tab is created - url_map[tabData.tabId].starts("chrome:")
+=> ignore
+
+
+CREATED
+# as popup window opens
+# as new tab is created
+
+UPDATED
+# as popup window opens - tabData.url.starts("chrome-")
+# as new tab opens      - tabData.url.starts("chrome:")
+
+* as url changes or page is reloaded
+  - loading
+=> ignore
+
+  - complete
+=> updateNotebook

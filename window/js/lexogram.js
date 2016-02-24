@@ -162,8 +162,30 @@
 
   , speak:function speak(phrase) {
       console.log(phrase, (+ new Date()) % 100000)
-      var utterance = new SpeechSynthesisUtterance(phrase)
-      window.speechSynthesis.speak(utterance)
+      // var utterance = new SpeechSynthesisUtterance(phrase)
+      // window.speechSynthesis.speak(utterance)
     }
   }
 })(window)
+
+//////// DEVELOPMENT UTILITY FUNCTIONS : DELETE FOR PRODUCTION //////
+
+function getTabMap() {
+  chrome.tabs.query({}, logTabMap)
+
+  function logTabMap(tabs) {
+    var data = {};
+    tabs.forEach(function (tab) {
+      data[tab.id] = tab.url
+    }); 
+    console.log(data);
+  }
+}
+
+function getTabData(tabId) {
+  chrome.tabs.get(tabId, logTabURL)
+   
+  function logTabURL(tab) {
+      console.log(tab.url, tab);
+  }
+}
