@@ -16,7 +16,7 @@
   },
   "browser_action": {
     "default_icon": "icons/icon19.png",
-    "default_title": "Meteor Extension Biolerplate",
+    "default_title": "Meteor Extension Boilerplate",
     "default_popup": "src/browser_action/browser_action.html"
   },
   "permissions": [

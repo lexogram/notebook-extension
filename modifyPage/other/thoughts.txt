@@ -1,0 +1,19 @@
+The source page may already contain <span> elements. These may be wrapped around single words or around multiple words, and they may already affect the layout and text colour. To avoid confusion every single span around every single word should have the class "lxo-w" where the "w" stands for "word".
+
+===
+
+In the future, we will also want to define discontiguous multi-word expressions. These could be enclosed in a <span class="lxo-e e000"> tag, where two spans with the same "e" tag refer to the same expression, and we could have up to "e999", giving 1000 different DMWE expressions on the same page.
+
+The same word could conceivably appear in multiple overlapping expressions. <Span> tags aren't allowed to overlap. The continuing tag would have to close at the same time as the tag that is ending, and then a second <span> with the same class would need to enclose the continued portion.
+
+Ignoring the spans on each separate word ...
+
+This is one span
+        one span that overlaps another
+
+... would become:
+
+<span class="a">This is <span class="b">one span</span b1></span a><span class="b"> that overlaps another</span b2>
+
+===
+

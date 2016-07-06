@@ -1,7 +1,7 @@
 "use strict"
 
 ;(function background(lx){
-  // Triggered when browser is launched or extension is reloded
+  // Triggered when browser is launched or extension is reloaded
   // lx.speak(
   //   "background loaded" +
   //   (!!chrome.browserAction ? "" : " browserAction missing")

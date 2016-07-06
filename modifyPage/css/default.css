@@ -1,0 +1,28 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  background-color: #000;
+}
+
+main {
+  height: 100%;
+  width: 30em;
+  margin: 0 auto;
+  background-color: #eee;
+}
+
+p {
+  margin: 1em;
+}
+
+main p:first-child {
+  margin-top: 0;
+}
+
+button {
+  font-weight: bold;
+}
+
+.bold {
+  font-weight: bold;
+}

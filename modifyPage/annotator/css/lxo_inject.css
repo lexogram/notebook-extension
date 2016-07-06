@@ -1,0 +1,41 @@
+body.lxo-annotator {
+  margin-top: 45px;
+}
+
+section.lxo-annotations {
+  height: 100%;
+  margin: 0;
+  background-color: #003;
+}
+
+body > *:not(.lxo-annotations) {
+  display: none;
+}
+
+section.lxo-toolbar {
+  position: fixed;
+  top: 0;
+  height: 44px;
+  min-width: 350px;
+  width: 100%;
+  overflow-x: auto;
+  background-color: #ccc;
+  border-bottom: #999;
+}
+
+span.lxo-w {
+  color: red;
+}
+
+a.close {
+  text-decoration: none;
+  color: #999;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+a.close:hover,
+a.close:active {
+   color: #900;
+}

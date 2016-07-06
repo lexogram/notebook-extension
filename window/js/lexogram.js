@@ -1,3 +1,5 @@
+ "use strict"
+
 /** LEXOGRAM **
 * Chrome-only version *
 * 20160217
@@ -10,9 +12,6 @@
 * and named instances, it is available for other objects to attach
 * properties to the lexogram global "namespace".
 */
-
-
- "use strict"
 
 ;(function lexogram(window){
  
@@ -132,7 +131,7 @@
 
     /** Creates a property of the lexogram global object that can be
      *  addressed directly:
-     *  var value = lexogram.ModuleName.moduleMethod()
+     *  var value = lexogram.<ModuleName>.<moduleMethod>()
      */
   , createModule: function createModule(constructor, options) {
       var name = this.getConstructorName(constructor)
@@ -143,6 +142,9 @@
       }
     }
     
+    /**
+     * @param {object} data object used to extend this.data
+     */
   , addData: function addData(data) {
       function DataException() {
         this.message = message;

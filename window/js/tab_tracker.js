@@ -30,7 +30,10 @@
   }
 
   /** Use a separate initialize() method so that all prototype
-   *  methods have been attached to the new object.
+   *  methods have been attached to the new object before this is
+   *  called
+   *  SOURCE: Sent by the useExtension() method in the background.js
+   *          script, when all scripts have been loaded.
    */
   TabTracker.prototype.initialize = function initialize(dependencies) {
     //lx.speak("initializing tab tracker")
@@ -116,14 +119,16 @@
     //console.log("tabCreated", tabData, this.open_tabs)
   }
 
+  /** Fires when the active tab in a window changes. Note that the
+   * tab's URL may not be set at the time this event fired, but you  * can listen to onUpdated events to be notified when a URL is set.
+   */
   TabTracker.prototype.tabActivated = function tabActivated(tabData) {
     /* 
-      tabData = {
-         tabId: 28
-       , windowId: 27
-       }
+    tabData = {
+       tabId: 28
+     , windowId: 27
+     }
     */ 
-    // Fires when the active tab in a window changes. Note that the tab's URL may not be set at the time this event fired, but you can listen to onUpdated events to be notified when a URL is set.
     announceEvent("activated", tabData)
 
     var tabId = tabData.tabId
@@ -177,19 +182,23 @@
       return // ignore the popup tab
     }
 
-    if (tabInfo.status === "complete" &&  that.active_tab === tabId) {
+    if (tabInfo.status === "complete" && that.active_tab === tabId) {
       that.updateNotebook()
     }
     //console.log("tabUpdated", tabId, tabInfo, this.url_map)
   }
 
+  /**
+   * @source Registered to be called by chrome.tabs.onRemoved
+   * @param  {integer} tabId      integer
+   * @param  {object} window_data { isWindowClosing: <boolean>
+   *                              , windowId: <integer>
+   *                              }
+   * @action Cleans up after a tab is closed.
+   */
   TabTracker.prototype.tabRemoved = function tabRemoved(
     tabId, window_data) {
-    // tabId = <integer>
-    // window_data = {
-    //   isWindowClosing: <boolean>
-    // , windowId: <integer>
-    // }
+
     announceEvent("removed", { tabId: tabId })
 
     if ( tabId === this.popup_id ) {
@@ -218,6 +227,14 @@
     //console.log("tabRemoved", tabId, this.open_tabs, this.active_tab)
   }
 
+  /**
+   * @source: sent by the windowCreated() method of popup.js after the
+   *          PopUp window opens. 
+   * @param: {integer} tabId – the id of the PopUp window
+   * @action: Sets this.popup_id and removes the popup_id from the
+   *          ids stored in open_tabs.
+   *          Calls tabActivated() on the frontmost tab.
+   */
   TabTracker.prototype.registerPopup = function register(tabId) {
     this.popup_id = tabId
 
@@ -239,6 +256,14 @@
     this.tabActivated( { tabId: tabId })
   }
 
+  /**
+   * @source: Sent by tabActivated() and tabUpdated()
+   * @action: Calls getFullText() in lx_content.js, which populates
+   *          options with { data: <full text of main frame on page }
+   *          and then sends the result in a callback to
+   *          sendFullTextToNotebook()
+   * @return {[type]} [description]
+   */
   TabTracker.prototype.updateNotebook = function updateNotebook() {
     var message = "getFullText"
     var options = {
@@ -253,6 +278,10 @@
     )
   }
 
+
+  /** updateNotebook() above makes a call to chrome.tabs.sendMessage()
+   *  which triggers this method as a callback.
+   */
   function sendFullTextToNotebook(response) {
     // { data: <full text string> }
     if (!response) {
@@ -309,6 +338,13 @@
     return isChrome
   }
 
+  /**
+   * @source: Sent by tabActivated(), tabUpdated(), tabCreated() and 
+   *          tabRemoved()
+   * @param  {string} eventName [description]
+   * @param  {object} tabData   [description]
+   * @action 
+   */
   function announceEvent(eventName, tabData) {
     var url = tabData.url
               ? tabData.url

@@ -55,3 +55,18 @@ I have to open the NoteBook explicitly for each page I want to use it with, even
 Click anywhere to select that word in that sentence.
 ——————
 Send the text of the current page to the Notebook window.
+
+——————
+A text extract needs to be treated multiple times:
+1. Detect individual words
+   In agglutinative languages, this step may be skipped
+2. Break into morphemes
+   Each word needs to be connected to its morphemes, so that the text can be exploded. New words can:
+   * contain new morphemes
+     In this case, you need to learn the effect of the morpheme in this context (small-er, sell-er)
+   * be composed of familiar morphemes in a new manner.
+     In this case, knowing the morphemes can help you to guess the meaning
+3. Reconstituted into phrases by regexes
+   Each morpheme may have several regexes connected with it that allow you to identify multi-word/multi-morpheme phrases that have a meaning of their own
+
+First step: for English, identify all the words in an extract and order them by frequency.

@@ -2,7 +2,7 @@
 
 // This script is injected into the every page visited by the user
 // and is executed on document_end after the DOM is ready.
-// 
+
 ;(function lx_content(){
   // Listen to messages from the background script
   chrome.extension.onMessage.addListener(dispatchMessage)
@@ -17,9 +17,15 @@
   var selection 
   var selectedText = ""// text selected on main page
 
+  /**
+   * Sets restorePadding to the default value for this page, and 
+   * generates bodyPadding, so that its individual elements can be 
+   * used in positionNoteBook() to set the `size` of the appropriate
+   * padding to make space for the notebook.
+   */
   ;(function getInitialBodyPadding(){
     var style = window.getComputedStyle(document.body)
-    restorePadding = style.padding
+    restorePadding = style.padding // used by closeNotebook()
 
     bodyPadding.top = style.paddingTop
     bodyPadding.right = style.paddingRight
@@ -56,7 +62,7 @@
   function openNoteBook(request) {
     // { placing: {
     //     edge: <top | right | bottom | left>
-    //   , size: { 
+    //   , edgeSizes: { 
     //       vertical: "Xpx"}
     //     , horizontal: "Ypx"
     //     }

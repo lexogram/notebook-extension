@@ -24,7 +24,7 @@
 
   var id // set in initializeNoteBook()
   var query = {
-    active:true
+    active: true
   , windowId: chrome.windows.WINDOW_ID_CURRENT
   }
   var URL = "html/lx-content.html" // <HARD-CODED>

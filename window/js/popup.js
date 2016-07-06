@@ -14,7 +14,14 @@
   }
 
   /** Use a separate initialize() method so that all prototype
-   *  methods have been attached to the new object.
+   *  methods will have been attached to the new object by the time
+   *  this method is called.
+   *  
+   *  @source Called by useExtension() in background.js, which itself
+   *          is triggered when the browser is launched or the
+   *          extension is reloaded.
+   *  @param {object} dependencies { tabTracker: TabTracker
+   *                               , popup: Popup}
    */
   Popup.prototype.initialize = function initialize(dependencies) {
     var width = 300
@@ -46,6 +53,13 @@
     })
   }
   
+  /**
+   * SOURCE: Called by the callback() function created above in
+   *         initialize() after chrome.windows.created() has
+   *         completed.
+   * @param  {[type]} window_data [description]
+   * @return {[type]}             [description]
+   */
   Popup.prototype.windowCreated = function windowCreated(window_data) {
   /*
     window_data = {
@@ -87,6 +101,11 @@
     this.tabTracker.registerPopup(this.tabId)
   }
 
+  /**
+   * SOURCE: Sent by the sendFullTextToNotebook() in tab_tracker.js
+   * @param  {[type]} message [description]
+   * @return {[type]}         [description]
+   */
   Popup.prototype.tellNotebook = function tellNotebook(message) {
     chrome.tabs.sendMessage(this.tabId, message)
   }

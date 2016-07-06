@@ -1,5 +1,10 @@
 "use strict"
 
+/**
+ * Stub intended to <relay messages from the currently active tab to
+ * the "base">
+ */
+
 ;(function manager(lx) {
  //lx.speak("manager")
 

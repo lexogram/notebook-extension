@@ -1,0 +1,46 @@
+{
+  "name": "Annotations"
+
+, "description": "Allows you to annotate a copy of the current page"
+, "version": "1.0"
+, "manifest_version": 2
+
+, "browser_action": {
+    "default_title": "Annotate" // tooltip
+  , "default_icon": "img/icon.png"
+  }
+
+, "background": {
+    "scripts": [
+      "js/lxo_background.js"
+    , "js/lxo_regex.js"
+    ]
+  }
+
+// , "icons": {
+//     "16": "img/icon16sw.png"
+//   , "48": "img/icon48s.png"
+//   , "128": "img/icon128s.png"
+//   }
+
+, "permissions": [
+    "activeTab"
+  , "tabs"
+  , "<all_urls>"
+  ]
+
+, "content_scripts": [ {
+    "matches": ["<all_urls>"]
+  , "js": [
+      "js/lxo_content.js"
+    ]
+  , "css": [ 
+      "css/lxo_content.css"
+    ]
+
+    // Files are injected and run after the DOM is complete but
+    // before subresources like images and frames have loaded. 
+  , "run_at": "document_end"
+  , "all_frames": true
+  } ]
+}
