@@ -10,8 +10,7 @@
 
   // <HARD-CODED>
   var injectedHTML = chrome.extension.getURL("html/lxo_inject.html")
-  //var injectedCSSFile = chrome.extension.getURL("css/lxo_inject.css")
-  var injectedCSSFile = "css/lxo_inject.css"
+  var injectedCSSFile = "css/lxo_inject.css" // no getURL() needed
   // </HARD-CODED>
 
   function activateExtension() {

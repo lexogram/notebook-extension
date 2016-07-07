@@ -1,7 +1,7 @@
 ;(function unicodeRegex(window){
   var wordRegexes = {
-    en: /(\w+)/g
-  , ru: /([0-9\u0400-\u04FF-]+)/gu
+    en: ["(\w+)", "g"]
+  , ru: ["([0-9\u0400-\u04FF-]+)", "gu"]
   }
 
   window.getLanguageRegexMap = function getRegexMap(languageArray) {

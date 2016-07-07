@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  <title>Add Spans Test</title>
+  <style>
+    .lxo-w0 {
+      color: red;
+    }
+    .lxo-w1 {
+      color: blue;
+    }
+  </style>  
+</head>
+<body>
+<p> ***
+уносит тебя в открытое море,
+и ты вспоминаешь
+*** </p>
+<script>
+;(function () {
+  var newHTML = ""
+  var p = document.querySelector("p")
+  var string = p.innerHTML
+  var regex = /([0-9\u0400-\u04FF-])+/gu // /(\w+)/g //
+  var start = 0
+  var odd = 0
+  var end
+    , word
+    , odd
+
+  while (result = regex.exec(string)) {
+    // [ 0: <word>
+    // , 1: <word>
+    // , index: <integer>
+    // , input: string
+    // , length: 2
+    // ]
+    end = result.index
+    word = result[0]
+    newHTML += string.substring(start, end)
+    start = end + word.length
+    className = "lxo-w" + (odd = (odd + 1) % 2 )
+    newHTML += "<span class='"+className+"'>"+word+"</span>"
+  }
+  end = string.length
+  newHTML += string.substring(start, end)
+
+  p.innerHTML = newHTML
+})()
+</script>
+</body>
+</html>

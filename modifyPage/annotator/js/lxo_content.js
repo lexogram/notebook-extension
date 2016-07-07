@@ -7,30 +7,8 @@
   // Listen to messages from the background script
   chrome.extension.onMessage.addListener(dispatchMessage)
 
-  var restorePadding   // "0px" or similar
   var body = document.body
-
-  // ;(function registerLXOElements(){
-  //   var lxoProto = Object.create(HTMLElement.prototype)
-  //   var prefix = "lxo-"
-  //   var customTypes = ["toolbar", "annotations"]
-
-  //   var total = customTypes.length
-  //   var ii
-    
-  //   for (ii = 0; ii < total; ii += 1) {
-  //     document.registerElement(
-  //       prefix + customTypes[ii]
-  //     , { prototype: lxoProto }
-  //     )
-  //   }
-    
-  // })()
-
-  ;(function getInitialBodyPadding(){
-    var style = window.getComputedStyle(document.body)
-    restorePadding = style.padding // used by closeNotebook()
-  })()
+  var original = body.cloneNode(true)
 
   function dispatchMessage(request, sender, callback) {
     var response = {}
@@ -54,49 +32,97 @@
     // , html: <html>
     // }
    
-    var parser = new DOMParser()
-    var tempDoc = parser.parseFromString(request.html, "text/html")
-    var section = tempDoc.querySelector("section.lxo-content")
+    var parser = new DOMParser() // used multiple times
+    var injectedDOM = parseAsElements(request.html)
 
-    duplicateBodyTo(section)
-    appendSectionToBody(tempDoc.body.children)
+    var regex = request.languageMap.ru // <HARD-CODED for now>
+    regex = new RegExp(regex[0], regex[1])
+
+    addSpansToWordsIn(body)
+    appendSectionToBody(injectedDOM)
     
     body.classList.add("lxo-annotator")
 
     return "showAnnotations complete"
 
-    function duplicateBodyTo(section) {
-      var elements = body.childNodes
-      var total = elements.length
-      var ii
-        , element
-      
-      for (ii = 0; ii < total; ii += 1) {
-        element = elements[ii].cloneNode(true)
-        addSpansToWordsIn(element)
-        section.appendChild(element)
-      }
+    function parseAsElements(htmlString) {
+      var tempDoc = parser.parseFromString(htmlString, "text/html")
+      return tempDoc.body.childNodes
     }
 
     function addSpansToWordsIn(element) {
       var children = element.childNodes
-      var total = children.length
+      var ii = children.length
 
-      if (total) {
-        var ii
-          , element
-      
-        for (ii = 0; ii < total; ii += 1) {
-          element = children[ii].cloneNode(true)
-          addSpansToWordsIn(element)
+      if (ii) {
+        // Work backwards, because .childNodes is a live collection,
+        // and so its length increases as new <span> nodes are added.
+        for (; ii > 0 ;) {
+          ii -= 1
+          addSpansToWordsIn(children[ii])
         }
 
       } else {
-        var words = element.innerHTML
-        if (words) {
+        replaceWithWordSpans(element)
+      }
+    }
 
+    function replaceWithWordSpans(element) {
+      //console.log(element, element.innerHTML, element.textContent)
+      
+      var textContent = element.textContent
+      var altered = false
+      var htmlString = ""
+      var start = 0
+      var odd = 0
+      var end
+        , word
+        , result
+        , className
+        , elements
+        , index
+        , nextSibling
+        , parentNode
+        , div
+
+      while (result = regex.exec(textContent)) {
+        // [ 0: <word>
+        // , 1: <word>
+        // , index: <integer>
+        // , input: string
+        // , length: 2
+        // ]
+        altered = true
+
+        end = result.index
+        word = result[0]
+        htmlString += textContent.substring(start, end)
+        start = end + word.length
+        className = "lxo-w" + (odd = (odd + 1) % 2 )
+        htmlString += "<span class='"+className+"'>"+word+"</span>"
+      }
+
+      if (altered) {
+        end = textContent.length
+        htmlString += textContent.substring(start, end)
+
+        // div = document.createElement("div")
+        // div.innerHTML = htmlString
+        // elements = div.childNodes
+        elements = parseAsElements(htmlString)
+        index = elements.length - 1
+
+        parentNode = element.parentNode
+        // Replace current text node with the last span ...      
+        nextSibling = elements[index]
+        parentNode.replaceChild(nextSibling, element)
+        // ... then place the other elements in reverse order
+        for (;index > 0;) {
+          index -=1
+          element = elements[index]
+          parentNode.insertBefore(element, nextSibling)         
+          nextSibling = element
         }
-
       }
     }
 

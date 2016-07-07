@@ -2,16 +2,6 @@ body.lxo-annotator {
   margin-top: 45px;
 }
 
-section.lxo-annotations {
-  height: 100%;
-  margin: 0;
-  background-color: #003;
-}
-
-body > *:not(.lxo-annotations) {
-  display: none;
-}
-
 section.lxo-toolbar {
   position: fixed;
   top: 0;
@@ -23,8 +13,12 @@ section.lxo-toolbar {
   border-bottom: #999;
 }
 
-span.lxo-w {
+span.lxo-w0 {
   color: red;
+}
+
+span.lxo-w1 {
+  color: green;
 }
 
 a.close {
