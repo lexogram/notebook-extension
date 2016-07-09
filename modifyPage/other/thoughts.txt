@@ -17,3 +17,33 @@ This is one span
 
 ===
 
+The colour of the span for each word needs to reflect the familiarity of the word. We need to store data about your familiarity with the word on the server, and get that information back from the server.
+
+When a new page is opened, the extension needs to:
+
+* Open a window
+* Send the text of the page to the server
+* Ask the server for a profile of the user, relative to the words used
+
+When the user navigates to a different page, the extension needs to repeat the last 2 steps.
+
+In the window, we should see tabs for
+* Machine translation of selection
+* Phrases using the selected word (and as many other words in the vicinity as possible)
+* User's notes
+* Notes by other users
+* Dictionary, with inflections
+* Synonyms
+* Antonyms
+* Words from the same field
+* Words that might be confused (homonyms, close spellings, ...)
+
+On the server:
+* Save each sentence
+  The exact sentence may already exist, but it may be from a different source (quotation, plagiarism). Create nodes which link
+  - SourceURL -[date, index]->
+  - User -[visit date]->
+
+For news feeds, and other pages that update regularly, the source URL may become out of date. Certain URLs may become the source of a huge amount of text, and visiting the page now may no longer show text containing the sentence in question. The entire page may be recreated by selecting all the links for the source for a given date and placing them in their original order.
+
+The same sentence may appear in different articles on different dates on the same page, so the [date,index] link will be different.

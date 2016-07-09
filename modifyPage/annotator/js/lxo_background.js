@@ -1,6 +1,6 @@
 "use strict"
 
-;(function noteBookSettings(){
+;(function noteBookSettings(lx){
   chrome.browserAction.onClicked.addListener(activateExtension)
  
    var query = {
@@ -15,6 +15,8 @@
 
   function activateExtension() {
     chrome.tabs.query(query, initializeNoteBook)
+    var notebookWindow = lx.getInstance("OpenWindow")
+    notebookWindow.initialize()
   }
     
   function initializeNoteBook(tabs) {
@@ -84,4 +86,4 @@
       }
     }
   }
-})()
+})(lexogram)

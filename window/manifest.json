@@ -19,7 +19,8 @@
     , "js/tab_tracker.js"
     , "js/text_tracker.js"
     , "js/popup.js"
-    , "js/background.js"]
+    , "js/background.js"
+    ]
   }
 
 , "icons": {
