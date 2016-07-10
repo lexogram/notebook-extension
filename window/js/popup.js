@@ -1,8 +1,16 @@
 "use strict"
 
+/**
+* The Popup object is instantiated by background.js when the
+* browser is launched or extension is reloaded
+* 
+* It opens a window at the right of the screen, then calls the
+* TabTracker object to register this window as the Popup.
+*/
+
 ;(function popup(lx) {
   //lx.speak("popup")
-
+ 
   lx.addConstructor(Popup)
 
   var that
@@ -102,11 +110,18 @@
   }
 
   /**
-   * SOURCE: Sent by the sendFullTextToNotebook() in tab_tracker.js
-   * @param  {[type]} message [description]
+   * @source Sent by the sendFullTextToNotebook() in tab_tracker.js
+   * @param  {object} message Object 
+   *                  { method: "showFullText"
+   *                  , data: <string text of current tabe>
+   *                  }
+   * @action Triggers the showFullText() method in lx_notebook.js,
+   *         the script attached to lx-content.html in the Popup 
+   *         window.
    * @return {[type]}         [description]
    */
   Popup.prototype.tellNotebook = function tellNotebook(message) {
+    // console.log("Tell Notebook", message)
     chrome.tabs.sendMessage(this.tabId, message)
   }
 

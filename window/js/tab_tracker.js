@@ -1,10 +1,13 @@
 "use strict"
 
 /**
- * The TabTracker object receives notification from chrome each time
- * a tab is created, activated, updated or removed. It also receives
- * a message directly from the Popup object when the Popup window has
- * been opened, to register the tabId of the Popup window.
+ * The TabTracker object is instantiated by background.js when the
+ * browser is launched or extension is reloaded
+ * 
+ * It receives notification from chrome each time a tab is created,
+ * activated, updated or removed. It also receives a message directly
+ * from the Popup object when the Popup window has been opened, to
+ * register the tabId of the Popup window.
  *
  * The url for windows for chrome://extension, the debugger, the
  * Popup and any new (empty) tabs begin with "chrome://" or

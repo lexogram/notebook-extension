@@ -1,6 +1,13 @@
 "use strict"
 
+/**
+ * Attached to the lx-content.html page which is displayed in the
+ * Popup window. This script handles incoming messages 
+ */
+
 ;(function notebook() {
+
+  chrome.extension.onMessage.addListener(dispatchMessage)
  
   function Notebook () {
     this.setup()
@@ -10,6 +17,16 @@
     this.fullText = document.querySelector("#full-text")
   }
 
+  /**
+   * @source Sent via chrome.tabs.sendMessage (through the 
+   *         dispatchMessage method in this script) from 
+   *         tellNotebook() in popup.js which receives a call from the
+   *         TabTracker object created by background.js
+   * @param  {object} request  { method: "showFullText"
+   *                           , data: <string>
+   *                           }
+   * @param  {object} response { method: "showFullText" }
+   */
   Notebook.prototype.showFullText = function showFullText(
     request  // { method: "showFullText", data: <string> }
   , response // { method: "showFullText" }
@@ -50,8 +67,6 @@
       callback(response)
     }
   }
-
-  chrome.extension.onMessage.addListener(dispatchMessage)
 
   function speak(phrase) {
     console.log(phrase, (+ new Date()) % 100000)

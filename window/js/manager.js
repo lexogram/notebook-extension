@@ -2,7 +2,7 @@
 
 /**
  * Stub intended to <relay messages from the currently active tab to
- * the "base">
+ * the "base">. Instantiation currently commented out in background.js
  */
 
 ;(function manager(lx) {
