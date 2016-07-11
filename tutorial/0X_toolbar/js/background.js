@@ -2,14 +2,9 @@
 
 ;(function background(){
 
-  var windowOpen = false
-
   function useExtension() {
-    if (windowOpen) {
-      return
-    }
-    
-    var URL = "http://localhost:3000/"
+ 
+    var URL = chrome.extension.getURL("html/popup.html")
     var width = 300
     var top = 0
 
@@ -26,7 +21,7 @@
     chrome.windows.create(options, callback)
 
     function callback(window_data) {
-      windowOpen = true
+      // TODO
     }
   }
 
