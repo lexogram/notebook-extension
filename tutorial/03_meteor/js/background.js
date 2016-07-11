@@ -2,15 +2,8 @@
 
 ;(function background(){
 
-  function notify() {
-    console.log.apply(console, arguments)
-    alert(arguments[0])
-  }
-
   function useExtension() {
-    notify ("useExtension triggered")
-
-    var URL = chrome.extension.getURL("html/popup.html")
+    var URL = "http://localhost:3000/"
     var width = 300
     var top = 0
 
@@ -21,16 +14,15 @@
     , width: width
     , height: screen.availHeight - top
     , focused: false
-    , type: "popup" // "normal"
+    , type: "popup"
     }
 
     chrome.windows.create(options, callback)
 
     function callback(window_data) {
-      notify ("window opened", window_data)
+      // TODO
     }
   }
 
   chrome.browserAction.onClicked.addListener(useExtension)
-  notify ("Background script loaded")
 })()
