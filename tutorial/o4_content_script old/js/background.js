@@ -3,6 +3,7 @@
 ;(function background(){
 
   var windowOpen = false
+  var notebookTabId
 
   function useExtension() {
     if (windowOpen) {
@@ -30,5 +31,27 @@
     }
   }
 
+
+  function treatMessage(request, sender, sendResponse) {
+    switch (request.method) {
+      case "registerNoteBookTabId":
+        notebookTabId = sender.tab.id
+      break
+      case "changeSelection":
+        changeSelection(request)
+      break
+    }
+  }
+
+  function changeSelection(request) {
+    if (!notebookTabId) {
+      console.log("NoteBook inactive. Request not treated:", request)
+      return
+    }
+
+    chrome.tabs.sendMessage(notebookTabId, request)
+  }
+
   chrome.browserAction.onClicked.addListener(useExtension)
+  chrome.runtime.onMessage.addListener(treatMessage)
 })()

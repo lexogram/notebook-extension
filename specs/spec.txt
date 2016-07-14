@@ -70,3 +70,69 @@ A text extract needs to be treated multiple times:
    Each morpheme may have several regexes connected with it that allow you to identify multi-word/multi-morpheme phrases that have a meaning of their own
 
 First step: for English, identify all the words in an extract and order them by frequency.
+
+——————
+
+- Send selection to server
+- On server:
+  - identify words
+  - get relative frequency of each word as index and %
+  - send result to NoteBook
+- In NoteBook
+  - list words in order of frequency
+  - show index and %
+
+- In content page
+  - Add Toolbar
+  - Replace body with an altered copy
+  - Send full text to NoteBook
+    - NoteBook asks server for frequency map
+  - Set colour for each word according to frequency
+
+  ——————
+
+  * Different scope and chrome object for
+    - page script
+    - content script
+    - background script
+  * Add content script to all pages except NoteBook
+  * Require user to activate extension for each individual tab
+  * If tab is using extension, keep it active
+  * If window is closed 
+    - All tabs should disconnect and revert to original
+  * Toolbar should
+    - Let you show familiarity mark-up colours, or hide it
+    - Let you choose which iframes to annotate, if there are any
+      - change opacity when not selected
+    - Let you examine an arbitrary chunk of text (that you might create yourself)
+    - Let you switch off the extension for this tab
+  * browserAction should allow you to
+    - Activate for the current tab
+    - Choose to add this site or this page to the "Always Annotate" list
+    - Switch users?
+  * Switching the annotation on for a tab should
+    - Show the toolbar
+    - Open the window, if is not open
+    - Set a flag in the content script to track key and mouse events
+
+If multiple active tabs are open, then
+* switching between these tabs will update the NoteBook to what it was showing last
+  - Active tab
+  - Selected text
+  ??? Perhaps there might be a reason for showing two NoteBook windows side-by-side ???
+  > The content script will need to remember its state so that it
+    can restore it, when its tab is selected.
+* If a tab that is not using the extension is activated, then the NoteBook window should not update. It should still be active so that you can use it to explore words and phrases. The Expression field should be editable, so that you can check on any text, but custom text should not be stored as language samples on the database.
+
+This means that switching to an active tab could overwrite the custom stuff that you have entered. Custom entries could be stored at a Custom tab that opens/becomes active when you switch to a non-active tab. When you return to an active tab, the Custom tab remains unchanged.
+
+——————
+
+For the first tutorial, we need to create:
+* A content script that connects to the background script, to tell it about selection changes
+  ??? Is there an onSelectionChange event ???
+* A connection between the Meteor page script and the background script, so that the background script can update the NoteBook.
+
+——————
+
+Set the text of the main page to grey, then, as each word is selected, get information on it from the server, and set its colour to black. There will be no memory of the page ever having been seen before, so it will start over all grey the next time.

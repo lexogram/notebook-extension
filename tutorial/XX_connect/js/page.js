@@ -1,10 +1,10 @@
+"use strict"
 
-Meteor.startup(function() {
-  var extensionId = "lfghaadcpbfjiabgmpdnejbmkknfnlpn"
+;(function page(){
+  var extensionId = "caojjneecknfaipddkpilpncmcipnkjd"
   var port = chrome.runtime.connect(extensionId)
-
-  var p = document.getElementById("selection")
   var message = { method: "startCounter" }
+  var p = document.getElementById("connection")
 
   function incoming(message) {
     if (message.method === "ping") {
@@ -13,8 +13,5 @@ Meteor.startup(function() {
   }
 
   port.onMessage.addListener(incoming)
-
-  setTimeout(function () {
-    port.postMessage(message)
-  }, 1)
-})
+  port.postMessage(message)
+})()
