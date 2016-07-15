@@ -4,11 +4,6 @@
 
   var port
 
-  function notify() {
-    console.log.apply(console, arguments)
-    alert(arguments[0])
-  }
-
   function useExtension() {
     if (port) {
       return
@@ -31,10 +26,13 @@
     chrome.windows.create(options)
   }
 
-
   function openConnection(externalPort) {
-    //notify("openConnection", externalPort)
     port = externalPort
+    port.onMessage.addListener(incoming)
+  }
+
+  function incoming(message) {
+    // TODO
   }
 
   function treatMessage(request, sender, sendResponse) {
@@ -47,14 +45,13 @@
 
   function changeSelection(request) {
     if (!port) {
-      //notify("NoteBook inactive. Request not treated:", request)
+      console.log("NoteBook inactive. Request not treated:", request)
       return
     }
 
     port.postMessage(request)
   }
 
-  // TODO: Add disconnect litene
   chrome.runtime.onConnectExternal.addListener(openConnection)
   chrome.browserAction.onClicked.addListener(useExtension)
   chrome.runtime.onMessage.addListener(treatMessage)

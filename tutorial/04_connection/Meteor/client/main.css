@@ -1,0 +1,9 @@
+/* CSS declarations go here */
+p#selection {
+  min-height: 2em;
+  width: 100%;
+  background-color: #ddd;
+  border: 1px solid #ccc;
+  border-bottom-color: #eee;
+  border-right-color: #eee;
+}

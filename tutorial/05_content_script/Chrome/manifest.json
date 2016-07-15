@@ -25,6 +25,10 @@
     ]
   }
 
+, "externally_connectable": {
+    "matches": ["http://localhost:*/*"]
+  }
+
 , "content_scripts": [
     { "matches": ["<all_urls>"]
     , "exclude_matches": ["http://localhost:*/*"]
@@ -33,8 +37,4 @@
       ]
     }
   ]
-
-, "externally_connectable": {
-    "matches": ["http://localhost:*/*"]
-  }
 }
