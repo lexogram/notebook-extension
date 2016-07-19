@@ -2,7 +2,7 @@ import { Template } from 'meteor/templating'
 
 Session.set("rows", [])
  
-Template.rows.helpers({
+Template.body.helpers({
   rows: function rows() {
     return Session.get("rows")
   }

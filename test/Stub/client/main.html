@@ -1,11 +1,11 @@
 <head>
-  <title>NoteBook</title>
+  <title>Stub</title>
 </head>
 
 <body>
   <p id="selection"></p>
   
-  <table border="1">
+  <table>
     <tr>
       <th>Word</th>
       <th>Index</th>
@@ -14,15 +14,12 @@
       {{> rows}}
   </table>
 </body>
- 
-<!-- TEMPLATES -->
 
 <template name="rows">
-  {{#each rows}}
-    <tr>
-      <td>{{word}}</td>
-      <td>{{index}}</td>
-      <td>{{count}}</td>
-    </tr>
+  <button>Click Me</button>
+  {{#each counter}}
+    <p>{{index}}: {{value}}</p>
   {{/each}}
 </template>
+
+
