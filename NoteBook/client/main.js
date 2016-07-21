@@ -1,16 +1,5 @@
-import { Template } from 'meteor/templating' 
-
-Session.set("rows", [])
- 
-Template.rows.helpers({
-  rows: function rows() {
-    return Session.get("rows")
-  }
-});
-
 Meteor.startup(function() {
-  var extensionId = "dfhlekkdciiblbidbchopphkalomlblf"
-  // Use your own extension id ^
+  var extensionId = "fjdkbjoegfbgmgdjjbaiakkimdamlloo"
   var port = chrome.runtime.connect(extensionId)
   var p = document.getElementById("selection")
 
@@ -24,17 +13,7 @@ Meteor.startup(function() {
 
   function changeSelection(selection) {
     p.innerHTML = selection
-    Meteor.call("analyzeText", { data: selection }, updateTable)
   }
-
-  function updateTable(error, data) {
-    if (error) {
-
-    } else {
-      Session.set("rows", data)
-    }
-  }
-
 
   port.onMessage.addListener(incoming)
 })

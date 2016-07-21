@@ -4,25 +4,4 @@
 
 <body>
   <p id="selection"></p>
-  
-  <table border="1">
-    <tr>
-      <th>Word</th>
-      <th>Index</th>
-      <th>Count/Billion</th>
-    </tr>
-      {{> rows}}
-  </table>
 </body>
- 
-<!-- TEMPLATES -->
-
-<template name="rows">
-  {{#each rows}}
-    <tr>
-      <td>{{word}}</td>
-      <td>{{index}}</td>
-      <td>{{count}}</td>
-    </tr>
-  {{/each}}
-</template>

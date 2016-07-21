@@ -1,5 +1,5 @@
 {
-  "name": "NoteBook",
+  "name": "Stub",
   "private": true,
   "scripts": {
     "start": "meteor run"
