@@ -4,6 +4,7 @@
 
   var selectedText = ""
   var extensionIsActive = false
+  var cssInjected = false
 
   document.body.addEventListener("mouseup", checkSelection, false)
   document.body.addEventListener("keyup", checkSelection, false)
@@ -34,30 +35,39 @@
       case "insertToolbar":
         insertToolbar(request)
       break
+      case "removeToolbar":
+        removeToolbar()
+      break
     }   
   }
 
   function extensionStatus(request, sendResponse) {
-    console.log("extensionStatus called. extensionIsActive:", extensionIsActive)
-    sendResponse({ extensionIsActive: extensionIsActive })
+    sendResponse({
+      extensionIsActive: extensionIsActive
+    , cssInjected: cssInjected
+    })
   }
 
   function insertToolbar(request) {
-    // request = {
-    //   method: "insertToolbar"
+    // { method: "insertToolbar"
     // , html: <html string>
     // }
-      
+   
+    
     var body = document.body
     var injectedDOM = parseAsElements(request.html)
     appendSectionToBody(injectedDOM)
     body.classList.add("lxo-annotations")
     extensionIsActive = true
+    cssInjected = true
+
+    var close = document.querySelector(".lxo-toolbar a.close")
+    close.addEventListener("click", removeToolbar, false)
 
     return "toolbar inserted"
 
     function parseAsElements(htmlString) {
-      var parser = new DOMParser()
+      var parser = new DOMParser() // used multiple times
       var tempDoc = parser.parseFromString(htmlString, "text/html")
       return tempDoc.body.childNodes
     }
@@ -69,6 +79,18 @@
         body.appendChild(children[0])
       }
     }
+  }
+
+  function removeToolbar() {
+    if (!extensionIsActive) {
+      return
+    }
+
+    var toolbar = document.querySelector("section.lxo-toolbar")
+    toolbar.parentNode.removeChild(toolbar)
+    document.body.classList.remove("lxo-annotations")
+    extensionIsActive = false
+    // cssInjected remains true
   }
 
   chrome.extension.onMessage.addListener(treatMessage)

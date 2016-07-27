@@ -102,7 +102,27 @@
   }
 
   function incoming(message) {
-    // TO DO
+    switch (message.method) {
+      case "disableExtension":
+        disableExtension()
+      break
+    }
+  }
+
+  function disableExtension() {
+    chrome.tabs.query({}, callAllTabs)
+
+    function callAllTabs(tabs) {
+      var message = { method: "removeToolbar" }
+      var total = tabs.length
+      var ii
+      
+      for (ii = 0; ii < total; ii += 1) {
+        chrome.tabs.sendMessage(tabs[ii].id, message)
+      }
+
+      port = null
+    }
   }
 
   function treatMessage(request, sender, sendResponse) {
@@ -121,7 +141,7 @@
 
     port.postMessage(request)
   }
-
+  
   chrome.runtime.onConnectExternal.addListener(openConnection)
   chrome.browserAction.onClicked.addListener(useExtension)
   chrome.runtime.onMessage.addListener(treatMessage)
