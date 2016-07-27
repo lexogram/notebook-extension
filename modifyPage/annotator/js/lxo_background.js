@@ -5,7 +5,7 @@
  
    var query = {
     active: true
-  //, windowId: chrome.windows.WINDOW_ID_CURRENT
+  , currentWindow: true
   }
 
   // <HARD-CODED>
