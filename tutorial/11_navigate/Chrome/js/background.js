@@ -2,32 +2,29 @@
 
 ;(function background(){
 
-  var extension = new Extension()
+  var extension = {
+    port: null
+  , meteorURL: "http://localhost:3000/"
+  , htmlToInject: chrome.extension.getURL("html/inject.html")
+  , injectedCSSFile: "css/inject.css"
+  , extensionTabMap: {}
 
-  function Extension() {
-    this.port = null
-    this.meteorURL = "http://localhost:3000/"
-    this.htmlToInject = chrome.extension.getURL("html/inject.html")
-    this.injectedCSSFile = "css/inject.css"
-    this.extensionTabMap = {}
+  , initialize: function initialize() {
+      var xhr = new XMLHttpRequest()
+      xhr.open("GET", this.htmlToInject, true)
+      xhr.onreadystatechange = stateChanged
+      xhr.send()
 
-    var xhr = new XMLHttpRequest()
-    xhr.open("GET", this.htmlToInject, true)
-    xhr.onreadystatechange = stateChanged
-    xhr.send()
+      return this
 
-    function stateChanged() {
-      if (xhr.readyState === 4) {
-        extension.htmlToInject = xhr.responseText
+      function stateChanged() {
+        if (xhr.readyState === 4) {
+          extension.htmlToInject = xhr.responseText
+        }
       }
     }
-  }
-
-  ;(function addExtensionMethods(){
-
-    // INCOMING MESSAGES // INCOMING MESSAGES // INCOMING MESSAGES //
-
-    Extension.prototype.useExtension = function useExtension() {
+  
+  , useExtension: function useExtension() {
       this.ensureNoteBookWindowIsOpen()
 
       chrome.tabs.query(
@@ -40,14 +37,14 @@
       )
     }
 
-    Extension.prototype.openConnection = function openConnection(externalPort) {
+  , openConnection: function openConnection(externalPort) {
       this.port = externalPort
       this.port.onMessage.addListener(treatMessage)
     }
 
     // treatMessage // treatMessage // treatMessage // treatMessage //
 
-    Extension.prototype.changeSelection = function changeSelection(request) {
+  , changeSelection: function changeSelection(request) {
       if (!this.port) {
         console.log("NoteBook inactive. Request not treated:", request)
         return
@@ -56,7 +53,7 @@
       this.port.postMessage(request)
     }
 
-    Extension.prototype.getExtensionStatus = function getExtensionStatus(request, sender, sendResponse) {
+  , getExtensionStatus: function getExtensionStatus(request, sender, sendResponse) {
       var id = sender.tab.id
       var extensionIsActive = this.extensionTabMap[id] // true | !true
 
@@ -80,12 +77,11 @@
       sendResponse({ extensionIsActive: extensionIsActive })
     }
 
-    Extension.prototype.forgetExtension =
-      function forgetExtension(request, sender) {
+  , forgetExtension: function forgetExtension(request, sender) {
       this.extensionTabMap[sender.tab.id] = false
     }
 
-    Extension.prototype.disableExtension = function disableExtension() {
+  , disableExtension: function disableExtension() {
       this.port = null
       chrome.tabs.query({}, callAllTabs)
 
@@ -102,8 +98,7 @@
 
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
-    Extension.prototype.ensureNoteBookWindowIsOpen = 
-      function ensureNoteBookWindowIsOpen() {
+  , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
       if (this.port) {
         return
       }
@@ -113,7 +108,7 @@
 
       var options = {
         url: this.meteorURL
-      , left: screen.availWidth - width - 8
+      , left: screen.availWidth - width
       , top: top
       , width: width
       , height: screen.availHeight - top
@@ -124,8 +119,7 @@
       chrome.windows.create(options)
     }
 
-    Extension.prototype.showToolbarIfRequired = 
-      function showToolbarIfRequired(tabs) {
+   , showToolbarIfRequired: function showToolbarIfRequired(tabs) {
       var id = tabs[0].id
       var extensionIsActive = this.extensionTabMap[id] // true|false|
 
@@ -142,7 +136,7 @@
       }
     }
 
-    Extension.prototype.insertCSS = function insertCSS(id) {  
+  , insertCSS: function insertCSS(id) {  
       var cssDetails = {
         file: this.injectedCSSFile
       , runAt: "document_start"
@@ -150,7 +144,7 @@
       chrome.tabs.insertCSS(id, cssDetails)
     }
 
-    Extension.prototype.insertToolbar = function insertToolbar(id) {
+  , insertToolbar: function insertToolbar(id) {
       var message = { 
         method: "insertToolbar"
       , html: this.htmlToInject
@@ -161,12 +155,11 @@
 
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
 
-    Extension.prototype.checkUrlForMatch =
-      function checkUrlForMatch(url) {
+  , checkUrlForMatch: function checkUrlForMatch(url) {
       var regex = /http:\/\/lexogram\.github\.io\/openbook\//
       return !!regex.exec(url)
     }
-  })()
+  }.initialize()
 
   // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 
 
