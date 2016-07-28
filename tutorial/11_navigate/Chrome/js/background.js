@@ -2,172 +2,191 @@
 
 ;(function background(){
 
-  var port
-  var injectedHTML = chrome.extension.getURL("html/inject.html")
-  var injectedCSSFile = "css/inject.css"
-  var extensionTabMap = {}
-  var html
+  var bg = new Background()
 
-  ;(function getContentHTML() {
+  function Background() {
+    this.port = null
+    this.meteorURL = "http://localhost:3000/"
+    this.htmlToInject = chrome.extension.getURL("html/inject.html")
+    this.injectedCSSFile = "css/inject.css"
+    this.extensionTabMap = {}
+  }
+
+  ;(function addBackgroundMethods(){
+
+    // INCOMING MESSAGES // INCOMING MESSAGES // INCOMING MESSAGES //
+
+    Background.prototype.useExtension = function useExtension() {
+      this.ensureNoteBookWindowIsOpen()
+
+      chrome.tabs.query(
+        { active: true
+        , currentWindow: true
+        }
+      , function (tabs) {
+          bg.showToolbarIfRequired.call(bg, tabs)
+        }
+      )
+    }
+
+    Background.prototype.openConnection = function openConnection(externalPort) {
+      this.port = externalPort
+      this.port.onMessage.addListener(treatMessage)
+    }
+
+    // user actions // user actions // user actions // user actions //
+
+    Background.prototype.changeSelection = function changeSelection(request) {
+      if (!this.port) {
+        console.log("NoteBook inactive. Request not treated:", request)
+        return
+      }
+
+      this.port.postMessage(request)
+    }
+
+    Background.prototype.getExtensionStatus = function getExtensionStatus(request, sender, sendResponse) {
+      var id = sender.tab.id
+      var extensionIsActive = this.extensionTabMap[id] // true | !true
+
+      if (!extensionIsActive) {
+        extensionIsActive = this.checkUrlForMatch(sender.url)
+        // true | false
+      }
+
+      if (extensionIsActive) {
+        this.ensureNoteBookWindowIsOpen()
+        this.insertCSS(id)
+        this.insertToolbar(id)
+        this.extensionTabMap[id] = true
+        // if added by checkUrlForMatch()
+      } else {
+        // ensure that extensionTabMap[id] is undefined for when 
+        // showToolbarIfRequired() is called next     
+        delete this.extensionTabMap[id]
+      }
+
+      sendResponse({ extensionIsActive: extensionIsActive })
+    }
+
+    Background.prototype.forgetExtension =
+      function forgetExtension(request, sender) {
+      this.extensionTabMap[sender.tab.id] = false
+    }
+
+    Background.prototype.disableExtension = function disableExtension() {
+      this.port = null
+      chrome.tabs.query({}, callAllTabs)
+
+      function callAllTabs(tabs) {
+        var message = { method: "removeToolbar" }
+        var total = tabs.length
+        var ii
+        
+        for (ii = 0; ii < total; ii += 1) {
+          chrome.tabs.sendMessage(tabs[ii].id, message)
+        }
+      }
+    }
+
+    // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
+
+    Background.prototype.ensureNoteBookWindowIsOpen = 
+      function ensureNoteBookWindowIsOpen() {
+      if (this.port) {
+        return
+      }
+
+      var width = 300
+      var top = 0
+
+      var options = {
+        url: this.meteorURL
+      , left: screen.availWidth - width - 8
+      , top: top
+      , width: width
+      , height: screen.availHeight - top
+      , focused: false
+      , type: "popup"
+      }
+
+      chrome.windows.create(options)
+    }
+
+    Background.prototype.showToolbarIfRequired = 
+      function showToolbarIfRequired(tabs) {
+      var id = tabs[0].id
+      var extensionIsActive = this.extensionTabMap[id] // true|false|
+
+      switch (extensionIsActive) {
+        default: // undefined
+          this.insertCSS(id)
+          // fall throught to injectToolbar()
+        case false:
+          this.insertToolbar(id)
+          this.extensionTabMap[id] = true
+          // no need to break: nothing else happens
+        case true:
+          // do nothing: the Toolbar is already active
+      }
+    }
+
+    Background.prototype.insertCSS = function insertCSS(id) {  
+      var cssDetails = {
+        file: this.injectedCSSFile
+      , runAt: "document_start"
+      }
+      chrome.tabs.insertCSS(id, cssDetails)
+    }
+
+    Background.prototype.insertToolbar = function insertToolbar(id) {
+      var message = { 
+        method: "insertToolbar"
+      , html: this.htmlToInject
+      }
+
+      chrome.tabs.sendMessage(id, message)
+    }
+
+    // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
+
+    Background.prototype.checkUrlForMatch =
+      function checkUrlForMatch(url) {
+      var regex = /http:\/\/lexogram\.github\.io\/openbook\//
+      return !!regex.exec(url)
+    }
+  })()
+
+  // AJAX // AJAX // AJAX // AJAX // AJAX // AJAX // AJAX // AJAX //
+
+  ;(function getHTMLToInject() {
     var xhr = new XMLHttpRequest()
-    xhr.open("GET", injectedHTML, true)
+    xhr.open("GET", bg.htmlToInject, true)
     xhr.onreadystatechange = stateChanged
     xhr.send()
 
     function stateChanged() {
       if (xhr.readyState === 4) {
-        html = xhr.responseText
+        bg.htmlToInject = xhr.responseText
       }
     }
   })()
 
-  function useExtension() {
-    ensureNoteBookWindowIsOpen()
-
-    chrome.tabs.query(
-      { active: true
-      , currentWindow: true
-      }
-    , showToolbarIfRequired)
-  }
-
-  function ensureNoteBookWindowIsOpen() {
-    if (port) {
-      return
-    }
-
-    var URL = "http://localhost:3000/"
-    var width = 300
-    var top = 0
-
-    var options = {
-      url: URL
-    , left: screen.availWidth - width - 8
-    , top: top
-    , width: width
-    , height: screen.availHeight - top
-    , focused: false
-    , type: "popup"
-    }
-
-    chrome.windows.create(options)
-  }
-
-  function showToolbarIfRequired(tabs) {
-    var id = tabs[0].id
-    var extensionIsActive = extensionTabMap[id] // true | false | 
-
-    switch (extensionIsActive) {
-      default: // undefined
-        insertCSS(id)
-        // fall throught to injectToolbar()
-      case false:
-        insertToolbar(id)
-        extensionTabMap[id] = true
-        // no need to break: nothing else happens
-      case true:
-        // do nothing: the Toolbar is already active
-    }
-  }
-
-  function insertCSS(id) {  
-    var cssDetails = {
-      file: injectedCSSFile
-    , runAt: "document_start"
-    }
-    chrome.tabs.insertCSS(id, cssDetails)
-  }
-
-  function insertToolbar(id) {
-    var message = { 
-      method: "insertToolbar"
-    , html: html
-    }
-
-    chrome.tabs.sendMessage(id, message)
-  }
+  // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 
 
   function openConnection(externalPort) {
-    port = externalPort
-    port.onMessage.addListener(incoming)
+    bg.openConnection.call(bg, externalPort)
   }
 
-  function incoming(message) {
-    switch (message.method) {
-      case "disableExtension":
-        disableExtension()
-      break
-    }
-  }
-
-  function disableExtension() {
-    chrome.tabs.query({}, callAllTabs)
-
-    function callAllTabs(tabs) {
-      var message = { method: "removeToolbar" }
-      var total = tabs.length
-      var ii
-      
-      for (ii = 0; ii < total; ii += 1) {
-        chrome.tabs.sendMessage(tabs[ii].id, message)
-      }
-
-      port = null
-    }
+  function useExtension() {
+    bg.useExtension.call(bg)
   }
 
   function treatMessage(request, sender, sendResponse) {
-    switch (request.method) {
-      case "changeSelection":
-        changeSelection(request)
-      break
-      case "getExtensionStatus":
-        getExtensionStatus(sender, sendResponse)
-      break
-      case "forgetExtension":
-        forgetExtension(sender)
-      break
+    var method = bg[request.method]
+    if (typeof method === "function") {
+      method.call(bg, request, sender, sendResponse)
     }
-  }
-
-  function changeSelection(request) {
-    if (!port) {
-      console.log("NoteBook inactive. Request not treated:", request)
-      return
-    }
-
-    port.postMessage(request)
-  }
-
-  function getExtensionStatus(sender, sendResponse) {
-    var id = sender.tab.id
-    var extensionIsActive = extensionTabMap[id] // true | !true
-
-    if (!extensionIsActive) {
-      extensionIsActive = checkUrlForMatch(sender.url) // true | false
-    }
-
-    if (extensionIsActive) {
-      ensureNoteBookWindowIsOpen()
-      insertCSS(id)
-      insertToolbar(id)
-      extensionTabMap[id] = true // if added by checkUrlForMatch()
-    } else {
-      // ensure that extensionTabMap[id] is undefined for when 
-      // showToolbarIfRequired() is called next     
-      delete extensionTabMap[id]
-    }
-
-    sendResponse({ extensionIsActive: extensionIsActive })
-
-    function checkUrlForMatch(url) {
-      var regex = /http:\/\/lx\// // FOR TESTING PURPOSES ONLY
-      return !!regex.exec(url)
-    }
-  }
-
-  function forgetExtension(sender) {
-    extensionTabMap[sender.tab.id] = false
   }
   
   chrome.runtime.onConnectExternal.addListener(openConnection)
