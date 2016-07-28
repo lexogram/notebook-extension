@@ -2,21 +2,32 @@
 
 ;(function background(){
 
-  var bg = new Background()
+  var extension = new Extension()
 
-  function Background() {
+  function Extension() {
     this.port = null
     this.meteorURL = "http://localhost:3000/"
     this.htmlToInject = chrome.extension.getURL("html/inject.html")
     this.injectedCSSFile = "css/inject.css"
     this.extensionTabMap = {}
+
+    var xhr = new XMLHttpRequest()
+    xhr.open("GET", this.htmlToInject, true)
+    xhr.onreadystatechange = stateChanged
+    xhr.send()
+
+    function stateChanged() {
+      if (xhr.readyState === 4) {
+        extension.htmlToInject = xhr.responseText
+      }
+    }
   }
 
-  ;(function addBackgroundMethods(){
+  ;(function addExtensionMethods(){
 
     // INCOMING MESSAGES // INCOMING MESSAGES // INCOMING MESSAGES //
 
-    Background.prototype.useExtension = function useExtension() {
+    Extension.prototype.useExtension = function useExtension() {
       this.ensureNoteBookWindowIsOpen()
 
       chrome.tabs.query(
@@ -24,19 +35,19 @@
         , currentWindow: true
         }
       , function (tabs) {
-          bg.showToolbarIfRequired.call(bg, tabs)
+          extension.showToolbarIfRequired.call(extension, tabs)
         }
       )
     }
 
-    Background.prototype.openConnection = function openConnection(externalPort) {
+    Extension.prototype.openConnection = function openConnection(externalPort) {
       this.port = externalPort
       this.port.onMessage.addListener(treatMessage)
     }
 
-    // user actions // user actions // user actions // user actions //
+    // treatMessage // treatMessage // treatMessage // treatMessage //
 
-    Background.prototype.changeSelection = function changeSelection(request) {
+    Extension.prototype.changeSelection = function changeSelection(request) {
       if (!this.port) {
         console.log("NoteBook inactive. Request not treated:", request)
         return
@@ -45,7 +56,7 @@
       this.port.postMessage(request)
     }
 
-    Background.prototype.getExtensionStatus = function getExtensionStatus(request, sender, sendResponse) {
+    Extension.prototype.getExtensionStatus = function getExtensionStatus(request, sender, sendResponse) {
       var id = sender.tab.id
       var extensionIsActive = this.extensionTabMap[id] // true | !true
 
@@ -69,12 +80,12 @@
       sendResponse({ extensionIsActive: extensionIsActive })
     }
 
-    Background.prototype.forgetExtension =
+    Extension.prototype.forgetExtension =
       function forgetExtension(request, sender) {
       this.extensionTabMap[sender.tab.id] = false
     }
 
-    Background.prototype.disableExtension = function disableExtension() {
+    Extension.prototype.disableExtension = function disableExtension() {
       this.port = null
       chrome.tabs.query({}, callAllTabs)
 
@@ -91,7 +102,7 @@
 
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
-    Background.prototype.ensureNoteBookWindowIsOpen = 
+    Extension.prototype.ensureNoteBookWindowIsOpen = 
       function ensureNoteBookWindowIsOpen() {
       if (this.port) {
         return
@@ -113,7 +124,7 @@
       chrome.windows.create(options)
     }
 
-    Background.prototype.showToolbarIfRequired = 
+    Extension.prototype.showToolbarIfRequired = 
       function showToolbarIfRequired(tabs) {
       var id = tabs[0].id
       var extensionIsActive = this.extensionTabMap[id] // true|false|
@@ -131,7 +142,7 @@
       }
     }
 
-    Background.prototype.insertCSS = function insertCSS(id) {  
+    Extension.prototype.insertCSS = function insertCSS(id) {  
       var cssDetails = {
         file: this.injectedCSSFile
       , runAt: "document_start"
@@ -139,7 +150,7 @@
       chrome.tabs.insertCSS(id, cssDetails)
     }
 
-    Background.prototype.insertToolbar = function insertToolbar(id) {
+    Extension.prototype.insertToolbar = function insertToolbar(id) {
       var message = { 
         method: "insertToolbar"
       , html: this.htmlToInject
@@ -150,42 +161,27 @@
 
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
 
-    Background.prototype.checkUrlForMatch =
+    Extension.prototype.checkUrlForMatch =
       function checkUrlForMatch(url) {
       var regex = /http:\/\/lexogram\.github\.io\/openbook\//
       return !!regex.exec(url)
     }
   })()
 
-  // AJAX // AJAX // AJAX // AJAX // AJAX // AJAX // AJAX // AJAX //
-
-  ;(function getHTMLToInject() {
-    var xhr = new XMLHttpRequest()
-    xhr.open("GET", bg.htmlToInject, true)
-    xhr.onreadystatechange = stateChanged
-    xhr.send()
-
-    function stateChanged() {
-      if (xhr.readyState === 4) {
-        bg.htmlToInject = xhr.responseText
-      }
-    }
-  })()
-
   // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 
 
   function openConnection(externalPort) {
-    bg.openConnection.call(bg, externalPort)
+    extension.openConnection.call(extension, externalPort)
   }
 
   function useExtension() {
-    bg.useExtension.call(bg)
+    extension.useExtension.call(extension)
   }
 
   function treatMessage(request, sender, sendResponse) {
-    var method = bg[request.method]
+    var method = extension[request.method]
     if (typeof method === "function") {
-      method.call(bg, request, sender, sendResponse)
+      method.call(extension, request, sender, sendResponse)
     }
   }
   

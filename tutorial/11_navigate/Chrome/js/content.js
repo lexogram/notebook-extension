@@ -2,76 +2,42 @@
 
 ;(function content(){
 
-  var selectedText = ""
-  var extensionIsActive = false
+  var toolbar = new Toolbar()
 
-  document.body.addEventListener("mouseup", checkSelection, false)
-  document.body.addEventListener("keyup", checkSelection, false)
+  function Toolbar() {
+    this.selectedText = ""
+    this.extensionIsActive = false
 
-  function checkSelection(event) {
-    if (!extensionIsActive) {
-      return
+    chrome.runtime.sendMessage(
+      { method: "getExtensionStatus" }
+    , updateStatus
+    )
+
+    function updateStatus(result) {
+      toolbar.extensionIsActive = result.extensionIsActive
+      toolbar.checkSelection()
     }
+  } 
 
-    var selection = document.getSelection()
-    var text = selection.toString()
-
-    if (selectedText !== text) {
-      selectedText = text
-
-      chrome.runtime.sendMessage({
-        method: "changeSelection"
-      , data: selectedText
-      })
-    }
-  }
-
-  function treatMessage(request, sender, sendResponse) {
-    switch (request.method) {
-      case "extensionStatus":
-        extensionStatus(request, sendResponse)
-      break
-      case "insertToolbar":
-        insertToolbar(request)
-      break
-      case "removeToolbar":
-        removeToolbar()
-      break
-    }   
-  }
-
-  // DELETED
-    // function extensionStatus(request, sendResponse) {
-    //   request.extensionIsActive = extensionIsActive
-    //   request.cssInjected = cssInjected
-
-    //   sendResponse(request)
-    // }
-
-  function insertToolbar(request) {
+  Toolbar.prototype.insertToolbar = function insertToolbar(request) {
     // { method: "insertToolbar"
     // , html: <html string>
     // }
     
     var body = document.body
-    var injectedDOM = parseAsElements(request.html)
-    appendSectionToBody(injectedDOM)
+    appendToBody(request.html)
     body.classList.add("lxo-annotations")
-    extensionIsActive = true
-    // cssInjected = true
+    this.extensionIsActive = true
 
     var close = document.querySelector(".lxo-toolbar a.close")
-    close.addEventListener("click", removeToolbar, false)
+    close.addEventListener("click", function () {
+      toolbar.removeToolbar.call(toolbar)
+    }, false)
 
-    return "toolbar inserted"
-
-    function parseAsElements(htmlString) {
+    function appendToBody(htmlString) {
       var parser = new DOMParser() // used multiple times
       var tempDoc = parser.parseFromString(htmlString, "text/html")
-      return tempDoc.body.childNodes
-    }
-
-    function appendSectionToBody(children) {
+      var children = tempDoc.body.childNodes
       var total = children.length
       
       for (var ii = 0; ii < total; ii += 1) {
@@ -80,31 +46,54 @@
     }
   }
 
-  function removeToolbar() {
-    if (!extensionIsActive) {
+  Toolbar.prototype.removeToolbar = function removeToolbar() {
+    if (!this.extensionIsActive) {
       return
     }
 
     var toolbar = document.querySelector("section.lxo-toolbar")
     toolbar.parentNode.removeChild(toolbar)
     document.body.classList.remove("lxo-annotations")
-    // CHANGED
+
     chrome.runtime.sendMessage({ method: "forgetExtension" })
 
-    extensionIsActive = false
+    this.extensionIsActive = false
   }
 
-  // CHANGED
-  ;(function setExtensionStatus(){
-    chrome.runtime.sendMessage(
-      { method: "getExtensionStatus" }
-    , updateStatus
-    )
-
-    function updateStatus(result) {
-      extensionIsActive = result.extensionIsActive
+  Toolbar.prototype.checkSelection = function checkSelection() {
+    if (!this.extensionIsActive) {
+      return
     }
-  })()
+
+    var selection = document.getSelection()
+    var text = selection.toString()
+
+    if (this.selectedText !== text) {
+      this.selectedText = text
+
+      chrome.runtime.sendMessage({
+        method: "changeSelection"
+      , data: this.selectedText
+      })
+    }
+  }
+
+  // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS //
+
+  function checkSelection(event) {
+    toolbar.checkSelection.call(toolbar)
+  }
+
+  document.body.addEventListener("mouseup", checkSelection, false)
+  document.body.addEventListener("keyup", checkSelection, false)
+
+  function treatMessage(request, sender, sendResponse) {
+    var method = toolbar[request.method]
+
+    if (typeof method === "function") {
+      method.call(toolbar, request, sender, sendResponse)
+    } 
+  }
 
   chrome.extension.onMessage.addListener(treatMessage)
 })()
