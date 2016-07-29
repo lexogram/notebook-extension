@@ -5,13 +5,13 @@
   var extension = {
     port: null
   , meteorURL: "http://localhost:3000/"
-  , htmlToInject: chrome.extension.getURL("html/inject.html")
+  , injectedHTML: chrome.extension.getURL("html/inject.html")
   , injectedCSSFile: "css/inject.css"
-  , extensionTabMap: {}
+  , tabMap: {}
 
   , initialize: function initialize() {
       var xhr = new XMLHttpRequest()
-      xhr.open("GET", this.htmlToInject, true)
+      xhr.open("GET", this.injectedHTML, true)
       xhr.onreadystatechange = stateChanged
       xhr.send()
 
@@ -19,9 +19,14 @@
 
       function stateChanged() {
         if (xhr.readyState === 4) {
-          extension.htmlToInject = xhr.responseText
+          extension.injectedHTML = xhr.responseText
         }
       }
+    }
+
+  , openConnection: function openConnection(externalPort) {
+      this.port = externalPort
+      this.port.onMessage.addListener(treatMessage)
     }
   
   , useExtension: function useExtension() {
@@ -37,11 +42,6 @@
       )
     }
 
-  , openConnection: function openConnection(externalPort) {
-      this.port = externalPort
-      this.port.onMessage.addListener(treatMessage)
-    }
-
     // treatMessage // treatMessage // treatMessage // treatMessage //
 
   , changeSelection: function changeSelection(request) {
@@ -55,7 +55,7 @@
 
   , getExtensionStatus: function getExtensionStatus(request, sender, sendResponse) {
       var id = sender.tab.id
-      var extensionIsActive = this.extensionTabMap[id] // true | !true
+      var extensionIsActive = this.tabMap[id] // true | !true
 
       if (!extensionIsActive) {
         extensionIsActive = this.checkUrlForMatch(sender.url)
@@ -66,19 +66,19 @@
         this.ensureNoteBookWindowIsOpen()
         this.insertCSS(id)
         this.insertToolbar(id)
-        this.extensionTabMap[id] = true
+        this.tabMap[id] = true
         // if added by checkUrlForMatch()
       } else {
-        // ensure that extensionTabMap[id] is undefined for when 
+        // ensure that tabMap[id] is undefined for when 
         // showToolbarIfRequired() is called next     
-        delete this.extensionTabMap[id]
+        delete this.tabMap[id]
       }
 
       sendResponse({ extensionIsActive: extensionIsActive })
     }
 
   , forgetExtension: function forgetExtension(request, sender) {
-      this.extensionTabMap[sender.tab.id] = false
+      this.tabMap[sender.tab.id] = false
     }
 
   , disableExtension: function disableExtension() {
@@ -121,7 +121,7 @@
 
    , showToolbarIfRequired: function showToolbarIfRequired(tabs) {
       var id = tabs[0].id
-      var extensionIsActive = this.extensionTabMap[id] // true|false|
+      var extensionIsActive = this.tabMap[id] // true|false|
 
       switch (extensionIsActive) {
         default: // undefined
@@ -129,7 +129,7 @@
           // fall throught to injectToolbar()
         case false:
           this.insertToolbar(id)
-          this.extensionTabMap[id] = true
+          this.tabMap[id] = true
           // no need to break: nothing else happens
         case true:
           // do nothing: the Toolbar is already active
@@ -147,7 +147,7 @@
   , insertToolbar: function insertToolbar(id) {
       var message = { 
         method: "insertToolbar"
-      , html: this.htmlToInject
+      , html: this.injectedHTML
       }
 
       chrome.tabs.sendMessage(id, message)
