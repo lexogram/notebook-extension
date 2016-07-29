@@ -10,7 +10,7 @@ Template.rows.helpers({
 })
 
 Meteor.startup(function() {
-  var extensionId = "cjegbcglnckddihiomlaimgeaamjploa"
+  var extensionId = "cmkciflpklcjekpiinpboldbjmnmjgib"
   // Use your own extension id ^
   var port = chrome.runtime.connect(extensionId)
   var p = document.getElementById("selection")

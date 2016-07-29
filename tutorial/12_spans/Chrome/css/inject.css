@@ -1,0 +1,38 @@
+body.lxo-annotations {
+  margin-top: 32px;
+}
+
+section.lxo-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 31px;
+  min-height: 31px;
+  min-width: 350px;
+  width: 100%;
+  padding: 0;
+  background-color: #ccc;
+  border-bottom: 1px solid #999;
+  z-index: 99999;
+}
+
+a.close {
+  text-decoration: none;
+  color: #999;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+a.close:hover,
+a.close:active {
+   color: #900;
+}
+
+span.lxo-w0 {
+  color: #f00;
+}
+
+span.lxo-w1 {
+  color: #000;
+}
