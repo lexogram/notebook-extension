@@ -5,6 +5,7 @@
   var toolbar = {
     selectedText: ""
   , extensionIsActive: false
+  , parser: new DOMParser()
 
   , initialize: function initialize() {
       chrome.runtime.sendMessage(
@@ -26,7 +27,8 @@
       // }
       
       var body = document.body
-      appendToBody(request.html)
+      var nodes = this.parseAsElements(request.html)
+      appendToBody(nodes)
       body.classList.add("lxo-annotations")
       this.extensionIsActive = true
 
@@ -35,16 +37,20 @@
         toolbar.removeToolbar.call(toolbar)
       }, false)
 
-      function appendToBody(htmlString) {
-        var parser = new DOMParser() // used multiple times
-        var tempDoc = parser.parseFromString(htmlString, "text/html")
-        var children = tempDoc.body.childNodes
-        var total = children.length
+      function appendToBody(nodes) {
+        var node
         
-        for (var ii = 0; ii < total; ii += 1) {
-          body.appendChild(children[0])
+        for (var ii = 0, total = nodes.length; ii < total; ii += 1) {
+          node = nodes[0]
+          body.appendChild(node)
+          toolbar.ignore.push(node)
         }
       }
+    }
+
+  , parseAsElements: function parseAsElements(html) {
+      var tempDoc = this.parser.parseFromString(html, "text/html")
+      return tempDoc.body.childNodes
     }
 
   , removeToolbar:function removeToolbar() {

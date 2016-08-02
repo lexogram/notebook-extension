@@ -5,10 +5,10 @@
   var toolbar = {
     selectedText: ""
   , extensionIsActive: false
-  , parser: new DOMParser()
   // CHANGE
   , ignore: []
   , mode: "annotations"
+  , parser: new DOMParser()
   , regex: /(\w+)/g
 
   , initialize: function initialize() {
@@ -32,7 +32,6 @@
 
       this.extensionIsActive = true
 
-      // CHANGE
       this.addSpansToTree(body)
  
       function appendToBody(nodes) {
@@ -47,21 +46,59 @@
         }
       }
 
-      var close = document.querySelector(".lxo-toolbar a.close")
-      close.addEventListener("click", function () {
-        toolbar.removeToolbar.call(toolbar)
-      }, false)
+      ;(function activateToolbarButtons() {
+        var close = document.querySelector(".lxo-toolbar a.close")
+        var toggleMode = document.querySelector(".lxo-toolbar button")
+
+        close.addEventListener("click", function () {
+          toolbar.removeToolbar.call(toolbar)
+        }, false)
+
+        // // CHANGE
+        // toggleMode.addEventListener("click", function (event) {
+        //   toolbar.toggleMode.call(toolbar, event)
+        // }, false)
+      })()
     }
 
+  // // CHANGE
   , parseAsElements: function parseAsElements(html) {
       var tempDoc = this.parser.parseFromString(html, "text/html")
       return tempDoc.body.childNodes
     }
 
+  // , toggleMode: function toggleMode(event) {
+  //     var button = event.target
+  //     var body = document.body
+  //     var hash = window.location.hash
+  //     button.textContent = "Show " + this.mode
+ 
+  //     switch (this.mode) {
+  //       case "original":
+  //         this.addSpansToTree(body)
+  //         this.mode = "annotations"
+  //       break
+  //       case "annotations":        
+  //         this.removeSpansFromTree(body)
+  //         this.mode = "original"
+  //       break
+  //     }
+
+  //     if (hash) {
+  //       // Force page to jump to current hash
+  //       window.location.hash = ""
+  //       window.location.hash = hash
+  //   }
+
   , removeToolbar:function removeToolbar() {
       if (!this.extensionIsActive) {
         return
       }
+
+      // // CHANGE
+      // if (this.mode === "annotations") {
+      //   this.removeSpansFromTree(document.body)
+      // }
 
       var toolbar = document.querySelector("section.lxo-toolbar")
       toolbar.parentNode.removeChild(toolbar)
@@ -108,7 +145,7 @@
       }
 
       function applicable (element) {
-        var applicable = element.nodeType !== 8 // not <!--comment-->
+        var applicable = element.nodeType !== 8 //not a <!--comment-->
 
         if (applicable) {
           applicable = element.tagName !== "SCRIPT"
@@ -167,7 +204,8 @@
           nextSibling = elements[index]
           parentNode.replaceChild(nextSibling, element)
           // ... then place the other elements in reverse order
-          while (1 < index--) { // Use 1 < because of earlier <HACK>
+          for (;index > 1;) { // Use > 1 because of earlier <HACK>
+            index -=1
             element = elements[index]
             parentNode.insertBefore(element, nextSibling)         
             nextSibling = element
@@ -175,6 +213,63 @@
         }
       }
     }
+
+  // , removeSpansFromTree: function removeSpansFromTree(element) {
+  //     var childNodes = element.childNodes 
+  //     var ii = childNodes.length
+
+  //     if (!ii) {
+  //       return
+  //     }
+
+  //     var textArray = []
+  //     var nodesToReplace = []
+  //     var regex = /lxo-w\d/
+  //     var treating = false
+  //     var childNode
+  //       , treat
+  //       , isTextNode
+
+  //     while (ii--) {
+  //       childNode = childNodes[ii]
+  //       isTextNode = childNode.nodeType === 3
+  //       treat = (childNode.tagName === "SPAN"
+  //        && regex.exec(childNode.className))
+
+  //       if (treat || treating && isTextNode) {
+  //         nodesToReplace.push(childNode)
+  //         textArray.unshift(childNode.textContent)
+  //         treating = true
+  //       } else {
+  //         if (treating) {
+  //           treating = false
+  //           replaceSpansWithTextContent()
+  //         }
+
+  //         this.removeSpansFromTree(childNode)
+  //       }
+  //     }
+
+  //     if (treating) {
+  //       replaceSpansWithTextContent()
+  //     }
+
+  //     function replaceSpansWithTextContent() {
+  //       var ii = nodesToReplace.length
+  //       if (ii) {
+  //         var textNode = document.createTextNode(textArray.join(""))
+          
+  //         while (--ii) { // leaves last node in place for replaceChild
+  //           element.removeChild(nodesToReplace.pop())
+  //         }
+          
+  //         element.replaceChild(textNode, nodesToReplace.pop())
+  //         textArray.length = 0
+  //       }
+  //     }
+  //   }
+
+
   }.initialize()
 
   // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 
