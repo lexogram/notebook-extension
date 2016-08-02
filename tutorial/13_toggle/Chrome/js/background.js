@@ -116,7 +116,7 @@
       , type: "popup"
       }
 
-      //chrome.windows.create(options)
+      chrome.windows.create(options)
     }
 
    , showToolbarIfRequired: function showToolbarIfRequired(tabs) {
@@ -156,8 +156,7 @@
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
 
   , checkUrlForMatch: function checkUrlForMatch(url) {
-      var regex = /http:\/\/lx\//
-      //var regex = /http:\/\/lexogram\.github\.io\/openbook\//
+      var regex = /http:\/\/lexogram\.github\.io\/openbook\//
       return !!regex.exec(url)
     }
   }.initialize()

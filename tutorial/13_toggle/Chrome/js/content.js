@@ -5,11 +5,11 @@
   var toolbar = {
     selectedText: ""
   , extensionIsActive: false
-  // CHANGE
-  , ignore: []
-  , mode: "annotations"
   , parser: new DOMParser()
+  , ignore: []
   , regex: /(\w+)/g
+  , removex: /lxo-w\d+/
+  , mode: "annotations"
 
   , initialize: function initialize() {
       chrome.runtime.sendMessage(
@@ -35,11 +35,9 @@
       this.addSpansToTree(body)
  
       function appendToBody(nodes) {
-        // CHANGE
-        var total = nodes.length
         var node
         
-        for (var ii = 0; ii < total; ii += 1) {
+        for (var ii = 0, total = nodes.length; ii < total; ii += 1) {
           node = nodes[0]
           body.appendChild(node)
           toolbar.ignore.push(node)
@@ -54,51 +52,45 @@
           toolbar.removeToolbar.call(toolbar)
         }, false)
 
-        // // CHANGE
-        // toggleMode.addEventListener("click", function (event) {
-        //   toolbar.toggleMode.call(toolbar, event)
-        // }, false)
+        // CHANGE
+        toggleMode.addEventListener("click", function (event) {
+          toolbar.toggleMode.call(toolbar, event)
+        }, false)
       })()
     }
 
-  // // CHANGE
+  , toggleMode: function toggleMode(event) {
+      var button = event.target
+      var body = document.body
+      var hash = window.location.hash
+      button.textContent = "Show " + this.mode
+ 
+      switch (this.mode) {
+        case "original":
+          this.addSpansToTree(body)
+          this.mode = "annotations"
+        break
+        case "annotations":        
+          this.removeSpansFromTree(body)
+          this.mode = "original"
+        break
+      }
+    }
+
   , parseAsElements: function parseAsElements(html) {
       var tempDoc = this.parser.parseFromString(html, "text/html")
       return tempDoc.body.childNodes
     }
-
-  // , toggleMode: function toggleMode(event) {
-  //     var button = event.target
-  //     var body = document.body
-  //     var hash = window.location.hash
-  //     button.textContent = "Show " + this.mode
- 
-  //     switch (this.mode) {
-  //       case "original":
-  //         this.addSpansToTree(body)
-  //         this.mode = "annotations"
-  //       break
-  //       case "annotations":        
-  //         this.removeSpansFromTree(body)
-  //         this.mode = "original"
-  //       break
-  //     }
-
-  //     if (hash) {
-  //       // Force page to jump to current hash
-  //       window.location.hash = ""
-  //       window.location.hash = hash
-  //   }
 
   , removeToolbar:function removeToolbar() {
       if (!this.extensionIsActive) {
         return
       }
 
-      // // CHANGE
-      // if (this.mode === "annotations") {
-      //   this.removeSpansFromTree(document.body)
-      // }
+      // CHANGE
+      if (this.mode === "annotations") {
+        this.removeSpansFromTree(document.body)
+      }
 
       var toolbar = document.querySelector("section.lxo-toolbar")
       toolbar.parentNode.removeChild(toolbar)
@@ -127,7 +119,6 @@
       }
     }
 
-  // CHANGE
   , addSpansToTree: function addSpansToTree(element) {
       var childNodes = element.childNodes
       var ii = childNodes.length
@@ -214,62 +205,59 @@
       }
     }
 
-  // , removeSpansFromTree: function removeSpansFromTree(element) {
-  //     var childNodes = element.childNodes 
-  //     var ii = childNodes.length
+  , removeSpansFromTree: function removeSpansFromTree(element) {
+      var childNodes = element.childNodes 
+      var ii = childNodes.length
 
-  //     if (!ii) {
-  //       return
-  //     }
+      if (!ii) {
+        return
+      }
 
-  //     var textArray = []
-  //     var nodesToReplace = []
-  //     var regex = /lxo-w\d/
-  //     var treating = false
-  //     var childNode
-  //       , treat
-  //       , isTextNode
+      var textArray = []
+      var nodesToReplace = []
+      var treating = false
+      var childNode
+        , treat
+        , isTextNode
 
-  //     while (ii--) {
-  //       childNode = childNodes[ii]
-  //       isTextNode = childNode.nodeType === 3
-  //       treat = (childNode.tagName === "SPAN"
-  //        && regex.exec(childNode.className))
+      while (ii--) {
+        childNode = childNodes[ii]
+        isTextNode = childNode.nodeType === 3
+        treat = (childNode.tagName === "SPAN"
+         && this.removex.exec(childNode.className))
 
-  //       if (treat || treating && isTextNode) {
-  //         nodesToReplace.push(childNode)
-  //         textArray.unshift(childNode.textContent)
-  //         treating = true
-  //       } else {
-  //         if (treating) {
-  //           treating = false
-  //           replaceSpansWithTextContent()
-  //         }
+        if (treat || treating && isTextNode) {
+          nodesToReplace.push(childNode)
+          textArray.unshift(childNode.textContent)
+          treating = true
+        } else {
+          if (treating) {
+            treating = false
+            replaceSpansWithTextContent()
+          }
 
-  //         this.removeSpansFromTree(childNode)
-  //       }
-  //     }
+          this.removeSpansFromTree(childNode)
+        }
+      }
 
-  //     if (treating) {
-  //       replaceSpansWithTextContent()
-  //     }
+      if (treating) {
+        replaceSpansWithTextContent()
+      }
 
-  //     function replaceSpansWithTextContent() {
-  //       var ii = nodesToReplace.length
-  //       if (ii) {
-  //         var textNode = document.createTextNode(textArray.join(""))
+      function replaceSpansWithTextContent() {
+        var ii = nodesToReplace.length
+        if (ii) {
+          var textNode = document.createTextNode(textArray.join(""))
           
-  //         while (--ii) { // leaves last node in place for replaceChild
-  //           element.removeChild(nodesToReplace.pop())
-  //         }
+          while (--ii) { // leaves last node in place for replaceChild
+            element.removeChild(nodesToReplace.pop())
+          }
           
-  //         element.replaceChild(textNode, nodesToReplace.pop())
-  //         textArray.length = 0
-  //       }
-  //     }
-  //   }
-
-
+          element.replaceChild(textNode, nodesToReplace.pop())
+          textArray.length = 0
+        }
+      }
+    }
   }.initialize()
 
   // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 

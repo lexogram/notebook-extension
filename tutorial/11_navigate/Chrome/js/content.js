@@ -43,7 +43,6 @@
         for (var ii = 0, total = nodes.length; ii < total; ii += 1) {
           node = nodes[0]
           body.appendChild(node)
-          toolbar.ignore.push(node)
         }
       }
     }

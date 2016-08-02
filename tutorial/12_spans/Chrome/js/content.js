@@ -6,9 +6,7 @@
     selectedText: ""
   , extensionIsActive: false
   , parser: new DOMParser()
-  // CHANGE
   , ignore: []
-  , mode: "annotations"
   , regex: /(\w+)/g
 
   , initialize: function initialize() {
@@ -32,15 +30,12 @@
 
       this.extensionIsActive = true
 
-      // CHANGE
       this.addSpansToTree(body)
  
       function appendToBody(nodes) {
-        // CHANGE
-        var total = nodes.length
         var node
         
-        for (var ii = 0; ii < total; ii += 1) {
+        for (var ii = 0, total = nodes.length; ii < total; ii += 1) {
           node = nodes[0]
           body.appendChild(node)
           toolbar.ignore.push(node)
