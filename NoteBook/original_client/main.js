@@ -1,25 +1,22 @@
-// import { Template } from 'meteor/templating'
-// Template.rows.helpers({
-//   rows: function rows() {
-//     return Session.get("rows")
-//   }
-// })
+import { Template } from 'meteor/templating'
+Template.rows.helpers({
+  rows: function rows() {
+    return Session.get("rows")
+  }
+})
 
-// import { Session } from 'meteor/session'
+import { Session } from 'meteor/session'
 
-// Session.set("rows", [])
+Session.set("rows", [])
  
-// Meteor.startup(function() {
+Meteor.startup(function() {
   
-;(function startUpWithoutMeteor(){
-  var  extensionId = "ooholfkelnhceiaclhclbcahhikfddoj"
+  var  extensionId = "gmbnkljadedkmfafkecdhfjknjgnoacb"
   // Use your own extension id ^
 
   var connections = {
     port: null
   , p: document.getElementById("selection")
-  , wiktionary: document.getElementById("wiktionary")
-  , wikiURL: ["https://en.wiktionary.org/w/index.php?title=", "&printable=no"]
 
   , initialize: function initialize() {
       this.port = chrome.runtime.connect(extensionId)
@@ -31,35 +28,22 @@
   , changeSelection: function changeSelection(request) {
       var selection = request.data
       this.p.innerHTML = selection
-      // Meteor.call("analyzeText", { data: selection }, updateTable)
+      Meteor.call("analyzeText", { data: selection }, updateTable)
 
-      // function updateTable(error, data) {
-      //   if (error) {
+      function updateTable(error, data) {
+        if (error) {
 
-      //   } else {
-      //     Session.set("rows", data)
-      //   }
-      // }
-      
-      this.showInWikiTab(selection)
-    }
-
-  , showInWikiTab: function showInWikiTab(word) {
-      var word = word.substr(0, word.indexOf(" ")) || word
-
-      if (!word) {
-        return
+        } else {
+          Session.set("rows", data)
+        }
       }
-      
-      var url = this.wikiURL[0] + word + this.wikiURL[1]
-      wiktionary.src = url
     }
 
   , getFrequencyData: function getFrequencyData(request) {
       // { method: "getFrequencyData"
       // , data: textContent
       // , id: <tab id where call originated> }
-   // Meteor.call("getFrequencyData", request, treatFrequencyData)
+      Meteor.call("getFrequencyData", request, treatFrequencyData)
 
       function treatFrequencyData(error, data) {
         if (error) {
@@ -97,4 +81,4 @@
   }
 
   window.onbeforeunload = disableExtension
-})() // remove iife () when Meteor.startup() is restored
+})

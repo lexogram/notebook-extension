@@ -1,0 +1,94 @@
+body.lxo-annotations {
+  margin-top: 32px;
+}
+
+section.lxo-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 31px;
+  min-height: 31px;
+  min-width: 350px;
+  width: 100%;
+  padding: 0;
+  background-color: #ccc;
+  border-bottom: 1px solid #999;
+  z-index: 99999;
+}
+
+a.close {
+  text-decoration: none;
+  color: #999;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+a.close:hover,
+a.close:active {
+   color: #900;
+}
+
+span.lxo-w0 {
+  color: #000;
+}
+
+span.lxo-w1 {
+  color: #100;
+}
+
+span.lxo-w2 {
+  color: #200;
+}
+
+span.lxo-w3 {
+  color: #300;
+}
+
+span.lxo-w4 {
+  color: #400;
+}
+
+span.lxo-w5 {
+  color: #500;
+}
+
+span.lxo-w6 {
+  color: #600;
+}
+
+span.lxo-w7 {
+  color: #700;
+}
+
+span.lxo-w8 {
+  color: #800;
+}
+
+span.lxo-w9 {
+  color: #900;
+}
+
+span.lxo-w10 {
+  color: #a00;
+}
+
+span.lxo-w11 {
+  color: #b00;
+}
+
+span.lxo-w12 {
+  color: #c00;
+}
+
+span.lxo-w13 {
+  color: #d00;
+}
+
+span.lxo-w14 {
+  color: #e00;
+}
+
+span.lxo-w15 {
+  color: #f00;
+}

@@ -26,8 +26,3 @@ td {
 td:first-child {
   text-align: left;
 }
-
-iframe#wiktionary {
-  width: 888px;
-  height: 555px;
-}

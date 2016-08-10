@@ -12,7 +12,7 @@
 // Meteor.startup(function() {
   
 ;(function startUpWithoutMeteor(){
-  var  extensionId = "ooholfkelnhceiaclhclbcahhikfddoj"
+  var  extensionId = "bjgdcgpomeengebjdjliaedpiboaildf"
   // Use your own extension id ^
 
   var connections = {
@@ -46,13 +46,38 @@
 
   , showInWikiTab: function showInWikiTab(word) {
       var word = word.substr(0, word.indexOf(" ")) || word
+      //var options = {}
 
       if (!word) {
         return
       }
-      
+
+      //options.url = 
+      //** http://stackoverflow.com/questions/2770547/how-to-retrieve-wiktionary-word-content **//
       var url = this.wikiURL[0] + word + this.wikiURL[1]
       wiktionary.src = url
+  //  options.pinned = false
+  //  options.openerTabId = 0 // id of this tab
+
+    //   if (this.wikiTabId) {
+    // //  options.highlighted = false
+    // //  options.muted = false
+    //     chrome.tabs.update(this.wikiTabId, options, setURL)
+    //   } else {
+    // //  options.windowId = 0 // id of popup window  
+    // //  options.index = 1 // position in window     
+    // //  options.active = false
+    //     chrome.tabs.create(options, tabOpened)
+    //   }
+      
+    //   function tabOpened(tab) {
+    //     console.log("Wiki tabOpened - id:", tab.id, "windowId", tab.windowId)
+    //     extension.wikiTabId = tab.id
+    //   }
+
+    //   function setURL(tab) {
+    //     console.log("setURL", tab.url)
+    //   }
     }
 
   , getFrequencyData: function getFrequencyData(request) {
