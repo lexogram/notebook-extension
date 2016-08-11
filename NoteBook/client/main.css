@@ -49,7 +49,7 @@ div {
   box-sizing: border-box;
 }
 
-.panes {
+#panels {
   position: absolute;
   height: calc(100% - 8px);
   width: calc(100% - 16px);
@@ -58,7 +58,7 @@ div {
   overflow-y: hidden;
 }
 
-.panes div {
+#panels div {
   position: absolute;
   height: 0;
   width: 100%;
@@ -66,7 +66,7 @@ div {
   border-radius: 1em 1em 0 0;
 }
 
-.panes div.active{
+#panels div.active{
   height: calc(100% - 72px);
   background: #ccc;
   border: 1px solid #eee;
@@ -75,16 +75,16 @@ div {
   z-index: 1;
 }
 
-.panes div#settings.active {
+#panels div#settings.active {
   height: calc(100% - 24px);
 }
 
-.panes div.active div {
+#panels div.active div {
   height: calc(100% - 64px);
   background: #ccc;
 }
 
-.panes div.active div.half {
+#panels div.active div.half {
   width: 50%;
   display: inline-block;
   position: relative;
@@ -93,27 +93,27 @@ div {
   border-radius: 0;
 }
 
-.panes div > img {
+#panels div > img {
   position: absolute;
   top: -24px;
   left: 12px;
   z-index: 2;
 }
 
-.panes div:not(.active) > img:not(.noclip) {
+#panels div:not(.active):not(.half) > img {
   clip: rect(0px 100px 24px 0px);
   -webkit-filter: brightness(0.75);
 }
 
-.panes div.active > img {
+#panels div.active > img {
   -webkit-filter: drop-shadow(0 0 2px #fff);
 }
 
-.panes div:nth-of-type(2) > img {
+#panels div:nth-of-type(2) > img {
   left: 72px;
 }
 
-.panes div:nth-of-type(3) > img {
+#panels div:nth-of-type(3) > img {
   left: 132px;
 }
 
@@ -140,11 +140,15 @@ option[selected] {
   font-weight: bold;
 }
 
-.panes div.active div.half img {
+#panels div.active div.half img {
   position: relative;
   top: auto;
   left: auto;
   z-index: 0;
   display: block;
   margin: auto;
+}
+
+#panels div:not(.active) div img {
+  display: none;
 }
