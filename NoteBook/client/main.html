@@ -9,7 +9,33 @@
 <body>
   <p id="selection"></p>
   <iframe src="" id="wiktionary"></iframe>
+
+  <div class="panes">
+    <div id="settings" class="active">
+      <img src="img/settings.png" alt="Settings" />
+      <div class="languages active">
+        <img src="img/languages.png" alt="Languages" />
+        <div class="half">
+          <img src="img/native.png" alt="Native Language" class=" noclip" />
+          <select multiple name="native"></select>
+        </div><div class="half">
+          <img src="img/learn.png" alt="Target Language" class=" noclip" />
+          <select multiple name="target"></select>
+        </div>
+      </div>
+      <div class="display">
+        <img src="img/display.png" alt="Display" />
+      </div>
+    </div>
+    <div id="wiktionary">
+      <img src="img/wiktionary.png" alt="Wiktionary" />
+    </div>
+    <div id="google">
+      <img src="img/google.png" alt="Google Translate" />
+    </div>
+  </div>
   <script src="main.js"></script>
+  <script src="l10n.js"></script>
 </body>
 </html>
 

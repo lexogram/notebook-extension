@@ -1,13 +1,25 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  margin: 0 8px;
+}
+
 p#selection {
+  position: relative;
+  top: 8px;
   min-height: 2em;
-  width: 100%;
+  width: 100%; 
+  margin: 0;
   background-color: #ddd;
   border: 1px solid #ccc;
   border-bottom-color: #eee;
   border-right-color: #eee;
 }
 
-table {
+/*table {
   border: 1px solid #000;
   border-collapse: collapse;
   min-width: 200px;
@@ -25,9 +37,114 @@ td {
 }
 td:first-child {
   text-align: left;
-}
+}*/
 
 iframe#wiktionary {
   width: 888px;
   height: 555px;
+  display: none;
+}
+
+div {
+  box-sizing: border-box;
+}
+
+.panes {
+  position: absolute;
+  height: calc(100% - 8px);
+  width: calc(100% - 16px);
+  bottom: 0;
+  border-radius: 1em 1em 0 0;
+  overflow-y: hidden;
+}
+
+.panes div {
+  position: absolute;
+  height: 0;
+  width: 100%;
+  bottom: 0;
+  border-radius: 1em 1em 0 0;
+}
+
+.panes div.active{
+  height: calc(100% - 72px);
+  background: #ccc;
+  border: 1px solid #eee;
+  border-right-color: #999;
+  border-bottom-width: 0;
+  z-index: 1;
+}
+
+.panes div#settings.active {
+  height: calc(100% - 24px);
+}
+
+.panes div.active div {
+  height: calc(100% - 64px);
+  background: #ccc;
+}
+
+.panes div.active div.half {
+  width: 50%;
+  display: inline-block;
+  position: relative;
+  top: 48px;
+  height: auto;
+  border-radius: 0;
+}
+
+.panes div > img {
+  position: absolute;
+  top: -24px;
+  left: 12px;
+  z-index: 2;
+}
+
+.panes div:not(.active) > img:not(.noclip) {
+  clip: rect(0px 100px 24px 0px);
+  -webkit-filter: brightness(0.75);
+}
+
+.panes div.active > img {
+  -webkit-filter: drop-shadow(0 0 2px #fff);
+}
+
+.panes div:nth-of-type(2) > img {
+  left: 72px;
+}
+
+.panes div:nth-of-type(3) > img {
+  left: 132px;
+}
+
+h1 {
+  position: relative;
+  left: 64px;
+  top: -1.25em;
+  width: calc(100% - 64px);
+}
+
+select {
+  height: 144px;
+  width: calc(100% - 8px);
+  margin: 0 4px;
+  overflow: auto;
+  text-align: center;
+}
+
+option {
+  height: 16px;
+}
+
+option[selected] {
+  font-weight: bold;
+}
+
+.panes div.active div.half img {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 0;
+  display: block;
+  margin: auto;
 }

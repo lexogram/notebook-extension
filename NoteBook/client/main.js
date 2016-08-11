@@ -12,7 +12,7 @@
 // Meteor.startup(function() {
   
 ;(function startUpWithoutMeteor(){
-  var  extensionId = "ooholfkelnhceiaclhclbcahhikfddoj"
+  var  extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
   // Use your own extension id ^
 
   var connections = {
