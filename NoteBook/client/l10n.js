@@ -90,6 +90,9 @@ var Session
       }
     }
   })()
+  var nativeDefault = Object.keys(l10nMap)
+  var targetDefault = nativeDefault[1]
+  nativeDefault = nativeDefault[0]
 
   Session = {
     map: {}
@@ -101,6 +104,7 @@ var Session
       this.map[key] = value
       localStorage.setItem("session", JSON.stringify(this.map))
       this.broadcast()
+      return value
     }
   , register: function register(listener) {
       if (listeners.indexOf(listener) < -1) {
@@ -114,7 +118,7 @@ var Session
     }
   , initialize: function initialize() {
       try {
-        this.map = JSON.parse(localStorage.getItem("session"))
+        this.map = JSON.parse(localStorage.getItem("session")) || {}
       } catch (e) {
         this.map = {}
       }
@@ -126,54 +130,99 @@ var Session
     var nativeCode = Session.get("nativeCode")
     var options = ""
     var endonym
-      , option
 
+    // Create a set of options with the language's own name for itself
     for (var key in l10nMap) {
       endonym = l10nMap[key][key]
-      option = templateStart + key + '">' + endonym + templateEnd
-      options += option
+      options += templateStart + key + '">' + endonym + templateEnd
     }
 
     nativeSelector.innerHTML = options
+
+    // Set up event listeners
     nativeSelector.onchange = changeNativeLanguage
     targetSelector.onchange = changeTargetLanguage
-    changeNativeLanguage(null, nativeCode)
+
+    // Initialize target language selector
+    changeNativeLanguage.call({}, null, nativeCode)
   })()
 
   function changeNativeLanguage(event, nativeCode) {
+    // <this> may be:
+    // * {} if the call came from initializeLanguageSelectors
+    // * the select element if it has been clicked, in which case
+    //   it has a .value property
+    // * { value: "xx" } if the call came from changeTargetLanguage
+    //   because the target language is the same as the native 
+    //   language
+    // <event> is ignored
+    // <nativeCode> will be
+    // * undefined unless
+    // * the call came from initializeLanguageSelectors on a second
+    //   or subsequence launch in which case it will be an "xx" code
+  
+    var currentTarget = Session.get("targetCode")
+    var currentNative = Session.get("nativeCode")
+
     if (!nativeCode) {
-      nativeCode = this.value
+      // This is the first startup, or the reaction to a click on one
+      // of the select elements
+      nativeCode = this.value || nativeDefault
       Session.set("nativeCode", nativeCode)
     }
 
-    setSelected(nativeSelector, nativeCode)
-    updateTargetLanguageSelector(nativeCode)
+    nativeSelector.value = nativeCode
+    updateTargetLanguageSelector(nativeCode, currentNative)
+
+    if (nativeCode === currentTarget) {
+      changeTargetLanguage.call({ value: currentNative})
+    } else {
+      tellBackground({
+        method: "setLanguages"
+      , nativeCode: nativeCode
+      , targetCode: currentTarget
+      })
+    }
   }
 
   function changeTargetLanguage() {
+    var currentNative = Session.get("nativeCode")
     var targetCode = this.value
-    Session.set("targetCode", targetCode)
-    setSelected(this, targetCode)
-  }
+    var currentTarget
 
-  function setSelected(selectElement, languageCode) {
-    var selector = "option[selected]"
-    selector = selectElement.querySelector(selector)
-    if (selector) {
-      selector.removeAttribute("selected")
+    if (targetCode === currentNative) {
+      currentTarget = Session.get("targetCode")
     }
 
-    selector = "option[value="+languageCode+"]"
-    selector = selectElement.querySelector(selector)
-    selector.setAttribute("selected", true)
+    Session.set("targetCode", targetCode)
+    targetSelector.value = targetCode
+
+    if (currentTarget) {
+      changeNativeLanguage.call({ value: currentTarget })
+    } else {     
+      tellBackground({
+        method: "setLanguages"
+      , nativeCode: currentNative
+      , targetCode: targetCode
+      })
+    }
   }
 
-  function updateTargetLanguageSelector(nativeCode) {
+  function updateTargetLanguageSelector(nativeCode, formerNative) {
     var targetCode = Session.get("targetCode")
     var exonyms = l10nMap[nativeCode]
     var options = ""
     var exonym
       , option
+
+    if (!targetCode) {
+      targetCode = Session.set("targetCode", targetDefault)
+    }
+
+    if (targetCode === nativeCode) {
+      targetCode = formerNative
+      Session.set("targetCode", targetCode)
+    }
 
     for (var key in exonyms) {
       exonym = exonyms[key]

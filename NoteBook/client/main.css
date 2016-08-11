@@ -42,7 +42,6 @@ td:first-child {
 iframe#wiktionary {
   width: 888px;
   height: 555px;
-  display: none;
 }
 
 div {
@@ -56,6 +55,7 @@ div {
   bottom: 0;
   border-radius: 1em 1em 0 0;
   overflow-y: hidden;
+  pointer-events: none;
 }
 
 #panels div {
@@ -64,6 +64,8 @@ div {
   width: 100%;
   bottom: 0;
   border-radius: 1em 1em 0 0;
+  transition: height 0.5s;  
+  pointer-events: auto;
 }
 
 #panels div.active{
@@ -81,7 +83,8 @@ div {
 
 #panels div.active div {
   height: calc(100% - 64px);
-  background: #ccc;
+  background: #ccc; 
+  transition: height 0s;
 }
 
 #panels div.active div.half {
@@ -117,29 +120,6 @@ div {
   left: 132px;
 }
 
-h1 {
-  position: relative;
-  left: 64px;
-  top: -1.25em;
-  width: calc(100% - 64px);
-}
-
-select {
-  height: 144px;
-  width: calc(100% - 8px);
-  margin: 0 4px;
-  overflow: auto;
-  text-align: center;
-}
-
-option {
-  height: 16px;
-}
-
-option[selected] {
-  font-weight: bold;
-}
-
 #panels div.active div.half img {
   position: relative;
   top: auto;
@@ -151,4 +131,19 @@ option[selected] {
 
 #panels div:not(.active) div img {
   display: none;
+}
+
+select {
+  height: 144px;
+  width: 100%;
+  overflow: auto;
+  text-align: center;
+}
+
+option {
+  height: 16px;
+}
+
+option:checked {
+  font-weight: bold;
 }

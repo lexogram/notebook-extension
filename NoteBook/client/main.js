@@ -10,6 +10,10 @@
 // Session.set("rows", [])
  
 // Meteor.startup(function() {
+
+
+
+var tellBackground
   
 ;(function startUpWithoutMeteor(){
   var  extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
@@ -17,20 +21,35 @@
 
   var connections = {
     port: null
-  , p: document.getElementById("selection")
+  , pSelection: document.getElementById("selection")
+  , pTranslation: document.getElementById("translation")
   , wiktionary: document.getElementById("wiktionary")
-  , wikiURL: ["https://en.wiktionary.org/w/index.php?title=", "&printable=no"]
+  , wikiURL: ["https://"
+    , ".wiktionary.org/w/index.php?title="
+    , "&printable=no"
+    ]
+  , word: ""
 
   , initialize: function initialize() {
       this.port = chrome.runtime.connect(extensionId)
       this.port.onMessage.addListener(treatMessage)
+
+      this.pSelection.onclick = function (event) {
+        connections.selectWord.call(connections, event)
+      }
+
+      tellBackground = function (message) {
+        connections.tellBackground.call(connections, message) // NEW
+      }
 
       return this
     }
 
   , changeSelection: function changeSelection(request) {
       var selection = request.data
-      this.p.innerHTML = selection
+      this.word = selection.substr(0, selection.indexOf(" "))
+               || selection
+      this.pSelection.innerHTML = selection
       // Meteor.call("analyzeText", { data: selection }, updateTable)
 
       // function updateTable(error, data) {
@@ -41,17 +60,22 @@
       //   }
       // }
       
-      this.showInWikiTab(selection)
+      this.showInWikiTab()
     }
 
-  , showInWikiTab: function showInWikiTab(word) {
-      var word = word.substr(0, word.indexOf(" ")) || word
+  , selectWord: function selectWord(event) {
+      alert("click")
+    }
 
-      if (!word) {
+  , showInWikiTab: function showInWikiTab() {
+      var code = Session.get("nativeCode")
+      var urlArray = this.wikiURL
+
+      if (!this.word) {
         return
       }
       
-      var url = this.wikiURL[0] + word + this.wikiURL[1]
+      var url = urlArray[0]+code+urlArray[1]+this.word+urlArray[2]
       wiktionary.src = url
     }
 
@@ -73,6 +97,21 @@
           })
         }
       }
+    }
+
+  , tellBackground: function tellBackround(message) { // NEW
+      this.port.postMessage(message)
+
+      switch (message.method) {
+        case "setLanguages":
+          this.showInWikiTab()
+        break
+      }
+    }
+
+  , showGoogleTranslation: function showGoogleTranslation(request) {
+      console.log(request)
+      this.pTranslation.innerHTML = request.data
     }
 
   , disableExtension: function disableExtension() {

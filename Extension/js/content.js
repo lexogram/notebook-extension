@@ -11,6 +11,7 @@
   , removex: /lxo-w\d+/
   , mode: "original"
   , frequencyMap: {}
+  , translationSpan: null
 
   , initialize: function initialize() {
       chrome.runtime.sendMessage(
@@ -305,6 +306,40 @@
         }
       }
     }
+  
+  // , getGoogleTranslation: function getGoogleTranslation(
+  //     request, sender, sendResponse) {
+  //     var result_box = document.getElementById("result_box")
+  //     var result = result_box.innerHTML
+  //     sendResponse(result)
+  //   }
+  
+  , activateTranslationSpan: function activateTranslationSpan() {
+      var translationSpan
+
+      ;(function setTranslationSpan(){
+        translationSpan = document.getElementById("result_box")
+        if (!translationSpan) {
+          setTimeout(setTranslationSpan, 10)
+
+        } else {
+          translationSpan.addEventListener(
+            "DOMSubtreeModified"
+          , sendTranslation
+          , false
+          )
+          sendTranslation()
+        }
+      })()
+
+      function sendTranslation() {
+        chrome.runtime.sendMessage({ 
+          method: "showGoogleTranslation"
+        , data: result_box.innerHTML
+        })
+      }
+    }
+
   }.initialize()
 
   // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 

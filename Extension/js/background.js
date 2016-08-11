@@ -10,6 +10,13 @@
   , injectedHTML: chrome.extension.getURL("html/inject.html")
   , injectedCSSFile: "css/inject.css"
   , tabMap: {}
+  // NEW
+  , googleTabId: 0
+  , nativeCode: "en"
+  , targetCode: "en"
+  , selection: ""
+  , word: ""
+  
 
   , initialize: function initialize() {
       var xhr = new XMLHttpRequest()
@@ -52,41 +59,51 @@
         return
       }
 
+      // NEW
+      this.selection = request.data
+      
       this.port.postMessage(request)
-      this.showInGoogleTab(request.data) // NEW
+      this.showInGoogleTab() // NEW
     }
 
-  , showInGoogleTab: function showInGoogleTab(string) {
-      var string = encodeURIComponent(string)
+  , showInGoogleTab: function showInGoogleTab() { // NEW
+      var string = encodeURIComponent(this.selection)
       var options = {}
 
       if (!string) {
         return
       }
 
-      options.url = "https://translate.google.com/#ru/en/" + string
+      options.url = "https://translate.google.com/#"
+      options.url += this.targetCode + "/" + this.nativeCode + "/"
+      options.url += string
+
   //  options.pinned = false
   //  options.openerTabId = 0 // id of this tab
 
       if (this.googleTabId) {
     //  options.highlighted = false
     //  options.muted = false
-        chrome.tabs.update(this.googleTabId, options, setURL)
+        chrome.tabs.update(this.googleTabId, options) //, setURL)
       } else {
     //  options.windowId = 0 // id of popup window  
     //  options.index = 1 // position in window     
-    //  options.active = false
+        options.active = false
         chrome.tabs.create(options, tabOpened)
       }
       
       function tabOpened(tab) {
-        console.log("Google tabOpened - id:", tab.id, "windowId", tab.windowId)
+        //console.log("Google tabOpened - id:", tab.id, "windowId", tab.windowId)
         extension.googleTabId = tab.id
+        chrome.tabs.sendMessage(
+          tab.id
+        , { method: "activateTranslationSpan" }
+        )
       }
 
-      function setURL(tab) {
-        console.log("setURL", tab.url)
-      }
+      // function setURL(tab) {
+      //   console.log("setURL", tab.url)
+      // }
     }
 
   , getExtensionStatus: function getExtensionStatus(request, sender, sendResponse) {
@@ -154,6 +171,13 @@
       chrome.tabs.sendMessage(request.id, request)
     }
 
+  , setLanguages: function setLanguages(languageMap) { // NEW
+      this.nativeCode = languageMap.nativeCode
+      this.targetCode = languageMap.targetCode
+      
+      this.showInGoogleTab()
+    }
+
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
   , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
@@ -211,6 +235,43 @@
       chrome.tabs.sendMessage(id, message)
     }
 
+  , tabChanged: function tabChanged(tabId, changedInfo, tab) { // NEW
+      // <changedInfo> may be:
+      // * { isWindowClosing: <boolean, windowId: <integer> }
+      //   if call triggered by chrome.tabs.onRemoved
+      // * one of ...
+      //   { status: "loading", url: <url string> }
+      //   { title: "Google Translate" }
+      //   { status: "complete" }
+      //   { favIconUrl: "https...favicon.ico" }
+      //   if call triggered by chrome.tabs.onUpdate
+      
+      //console.log(changedInfo.status)
+
+      if (tabId === this.googleTabId) {
+        if (!tab) {
+        // The Google Translate tab is closing
+          this.googleTabId = 0
+        } else if (changedInfo.status === "complete") {
+          chrome.tabs.sendMessage(
+            tabId
+          , { method: "getGoogleTranslation"}
+          , function (result) {
+              extension.showGoogleTranslation.call(extension, result)
+            });
+        }
+      }
+    }
+
+  , showGoogleTranslation: function showGoogleTranslation(result) {
+      var request = {
+        method: "showGoogleTranslation"
+      , result: result
+      }
+
+      this.port.postMessage(result)
+    }
+
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
 
   , checkUrlForMatch: function checkUrlForMatch(url) {
@@ -229,6 +290,10 @@
     extension.useExtension.call(extension)
   }
 
+  function tabChanged(tabId, changedInfo, tab) { // NEW
+    extension.tabChanged.call(extension, tabId, changedInfo, tab)
+  }
+
   function treatMessage(request, sender, sendResponse) {
     var method = extension[request.method]
     if (typeof method === "function") {
@@ -239,4 +304,6 @@
   chrome.runtime.onConnectExternal.addListener(openConnection)
   chrome.browserAction.onClicked.addListener(useExtension)
   chrome.runtime.onMessage.addListener(treatMessage)
+  chrome.tabs.onRemoved.addListener(tabChanged) // NEW
+  //chrome.tabs.onUpdated.addListener(tabChanged);
 })()
