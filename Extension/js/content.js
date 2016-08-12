@@ -2,6 +2,8 @@
 
 ;(function content(){
 
+  // alert ("content.js " + window.location.href)
+
   var toolbar = {
     selectedText: ""
   , extensionIsActive: false
@@ -307,32 +309,35 @@
       }
     }
   
-  // , getGoogleTranslation: function getGoogleTranslation(
-  //     request, sender, sendResponse) {
-  //     var result_box = document.getElementById("result_box")
-  //     var result = result_box.innerHTML
-  //     sendResponse(result)
-  //   }
-  
-  , activateTranslationSpan: function activateTranslationSpan() {
+  , activateTranslationSpan: function activateTranslationSpan(request, sender, sendResponse) {
+      sendResponse(true)
       var translationSpan
+      var debounceDelay = 10
+      var timeOut
 
       ;(function setTranslationSpan(){
         translationSpan = document.getElementById("result_box")
-        if (!translationSpan) {
-          setTimeout(setTranslationSpan, 10)
 
-        } else {
-          translationSpan.addEventListener(
-            "DOMSubtreeModified"
-          , sendTranslation
-          , false
-          )
-          sendTranslation()
-        }
+        translationSpan.addEventListener(
+          "DOMSubtreeModified"
+        , debounceTranslation // sendTranslation
+        , false
+        )
+
+        debounceTranslation() // sendTranslation()
       })()
 
+      function debounceTranslation () {
+        if (timeOut) {
+          clearTimeout(timeOut)
+        }
+        timeOut = setTimeout(sendTranslation, debounceDelay)
+      }
+
       function sendTranslation() {
+        // console.log("sendTranslation", result_box.innerHTML)
+        timeOut = 0
+
         chrome.runtime.sendMessage({ 
           method: "showGoogleTranslation"
         , data: result_box.innerHTML

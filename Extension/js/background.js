@@ -12,6 +12,7 @@
   , tabMap: {}
   // NEW
   , googleTabId: 0
+  , googleInitialized: false
   , nativeCode: "en"
   , targetCode: "en"
   , selection: ""
@@ -95,10 +96,6 @@
       function tabOpened(tab) {
         //console.log("Google tabOpened - id:", tab.id, "windowId", tab.windowId)
         extension.googleTabId = tab.id
-        chrome.tabs.sendMessage(
-          tab.id
-        , { method: "activateTranslationSpan" }
-        )
       }
 
       // function setURL(tab) {
@@ -246,19 +243,26 @@
       //   { favIconUrl: "https...favicon.ico" }
       //   if call triggered by chrome.tabs.onUpdate
       
-      //console.log(changedInfo.status)
-
+ 
       if (tabId === this.googleTabId) {
+        //alert("googleTab changed")
+        //console.log(changedInfo.status)
+
         if (!tab) {
         // The Google Translate tab is closing
           this.googleTabId = 0
-        } else if (changedInfo.status === "complete") {
-          chrome.tabs.sendMessage(
-            tabId
-          , { method: "getGoogleTranslation"}
-          , function (result) {
-              extension.showGoogleTranslation.call(extension, result)
-            });
+          this.googleInitialized = false
+
+        } else if (!this.googleInitialized) {
+          if (changedInfo.status === "complete") {
+            chrome.tabs.sendMessage(
+              tabId
+            , { method: "activateTranslationSpan"}
+            , function (result) {
+                extension.googleInitialized = result
+              }
+            )
+          }
         }
       }
     }
@@ -305,5 +309,5 @@
   chrome.browserAction.onClicked.addListener(useExtension)
   chrome.runtime.onMessage.addListener(treatMessage)
   chrome.tabs.onRemoved.addListener(tabChanged) // NEW
-  //chrome.tabs.onUpdated.addListener(tabChanged);
+  chrome.tabs.onUpdated.addListener(tabChanged);
 })()
