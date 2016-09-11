@@ -1,0 +1,190 @@
+@font-face {
+font-family: 'asides';
+src: url('../fonts/asides.eot');
+src: url('../fonts/asides.eot') format('embedded-opentype'), url('../fonts/asides.woff') format('woff'), url('../fonts/asides.ttf') format('truetype'), url('../fonts/asides.svg') format('svg');
+font-weight: normal;
+font-style: normal;
+}
+
+body, html{
+height: 100%;
+margin: 0;
+}
+
+.lxo-panels {
+position:absolute;
+width:100%;
+top:0; /* will be overriden */
+bottom:0;
+background-color: #ccc;
+overflow: hidden;
+}
+
+.lxo-panel {
+position:absolute;
+width:100%;
+height:0;
+bottom:0;
+transition: height 0.5s;
+}
+
+.lxo-panel.active {
+z-index: 1;
+}
+
+.lxo-panel.active {
+height:calc(100% - 24px);
+}
+
+div.lxo-panel {
+background-color: #333;
+}
+
+div.red {
+background-color: #300;
+}
+
+div.green {
+background-color: #030;
+}
+
+div.blue {
+background-color: #003;
+}
+
+.lxo-panel .icon {
+position: absolute;
+top: -24px;
+width: 48px;
+height: 48px;
+z-index: 2;
+cursor: pointer;
+-webkit-user-select: none;
+user-select: none;
+-webkit-user-drag: none;
+user-drag: none;
+}
+
+.lxo-panel.active .icon {
+cursor: default;
+}
+
+.lxo-panel:not(.active) > img {
+-webkit-filter: brightness(0.5);
+}
+
+.lxo-translator {
+position: relative;
+background-color: #ccc;
+padding: 0.25em;
+padding-bottom: 4px;
+}
+
+#sync-scroll {
+position: absolute;
+right: 0;
+top: 0;
+visibility: hidden;
+} 
+#sync-scroll + label::before{
+position: absolute;
+top: 6px;
+right: 4px;
+width: 36px;
+height: 36px;
+background-image: url("../img/separate_scroll.png");
+content: "";
+cursor: pointer;
+}
+#sync-scroll:checked + label::before{
+background-image: url("../img/sync_scroll.png");
+}
+
+.lxo-translator > div {
+position: relative;
+}
+
+.lxo-translator p {
+margin: 2px 4px 6px;
+border: 1px inset #ddd;
+min-height: 2.85em;
+overflow-y: auto;
+height: 2.85em;
+width: calc(100% - 45px);
+box-sizing: border-box;
+}
+.lxo-translator.collapsed p,
+.lxo-translator hr {
+width: calc(100% - 8px);
+}
+.lxo-translator.collapsed #sync-scroll + label {
+display:none;
+}
+
+div#input p {
+padding: 0.25em;
+background-color: #fff;
+}
+div#output p {
+height: 0;
+min-height: 0;
+}
+
+#toggle-output {
+position: absolute;
+top: 0;
+left: 0;
+visibility: hidden;
+}
+#toggle-output + label::before{
+position: absolute;
+top: -16px;
+left: -1px;
+font-family: asides;
+font-size: 2em;
+content: "\e805";
+cursor: pointer;
+}
+#toggle-output:checked + label::before{
+top: -10px;
+left: -3px;
+content: "\e806";
+}
+#toggle-output:checked ~ p {
+min-height: 2.85em;
+padding: 0.25em;
+}
+#toggle-output:checked ~ button {
+display: block;
+}
+
+div#output button {
+position: absolute;
+width: 36px;
+height: 36px;
+right: 0;
+bottom: 0;
+padding: 0;
+background-image: url("../img/google.png");
+background-size:contain;
+background-repeat: no-repeat;
+background-position: center;
+display: none;
+cursor: pointer;
+}
+
+.lxo-translator hr {
+position: absolute;
+bottom: 0;
+margin-bottom: 0;
+cursor: row-resize;
+}
+
+iframe {
+position: absolute;
+top: 0;
+left: 0;
+border: none;
+width: 100%;
+height: 100%;
+}

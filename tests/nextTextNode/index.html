@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+  <h1></h1>
+  Raw text node
+  <div style="user-select: none;-webkit-user-select: none;">This node has unselectable text
+    <p><span></span></p>
+    <p><span></span><span style="user-select: text;-webkit-user-select: text;">You found me once!</span></p>
+    
+  </div>Space between divs
+  <div>
+    <p><span></span><span></span></p>
+    <p><span></span><span >You found me twice!</span></p>
+  </div>
+
+  <script>
+    "use strict"
+
+    function getNextTextNode(node, mustBeSelectable) {
+      var parent = node.parentNode
+
+      while (node = node.nextSibling) {
+        if (node.textContent.search(/\S/) < 0) {         
+        } else if (node.tagName !== "SCRIPT") {
+          // The next child of current parent has non-empty content
+          return getFirstTextNode(node)
+        }
+      } 
+
+      // If we get here, there were no more sibling nodes.
+      // Go to the next sibling of the parent, unless we've reached
+      // the last child of the body itself 
+      if (parent !== document.body) {
+        return getNextTextNode(parent)
+      }
+
+      function getFirstTextNode(nextNode) {
+        var childNodes = [].slice.call(nextNode.childNodes)
+
+        if (!childNodes.length) {
+          return nextNode
+        }
+
+        while (nextNode = childNodes.shift()) {
+          if (nextNode.textContent.search(/\S/) < 0) {         
+          } else if (nextNode.tagName !== "SCRIPT") {
+            if (nextNode.nodeType === 3) {
+              if (!mustBeSelectable 
+                || elementIsSelectable(nextNode.parentNode)) {
+                return nextNode
+              }
+            } else {
+              nextNode = getFirstTextNode(nextNode)
+              if (nextNode) {
+                return nextNode
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function elementIsSelectable(element) {
+      var prefixes = [
+        "-webkit-"
+      , "-khtml-"
+      , "-moz-"
+      , "-ms-"
+      , ""
+      ]
+      var style = window.getComputedStyle(element)
+
+      var selectable = prefixes.every(function check(key) {
+        key += "user-select"
+        return style[key] !== "none"
+      })
+
+      return selectable
+    }
+
+    var node = document.body.childNodes[0]
+
+    while (node = getNextTextNode(node, true)) {
+      console.log(node, "\n *****")
+    }
+  </script>
+</body>
+</html>

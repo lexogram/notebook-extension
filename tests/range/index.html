@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    span {
+      color: blue;
+    }
+  </style>  
+</head>
+<body>
+<p><span>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span> In nunc ipsum, tristique in convallis non, ultrices sed eros. <span>Integer eu dignissim justo, eu facilisis est.</span></p>
+
+<script>
+;(function () {
+  var p = document.getElementsByTagName("p")[0]
+  var textNodes = []
+  fillTextNodes(p)
+
+  function fillTextNodes(element){
+    if (element.nodeType === 3) {
+      textNodes.unshift(element)
+      return
+    }
+
+    var childNodes = [].slice.call(element.childNodes)
+    var ii = childNodes.length
+    while (ii--) {
+      fillTextNodes(childNodes[ii])
+    }
+  }
+
+  p.onmousedown = function () {
+    var selection = window.getSelection()
+    var range = selection.getRangeAt(0)
+    var startContainer = range.startContainer
+    console.log(textNodes.indexOf(startContainer), startContainer.textContent)
+  }
+})()
+</script>
+</body>
+</html>

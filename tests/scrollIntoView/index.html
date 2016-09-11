@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  <title>scrollIntoView Test</title>
+  <style>
+    body, html {
+      height: 200%;
+      margin: 0;
+      background-color: #fff;
+    }
+    div {
+      position: relative;
+      width: 90%;
+      height: 60%;
+      top: 60%;
+      left: 5%;
+    }
+    body > div {
+      background-color: #333;
+      overflow: auto;
+    }
+    div > div {
+      background-color: #fff;
+      overflow: auto;
+    }
+    a {
+      color: #f00;
+    }
+
+  </style>  
+</head>
+<body>
+<a href="javascript:scrollRandom()">Scroll Random</a>
+<div id="outer">
+<a href="javascript:scrollRandom(true)">Scroll Random</a>
+<div></div>
+<div></div>
+<div></div>
+<div id="inner">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque hendrerit et erat eget suscipit. Proin malesuada placerat nisi ut facilisis. Vivamus ac nisi iaculis libero sollicitudin scelerisque. Morbi libero lorem, cursus nec fringilla in, lobortis vitae risus. Praesent vitae elementum leo. Donec a scelerisque dui, ut cursus magna. Morbi at magna a ex pretium pharetra.</p>
+<p>Cras vulputate, tellus ut placerat ullamcorper, augue arcu iaculis est, id pretium sem neque ut neque. Aenean congue, diam suscipit mattis maximus, ipsum orci cursus erat, eget lobortis neque neque ornare neque. Suspendisse vel ornare augue. Proin sit amet mi non tortor malesuada malesuada. Quisque sagittis condimentum neque ut molestie. Vestibulum varius ante tellus, vitae maximus justo condimentum ut. Praesent a odio suscipit, pulvinar tellus eu, volutpat diam. Mauris commodo auctor ultrices. Praesent semper est vel quam euismod ullamcorper.</p>
+<p>Morbi placerat condimentum urna, a cursus diam pellentesque nec. Curabitur ut lorem dui. Integer aliquam augue ipsum. Morbi ut arcu ullamcorper, lacinia arcu id, convallis est. Phasellus a aliquet libero, vitae ultrices elit. Pellentesque tempus eros magna. Aliquam lorem eros, semper sed suscipit nec, vulputate vel odio. Morbi vulputate leo eget porta condimentum. In eu ligula ut diam pretium ullamcorper.</p>
+<p>Maecenas neque sem, fringilla in diam a, fringilla interdum metus. Nullam diam magna, tempor id leo non, ullamcorper facilisis augue. Aenean accumsan ultricies mi in placerat. Morbi lectus erat, gravida accumsan risus condimentum, faucibus dignissim sapien. Phasellus semper consequat dui, vel maximus diam tincidunt id. Ut luctus rutrum nisl ac viverra. Vivamus blandit faucibus semper. Pellentesque tempor neque in risus vulputate, quis dignissim neque porttitor. Morbi suscipit gravida nibh quis ornare. Donec venenatis, neque quis vehicula condimentum, nisl felis volutpat libero, at semper lectus metus efficitur libero.</p>
+<p>Cras tempus lacus enim, et vestibulum leo accumsan vel. Nunc cursus a sem non sagittis. Aenean ultricies est et orci sagittis iaculis ultrices id sapien. Aenean consequat nulla orci, sit amet gravida urna mollis ut. Aenean quam sem, consectetur eget quam nec, blandit posuere neque. Ut mi mi, facilisis ut mi at, sodales ultrices enim. Sed et libero vel arcu ultricies placerat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Ut egestas vel velit vitae porta. Quisque vel sagittis sapien. Pellentesque maximus magna at ullamcorper lobortis.</p>
+</div>
+</div>
+
+<script src="js/scroll.js"></script>
+</body>
+</html>

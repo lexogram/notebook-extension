@@ -3,69 +3,19 @@
 <head>
   <meta charset="utf-8">
   <title>NoteBook</title>
-  <link rel="stylesheet" type="text/css" href="main.css">
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-
 <body>
-  <p id="selection"></p>
-  <p id="translation"></p>
 
-  <div id="panels">
-    <div id="settings" class="_active">
-      <img src="img/settings.png" alt="Settings" />
-      <div class="languages active">
-        <img src="img/languages.png" alt="Languages" />
-        <div class="half">
-          <img src="img/native.png" alt="Native Language" class=" noclip" />
-          <select multiple name="native"></select>
-        </div><div class="half">
-          <img src="img/learn.png" alt="Target Language" class=" noclip" />
-          <select multiple name="target"></select>
-        </div>
-      </div>
-      <div class="display">
-        <img src="img/display.png" alt="Display" />
-      </div>
-    </div>
-    <div id="wiki">
-      <img src="img/wiktionary.png" alt="Wiktionary" />
-      <iframe src="" id="wiktionary"></iframe>
-    </div>
-    <div id="google">
-      <img src="img/google.png" alt="Google Translate" />
-    </div>
-  </div>
-  <script src="main.js"></script>
-  <script src="l10n.js"></script>
-  <script src="panels.js"></script>
+<script src="//code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="//code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<script src="js/hack.js"></script>
+<script src="js/session.js"></script>
+<script src="js/initialize.js"></script>
+<!-- <script src="js/l10n.js"></script> -->
+<script src="js/panels.js"></script>
+<script src="js/wiktionary.js"></script>
+<script src="js/selection.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
-
-<!-- <head>
-  <title>NoteBook</title>
-</head> -->
-
-<!-- <body>
-  <p id="selection"></p>
-  
-  <table border="1">
-    <tr>
-      <th>Word</th>
-      <th>Index</th>
-      <th>Count/Billion</th>
-    </tr>
-      {{> rows}}
-  </table>
-</body> -->
-
-<!-- TEMPLATES -->
-
-<!-- <template name="rows">
-  {{#each rows}}
-    <tr>
-      <td>{{word}}</td>
-      <td>{{index}}</td>
-      <td>{{count}}</td>
-    </tr>
-  {{/each}}
-</template> -->

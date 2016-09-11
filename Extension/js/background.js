@@ -13,7 +13,7 @@
   // NEW
   , googleTabId: 0
   , googleInitialized: false
-  , nativeCode: "en"
+  , nativeCode: "fr"
   , targetCode: "en"
   , selection: ""
   , word: ""

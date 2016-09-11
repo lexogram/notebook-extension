@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  <title>Synch Scroll</title>
+  <style>
+    p {
+      display: inline-block;
+      float: left;
+      width: 30%;
+      margin: 1.5%;
+      height: 200px;
+      overflow-y: auto;
+    }
+    span {
+      color: #900;
+    }
+  </style>  
+</head>
+
+<body>
+<h1></h1>
+<p lang="en">The hr element controls the height of the two translation paragraphs. It will collapse the taller field until it is the same height as the other, then collapse them both until <span>they are 2 lines high.</span> Pushing up further will hide the lower field, as if the disclosure triangle had been pressed (as a shortcut)</p>
+<p lang="ru">Элемент час контролирует высоту двух пунктов перевода. Он будет сворачивать более высокий поле до тех пор, пока на той же высоте, как и другие, а затем свернуть их обоих, пока <span>они не 2 высоковольтные линии</span>. Нажатие вверх дальше будет скрывать нижнее поле, как будто треугольник раскрытия была нажата (в качестве ярлыка)</p>
+<p  lang="th">
+องค์ประกอบ HR ควบคุมความสูงของสองย่อหน้าแปล มันจะยุบฟิลด์สูงจนกว่าจะมีสูงเช่นเดียวกับคนอื่น ๆ แล้วยุบพวกเขาทั้งสองจนกระทั่ง <span>พวกเขาจะมี 2 สายสูง</span> ผลักดันขึ้นต่อไปจะซ่อนฟิลด์ที่ต่ำกว่าเช่นถ้าสามเหลี่ยมเปิดเผยข้อมูลที่ได้รับ กด (เป็นทางลัด)</p>
+</body>
+
+<script>
+;(function () {
+  "use strict"
+
+  var en = document.querySelector("p[lang=en]")
+  var pArray = {
+    ru: document.querySelector("[lang=ru]")
+  , th: document.querySelector("[lang=th]")
+  }
+
+  en.addEventListener("scroll", syncWithMaster, false)
+
+  function syncWithMaster(event) {
+    var maxScrollMap = {}
+    var p
+      , ratio
+
+    for (var key in pArray) {
+      p = pArray[key]
+      maxScrollMap[key] = p.scrollHeight - p.clientHeight
+    }
+
+    ratio = en.scrollTop / (en.scrollHeight - en.clientHeight)
+
+
+
+    for (var key in pArray) {
+      pArray[key].scrollTop = ratio * maxScrollMap[key]
+    }
+  }
+})()
+</script>
+</html>

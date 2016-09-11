@@ -64,7 +64,8 @@ var tellBackground
     }
 
   , selectWord: function selectWord(event) {
-      alert("click")
+      var selection = window.getSelection()
+      var range = selection.getRangeAt(0)
     }
 
   , showInWikiTab: function showInWikiTab() {
@@ -110,7 +111,6 @@ var tellBackground
     }
 
   , showGoogleTranslation: function showGoogleTranslation(request) {
-      console.log(request)
       this.pTranslation.innerHTML = request.data
     }
 
