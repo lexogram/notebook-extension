@@ -4,11 +4,10 @@
  * occur.
  */
 
-"use strict"
-
 var Hack
 
 ;(function hack(){
+  "use strict"
 
   Hack = {
     /** http://stackoverflow.com/a/36806402/1927589 **/
@@ -28,15 +27,21 @@ var Hack
     }
 
     /**
-     * SOURCE: Called by panel_modifyDOM in the panels script, when
-     *         an iFrame is created. Without this hack, iFrames with
-     *          a src of"https://www.wiktionary.org/" show an
-     *          incorrect vertical offset although other remote
-     *          URLs work well without the hack.
+     * 
      * ACTION: Removes the given property from the CSS rule identified
      *         by the given selector, then restores it after a delay
-     * FIXES:  Chrome 52.0.2743.116
-     * FIXED:  Chrome 53.0.2785.101
+     * ISSUES: * Called by panel_modifyDOM in the panels script, when
+     *           an iFrame is created. Without this hack, iFrames with
+     *           a src of"https://www.wiktionary.org/" show an
+     *           incorrect vertical offset although other remote
+     *           URLs work well without the hack.
+     *           FIXES:  Chrome up to and including 53.0.2785.101
+     *           FIXED:  NOT YET
+     *         * Called by openPanel in the panels script, to ensure
+     *           that the icon for tabs that slide horizontally are
+     *           correctly placed at the end of the slide
+     *           FIXES:  Chrome up to and including 53.0.2785.101
+     *           FIXED:  NOT YET
      * @param  {string}  selector CSS selector such as "div#myID p" to
      *                            identify a CSS style declaration
      * @param  {string}  property CSS property such as "position"
@@ -44,21 +49,36 @@ var Hack
      *                            property of the given CSS style
      *                            declaration will be restored.
      **/
-  , tweakCSSDeclaration: function (selector, property, delay) {
-      var rule = this.getCSSRule(selector)
+  , tweakCSSDeclaration: function (options) {
+      var rule = this.getCSSRule(options.selector)
+      var property = options.property
       var style
         , value
 
       if (rule) {
         style = rule.style
         value = style.getPropertyValue(property)
-        style.removeProperty(property)
+        
 
-        setTimeout(function () {
-          style.setProperty(property, value)
-        }, delay||1)
+        setTimeout(function remove() {
+          style.removeProperty(property)
+
+          setTimeout(function restore() {
+            style.setProperty(property, value)
+          }, options.delay||1)
+
+        }, options.pause||0)
       }
 
+    }
+
+  , speak: function speak(message) {
+      if (!this.utterance) {
+        this.utterance = new SpeechSynthesisUtterance()
+      }
+      this.utterance.text = message
+      window.speechSynthesis.speak(this.utterance)
+      console.log(message)
     }
   }
 })()

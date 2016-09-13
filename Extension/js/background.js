@@ -1,6 +1,19 @@
-"use strict"
+/** BACKGROUND **
+ * 
+ */
+
 
 ;(function background(){
+  "use strict"
+
+// // <TESTING
+  window.SPEAK = function SPEAK(message) {
+    
+    var utterance = new SpeechSynthesisUtterance(message)
+    window.speechSynthesis.speak(utterance)
+    console.log(message)
+  }
+// // TESTING>
 
   var extension = {
     port: null
@@ -10,7 +23,6 @@
   , injectedHTML: chrome.extension.getURL("html/inject.html")
   , injectedCSSFile: "css/inject.css"
   , tabMap: {}
-  // NEW
   , googleTabId: 0
   , googleInitialized: false
   , nativeCode: "fr"
@@ -18,7 +30,7 @@
   , selection: ""
   , word: ""
   
-
+    /** Import injectedHTML for use in content pages */
   , initialize: function initialize() {
       var xhr = new XMLHttpRequest()
       xhr.open("GET", this.injectedHTML, true)
@@ -34,11 +46,17 @@
       }
     }
 
+    /** Set up connection with NoteBook's connection script */
   , openConnection: function openConnection(externalPort) {
       this.port = externalPort
       this.port.onMessage.addListener(treatMessage)
+
+      if (this.googleTabId) {
+        this.activateGooglePage(this.googleTabId)
+      }
     }
   
+    /** Called when browserAction button is clicked */
   , useExtension: function useExtension() {
       this.ensureNoteBookWindowIsOpen()
 
@@ -54,53 +72,27 @@
 
     // treatMessage // treatMessage // treatMessage // treatMessage //
 
+    /**
+     * SOURCE: Called by the checkSelection method of the toolbar 
+     *         object in the extension's content.js script
+     * ACTION: Forwards the request to the NoteBook window, where the
+     *         data string will be shown in the p#selection element.
+     *         Sets the URL for the Google tab; when the page is
+     *         loaded, 
+     * @param  {object} request will be an object map with the format:
+     *                          { method: "changeSelection"
+     *                          , data: <string selected text>}
+     */
   , changeSelection: function changeSelection(request) {
       if (!this.port) {
-        console.log("NoteBook inactive. Request not treated:", request)
+        console.log("NoteBook inactive. Request not treated:",request)
         return
       }
 
-      // NEW
       this.selection = request.data
       
       this.port.postMessage(request)
-      this.showInGoogleTab() // NEW
-    }
-
-  , showInGoogleTab: function showInGoogleTab() { // NEW
-      var string = encodeURIComponent(this.selection)
-      var options = {}
-
-      if (!string) {
-        return
-      }
-
-      options.url = "https://translate.google.com/#"
-      options.url += this.targetCode + "/" + this.nativeCode + "/"
-      options.url += string
-
-  //  options.pinned = false
-  //  options.openerTabId = 0 // id of this tab
-
-      if (this.googleTabId) {
-    //  options.highlighted = false
-    //  options.muted = false
-        chrome.tabs.update(this.googleTabId, options) //, setURL)
-      } else {
-    //  options.windowId = 0 // id of popup window  
-    //  options.index = 1 // position in window     
-        options.active = false
-        chrome.tabs.create(options, tabOpened)
-      }
-      
-      function tabOpened(tab) {
-        //console.log("Google tabOpened - id:", tab.id, "windowId", tab.windowId)
-        extension.googleTabId = tab.id
-      }
-
-      // function setURL(tab) {
-      //   console.log("setURL", tab.url)
-      // }
+      this.showInGoogleTab()
     }
 
   , getExtensionStatus: function getExtensionStatus(request, sender, sendResponse) {
@@ -132,6 +124,7 @@
     }
 
   , disableExtension: function disableExtension() {
+      this.port.disconnect()
       this.port = null
       chrome.tabs.query({}, callAllTabs)
 
@@ -243,37 +236,82 @@
       //   { favIconUrl: "https...favicon.ico" }
       //   if call triggered by chrome.tabs.onUpdate
       
- 
+     
       if (tabId === this.googleTabId) {
-        //alert("googleTab changed")
-        //console.log(changedInfo.status)
-
         if (!tab) {
         // The Google Translate tab is closing
           this.googleTabId = 0
           this.googleInitialized = false
 
         } else if (!this.googleInitialized) {
+          // Required the first time the a translation is requested
           if (changedInfo.status === "complete") {
-            chrome.tabs.sendMessage(
-              tabId
-            , { method: "activateTranslationSpan"}
-            , function (result) {
-                extension.googleInitialized = result
-              }
-            )
+            extension.activateGooglePage(tabId)
           }
         }
       }
     }
 
-  , showGoogleTranslation: function showGoogleTranslation(result) {
-      var request = {
-        method: "showGoogleTranslation"
-      , result: result
+  , showInGoogleTab: function showInGoogleTab() { // NEW
+      var options = {}
+
+      if (!this.selection) {
+        return
       }
 
-      this.port.postMessage(result)
+      this.activateGooglePage(this.googleTabId)
+
+      options.url = "https://translate.google.com/#"
+      options.url += this.targetCode + "/" + this.nativeCode + "/"
+      options.url += encodeURIComponent(this.selection)
+
+      if (this.googleTabId) {
+         chrome.tabs.update(this.googleTabId, options) //, setURL)
+      } else {
+         options.active = false
+        chrome.tabs.create(options, tabOpened)
+      }
+      
+      function tabOpened(tab) {
+        extension.activateGooglePage(tab.id)
+      }
+    }
+
+  , moveGoogleTabToFront: function moveGoogleTabToFront() {
+      if (!this.googleTabId) {
+        return
+      }
+      
+      chrome.tabs.update(
+        this.googleTabId
+      , { "active": true
+        , "highlighted": true
+        }
+      )
+    }
+
+  , activateGooglePage: function activateGooglePage(tabId) {
+      extension.googleTabId = tabId
+
+      chrome.tabs.sendMessage(
+        tabId
+      , { method: "activateTranslationSpan" }
+      , function (result) {
+          extension.googleInitialized = result
+        }
+      )
+    }
+
+  , showGoogleTranslation: function showGoogleTranslation(result) {
+      if (this.port) {
+        this.port.postMessage(result)
+      }
+    }
+
+    // IFRAMES // IFRAMES // IFRAMES // IFRAMES // IFRAMES // IFRAMES
+     
+  , iFrameHeight: function iFrameHeight(message) {
+      this.port.postMessage(message) 
     }
 
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
@@ -311,3 +349,4 @@
   chrome.tabs.onRemoved.addListener(tabChanged) // NEW
   chrome.tabs.onUpdated.addListener(tabChanged);
 })()
+

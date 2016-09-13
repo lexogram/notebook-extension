@@ -3,6 +3,14 @@
 ;(function content(){
 
   // alert ("content.js " + window.location.href)
+  // 
+// <TESTING
+  window.SPEAK = function SPEAK(message) {
+    var utterance = new SpeechSynthesisUtterance(message)
+    window.speechSynthesis.speak(utterance)
+    console.log(message)
+  }
+// TESTING>
 
   var toolbar = {
     selectedText: ""
@@ -14,6 +22,7 @@
   , mode: "original"
   , frequencyMap: {}
   , translationSpan: null
+  , googleActivated: false
 
   , initialize: function initialize() {
       chrome.runtime.sendMessage(
@@ -315,17 +324,28 @@
       var debounceDelay = 10
       var timeOut
 
-      ;(function setTranslationSpan(){
+      if (!toolbar.googleActivated) {
+        setTranslationSpan()
+      }
+      
+      function setTranslationSpan(){
         translationSpan = document.getElementById("result_box")
-
-        translationSpan.addEventListener(
+        translationSpan.removeEventListener(
           "DOMSubtreeModified"
-        , debounceTranslation // sendTranslation
+        , debounceTranslation
         , false
         )
 
-        debounceTranslation() // sendTranslation()
-      })()
+        translationSpan.addEventListener(
+          "DOMSubtreeModified"
+        , debounceTranslation
+        , false
+        )
+
+        toolbar.googleActivated = true
+
+        debounceTranslation()
+      }
 
       function debounceTranslation () {
         if (timeOut) {
@@ -335,7 +355,6 @@
       }
 
       function sendTranslation() {
-        // console.log("sendTranslation", result_box.innerHTML)
         timeOut = 0
 
         chrome.runtime.sendMessage({ 

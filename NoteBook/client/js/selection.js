@@ -1,4 +1,37 @@
+/** SELECTION **
+*
+* Listens to the p#selection element for changes to the selection 
+* (through click-and-drag, double-click) and for when the left and
+* right arrow keys are pressed. Selects hyphenated words whole.
+*
+* When a new selection is made, Session.set("meaning", data) is
+* called, where data is an object map with the format:
+* { text: <string>
+* , lang: <ISO code string>
+* }
+*
+* Listeners for dictionary panels such as div#wiktionary will update
+* their panels as necessary.
+* 
+* NOTE: checkForAlteredTextNodes() and updateWordsMap() are intended
+* for use with languages such as Thai where word boundaries are not
+* defined by spaces. The placeholder ASYNC object should be replaced
+* with an object that creates an asynchronous call to the server.
+* See https://github.com/lexogram/notebook-extension/issues/8
+*/
+
+// Placeholder
+ASYNC = { 
+  call: function(methodName) {
+    var args = [].slice.call(arguments)
+    args.shift()
+    console.log("ASYNC " + methodName + "called:", args)
+  }
+}
+
 ;(function selection(){
+  "use strict"
+
   var selection = window.getSelection()
   var _W = "\\s!-\\/:-@[-`{-~\\u00A0-¾—-⁊\\u200b"
   var startRegex = new RegExp("([^" + _W + "]+'?-?)+['-]$", "g")
@@ -18,12 +51,12 @@
     , container
     , selectionUpdated
 
-  var box = document.querySelector("#selection")
+  var box = document.querySelector("p#selection") // HARD-CODED
   var wordsCache = {}
-  var wordsMap = { th: {}, enx: {} }
+  var wordsMap = { th: {} }
   var observer = new MutationObserver(checkForAlteredTextNodes)
 
-  observer.observe(document.body, { 
+  observer.observe(box, { 
     childList: true
   , attributes: true
   , subtree: true
@@ -656,62 +689,7 @@
     // Ignore word if it is all whitespace
     word = word.match(lastWordRegex)
     if (word) {
-      Session.set("meaning", { word: word[0], lang: lang })
-      // word = word[0]
-    } else {
-      return
+      Session.set("meaning", { text: word[0], lang: lang }, "noSave")
     }
-
-    // if ((data = wordsCache[lang]) && (data = data[word])) {
-    //   return showTranslation(null, data, true)
-    // }
-    
-    // ASYNC.call("getTranslation", word, lang, showTranslation)
-
-    // function showTranslation (error, data, alreadyCached) {
-    //   if (error) {
-    //     return console.log(error)
-    //   }
-
-    //   var pTranslation = document.getElementById("translation")
-    //   var string
-    //     , word
-    //     , lang
-
-    //   if (data) {
-    //     word = data.word
-    //     lang = data.lang
-    //     if (!alreadyCached) {
-    //       addToWordsCache(lang, word, data)
-    //     }
-
-    //     if (word !== selection.toString()) {
-    //       return
-    //     }
-
-    //     string = "<h3>" + word + "</h3><dl>"
-
-    //     for (var key in data) {
-    //       if (key !== "word" && key !== "lang") {
-    //         string += "<dt>" + key + "</dt>"
-    //         string += "<dd>" + data[key] + "</dd>"
-    //       }
-    //     }
-
-    //     string += "</dl>"
-    //   }
-
-    //   pTranslation.innerHTML = string
-    // }
-
-    // function addToWordsCache(lang, word, data) {
-    //   var langMap = wordsCache[lang]
-    //   if (!langMap) {
-    //     langMap = {}
-    //     wordsCache[lang] = langMap
-    //   }
-
-    //   langMap[word] = data
-    // }
   }
 })()

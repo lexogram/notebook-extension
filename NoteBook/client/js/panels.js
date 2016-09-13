@@ -1,7 +1,29 @@
-"use strict"
+/** PANELS ** 
+*
+* This script creates 6 widgets:
+* - A simple panel with a div and an icon at the top
+* - A panel set, where clicking on an icon will raise the div to fill
+*   the space available
+* - A simple tab (inheriting from panel) with an icon on the right
+* - A tabset (inheriting from panelset) which opens tabs to the right
+* - A two-field translator widget, where the translation field can
+*   be hidden, or scrolled as a slave, with a button to open the
+*   translate.google.com tab in the main window
+* - A settings tab where Native and Target languages can be set
+*
+* REQUIREMENTS
+* - css/styles.css is needed for the layout, opening and closing of
+*   panels, tabs and disclosure
+* - session.js is needed for the Session global, used to store the
+*   activePanel, and native- and target-language codes
+* - l10n.js is required for setSelector() calls to show the names of
+*   languages
+* - connection.js is required for tellBackground
+*/
 
-;(function create_panel($, window){
-  
+;(function create_panel($){
+  "use strict"
+
   $.widget(
     "lxo.panel"
 
@@ -17,19 +39,23 @@
       }   
 
     , _create: function panel_create () {
-        this._modifyDOM() 
+        this._modifyDOM("left")
+        this._initialize()
+        this._setUserActions()
       } 
 
-    , _modifyDOM: function panel_modifyDOM () {
+    , _modifyDOM: function panel_modifyDOM(edge) {
         var options  = this.options
         var $panel   = this.element
-        this.offset  = (options.iconSize + options.spacing)
+        var offset   = {}
+        offset[edge] = (options.iconSize + options.spacing)
                      * options.rank
                      + options.spacing
-        this.$icon   = $("<img />")
-                       .attr("src", options.icon)
-                       .addClass("icon")
-                       .offset({left: this.offset})
+        
+        this.$icon  = $("<img />")
+                      .attr("src", options.icon)
+                      .addClass("icon")
+                      .offset(offset)
 
         $panel.attr("id", options.id) 
               .addClass(options.className) 
@@ -37,20 +63,69 @@
               .append(this.$icon)
 
         if (options.src) {
-          $panel.append($("<iframe></iframe")
-                        .attr("src", options.src))
+          $panel.append($("<div></div>")
+                        .append($("<iframe></iframe")
+                                .attr("src", options.src)))
           // HACK required. When the Wiktionary page is shown in an
           // iFrame, the bottom is 12px too high without this hack
-          // Hack.tweakCSSDeclaration(".lxo-panels", "bottom", 1000)
+          Hack.tweakCSSDeclaration({
+            selector: ".lxo-panels"
+          , property: "bottom"
+          , pause: 0
+          , delay: 1000
+          })
+        } else if (options.ui) {
+          $panel[options.ui](options.uiOptions)
         }
+      }
+
+    , _initialize: function initialize() {
+        var method = this.options.init
+        if (method instanceof Function) {
+          method.call(this, this)
+        }
+      }
+
+    , _setUserActions: function _setUserActions() {
+        // var events = this.options.on
+        // var event
+        //   , action
+
+        // for (event in events) {
+        //   action = events[event]
+        //   if (action.find) {
+        //     this.element.find(action.find).on(event, action.listener)
+        //   }          
+        // }
       }
     }
   )
-})(jQuery, window)
+})(jQuery)
 
 
 
-;(function create_panelset($, window){ 
+;(function create_tab($){
+  "use strict"
+
+  $.widget(
+    "lxo.tab"
+  , $.lxo.panel
+
+  , { 
+      options: {}
+
+    , _create: function tab_create() {
+        this._modifyDOM("top")
+      }
+    }
+  )
+})(jQuery)
+
+
+
+;(function create_panelset($){ 
+  "use strict"
+
   $.widget(
     "lxo.panelset"
 
@@ -58,34 +133,59 @@
       options: {
         panels: [{}]
       , className: "lxo-panels"
+      , iconSize: 48
       , spacing: 12
       , top: 200
       , default: 0
       }
 
-    , panels: []
+  //, panels: []
     
     , _create: function panelset_create () {
+        var activeIndex = (function getActiveIndex(panels, id) {
+          var activeIndex = -1
+          var panelOptions = panels.find(function(panel) {
+            activeIndex += 1
+            return panel.id === id
+          })
+          
+          if (!panelOptions) {
+            activeIndex = 0
+          }
+
+          return activeIndex
+        })(this.options.panels, this.options.default)
+
+        this.panels = [] // local to this instance
         this._modifyDOM() 
         this._setUserActions()
-        this.toggleActive(this.panels[this.options.default], true)
+        // this.panels is now populated
+        this.toggleActive(this.panels[activeIndex], true)
       } 
 
     , _modifyDOM: function panelset_modifyDOM () {
         var $parent = this.element
+        var options = this.options
+        var panels  = options.panels
         var panelOptions
+        var widget
         var $panel
-        var panels  = this.options.panels
+        var icon
+        var offset
         
-        $parent.addClass(this.options.className)
-               .css({ top: this.options.top })
+        $parent.addClass(options.className)
+               .css({ top: options.top })
 
         for (var ii = 0, total = panels.length; ii < total; ii ++) {
           $panel = $("<div></div>")
           panelOptions = panels[ii]
+          if (!(widget = panelOptions.widget)) {
+            widget = "panel"
+          }
+
           panelOptions.rank = ii
           panelOptions.spacing = this.options.spacing
-          $panel.panel(panelOptions)
+          $panel[widget](panelOptions)
           $parent.append($panel)
 
           this.panels.push($panel)
@@ -102,13 +202,18 @@
           
           function addAction(panel){
             var $panel = panel.data("lxo-panel")
+                      || panel.data("lxo-tabset")
+                      || panel.data("lxo-tab")
             var $element = $panel.element
             var $icon = $panel.$icon
             var $other
 
-            $panel.$icon.on("mouseup", function() {
+            $panel.$icon.on("mouseup", function openPanel() {
               for (var ii = 0; ii < total; ii += 1) {
-                $other = panels[ii].data("lxo-panel")
+                $other = panels[ii]
+                $other = $other.data("lxo-panel")
+                      || $other.data("lxo-tabset")
+                      || $other.data("lxo-tab")
                 
                 if ($other.element !== $panel.element) {
                   self.toggleActive($other.element, false)
@@ -118,6 +223,16 @@
               if(!$panel.element.hasClass("active")) {
                 self.toggleActive($panel.element, true)
               }
+             
+              // HACK required. When a tab widget slides horizontally
+              // to the left, the icon is trimmed at the right rather
+              // than pushed off-screen to the left
+              Hack.tweakCSSDeclaration({
+                selector: ".lxo-tab > .icon"
+              , property: "right"
+              , pause: 500
+              , delay: 0
+              })
             })
           }
         }       
@@ -126,6 +241,7 @@
     , toggleActive:  function toggleActive($panel, makeActive) {
         if (makeActive) {
           $panel.addClass("active")
+          Session.set("activePanel", $panel[0].id)
         } else {
           $panel.removeClass("active")
         }
@@ -136,11 +252,50 @@
       }
     }
   )
-})(jQuery, window)
+})(jQuery)
 
 
 
-;(function create_translator(){
+;(function create_tabset($){
+  "use strict"
+
+  $.widget(
+    "lxo.tabset"
+  , $.lxo.panelset
+
+  , { options: {}
+
+  //, panels: []
+
+    , _modifyDOM: function panelset_modifyDOM () {
+        var options = this.options
+        var offset  = (options.iconSize + options.spacing)
+                    * options.rank
+                    + options.spacing
+        this.$icon  = $("<img />")
+                      .attr("src", options.icon)
+                      .addClass("icon")
+                      .offset({left: offset})
+        
+        options.panels.forEach(function(panel) {
+          panel.widget = "tab"
+        })
+
+        this._super()
+
+         // Set icon, remove setting for top
+        this.element.append(this.$icon)
+        this.element[0].style.removeProperty("top")    
+      }
+    }
+  )
+})(jQuery)
+
+
+
+;(function create_translator($){
+  "use strict"
+
   $.widget(
     "lxo.translator"
 
@@ -151,12 +306,12 @@
       , className: "lxo-translator"
       }
 
-    , $syncScroll: 0
-    , $disclosure: 0
-    , $input: 0
-    , $tranlation: 0
-    , $goSource: 0
-    , $hr: 0
+    // , $syncScroll: 0
+    // , $disclosure: 0
+    // , $input: 0
+    // , $tranlation: 0
+    // , $goSource: 0
+    // , $hr: 0
     
     , _create: function translator_create () {
         var self = this
@@ -168,23 +323,27 @@
 
     , _modifyDOM: function translator_modifyDOM () {
         var $parent = this.element
+        var showTranslation = Session.get("showTranslation")
         var $element
 
         $parent.addClass(this.options.className)
 
-        this.$syncScroll  = ($("<input type='checkbox'>")
+        this.$syncScroll = ($("<input type='checkbox'>")
                            .attr("id", "sync-scroll")
                            .attr("checked", "true"))
-        this.$disclosure  = $("<input type='checkbox'>")
+        this.$disclosure = $("<input type='checkbox'>")
                            .attr("id", "toggle-output")
-        this.$input       = $("<p></p>")
+                           .attr("checked", showTranslation)
+        this.$input      = $("<p></p>")
                            .attr("id", "selection")
-        this.$output      = $("<p></p>")
+        this.$output     = $("<p></p>")
                            .attr("id", "translation")
-        this.$goSource    = $("<button type='button'></button>")
-        this.$hr          = $("<hr />")
+        this.$goSource   = $("<button type='button'></button>")
+                           .attr("id", "show-source")
+                           .attr("disabled", true)
+        this.$hr         = $("<hr />")
 
-        $parent.addClass("collapsed")
+        //$parent.addClass("collapsed")
 
         $element = $("<div></div>")
                    .attr("id", "input")
@@ -204,7 +363,6 @@
                    .append(this.$goSource)
         $parent.append($element)
                .append(this.$hr)
-
       }
           
     , _setUserActions: function translator_setUserActions() {
@@ -219,18 +377,23 @@
         var minHeight = $input.outerHeight()
         var collapseSize = minHeight
 
+        // SyncScroll
         this.$syncScroll.change(function () {
           toggleSyncScroll()
         })
 
+        // Disclosure
         this.$disclosure.change(function () {
-          if ($(this).is(':checked')) {
+          var showTranslation = $(this).is(':checked')
+
+          if (showTranslation) {
             showOutput()
           } else {
             hideOutput()
           }
 
           self.callbackWithNewHeight()
+          Session.set("showTranslation", showTranslation)
 
           function showOutput() {
             var fullHeight = $input.outerHeight() / 2 + border
@@ -253,6 +416,14 @@
           }
         })
 
+        // Google
+        this.$goSource.click(function () {
+          tellBackground({
+            method: "moveGoogleTabToFront"
+          })
+        })
+
+        // Resize
         $hr.on("mousedown", startDrag)
 
         toggleSyncScroll()
@@ -313,24 +484,6 @@
           }
         }
 
-        function getFullHeight(element) {
-          var height
-          var restore = element.style.height
-          var scrollTop = element.scrollTop
-
-          element.style.height = "auto"
-          height = element.offsetHeight
-          if (restore) {
-            element.style.height = restore
-          } else {
-            element.style.removeProperty("height")
-          }
-
-          element.scrollTop = scrollTop
-          
-          return height
-        }
-
         function prepareFullHeight($element, height) {
           $element.css("overflow-y", "hidden")
           setTimeout(function () {
@@ -348,11 +501,134 @@
       }
     }
   )
-})()
+})(jQuery)
 
 
 
-;(function create_notebook(){
+;(function create_language_settings($){
+"use strict"
+
+  $.widget(
+    "lxo.language-settings"
+
+  , {
+      options: {
+
+      }
+
+ // , $native: 0
+ // , $target: 0
+
+    , _create: function language_settings_create () {
+        this._modifyDOM() 
+        this._setUserActions() 
+      } 
+
+    , _modifyDOM: function language_settings_modifyDOM () {
+        var $parent  = this.element
+        var nativeCode = Session.get("nativeCode")
+        var targetCode = Session.get("targetCode")
+       
+        this.$native   = $("<select multiple></select>")
+                         .attr("name", "native")
+        this.$target   = $("<select multiple></select>")
+                         .attr("name", "target")
+        L10n.setSelector(this.$native, "endonym", nativeCode)
+        L10n.setSelector(this.$target, nativeCode, targetCode)
+
+        $parent.append($("<div></div>")
+                       .addClass("half")
+                       .append($("<img>")
+                               .attr("src", "img/native.png")
+                               .attr("alt", "Native language")
+                               .addClass("noClip"))
+                       .append(this.$native))
+
+        $parent.append($("<div></div>")
+                      .addClass("half")
+                      .append($("<img>")
+                              .attr("src", "img/target.png")
+                              .attr("alt", "Target language")
+                              .addClass("noClip"))
+                      .append(this.$target))
+      }
+
+    , _setUserActions: function language_selector_setUserActions() {
+        var self = this
+        this.$native.on("change", changeNativeLanguage)
+        this.$target.on("change", changeTargetLanguage)
+
+        function changeNativeLanguage() {
+          // <this> will be an object, either the selector itself or
+          // { value: <nativeCode>
+          // , refresh: true
+          // }
+        
+          var formerNative = Session.get("nativeCode")
+          var currentTarget = Session.get("targetCode")
+          var nativeCode = this.value
+
+          Session.set("nativeCode", nativeCode)
+          L10n.setSelector(self.$target, nativeCode, currentTarget) 
+
+          if (this.refresh) {
+            // The call came from changeTargetLanguage, to swap native
+            // and target languages
+            self.$native.val(nativeCode)
+          } else if (nativeCode === currentTarget) {
+            // Swap values. changeTargetLanguage will tellBackground
+            return changeTargetLanguage.call({
+              value: formerNative
+            , refresh: true
+            })
+          }
+
+          tellBackground({
+            method: "setLanguages"
+          , nativeCode: nativeCode
+          , targetCode: currentTarget
+          })
+        }
+
+        function changeTargetLanguage() {
+          // <this> will be an object, either the selector itself or
+          // { value: <nativeCode>
+          // , refresh: true
+          // }
+          
+          var formerTarget = Session.get("targetCode")
+          var currentNative = Session.get("nativeCode")
+          var targetCode = this.value
+
+          Session.set("targetCode", targetCode)
+
+          if (this.refresh) {
+            // The call came from changeNativeLanguage, to swap native
+            // and target languages
+            self.$target.val(targetCode)
+          } else if (targetCode === currentNative) {
+            // Swap values. changeTargetLanguage will tellBackground
+            return changeNativeLanguage.call({
+              value: formerTarget
+            , refresh: true
+            })
+          } 
+
+          tellBackground({
+            method: "setLanguages"
+          , nativeCode: currentNative
+          , targetCode: targetCode
+          })
+        }
+      }
+    }
+  )
+})(jQuery)
+
+
+
+;(function create_notebook($){
+  "use strict"
 
   $.widget(
     "lxo.notebook"
@@ -386,15 +662,47 @@
 
         options = {
           panels: [ 
-            { icon: "img/settings.png" 
-            , class: "red"
+            { id: "settings"
+            , icon: "img/settings.png" 
+            , widget: "tabset"
+            , panels: [
+                { id: "languages"
+                , icon: "img/languages.png"
+                , className: "lxo-tab"
+                , class: "blue"
+                , ui: "language-settings"
+                }
+              , { id: "resources"
+                , icon: "img/resources.png"
+                , className: "lxo-tab"
+                , class: "red"
+                }
+              ]
+            , className: "lxo-panel"
             }
-          , { icon: "img/google.png" 
+          , { id: "google"
+            , icon: "img/google.png" 
             , class: "green"
             }
-          , { icon: "img/wiktionary.png" 
-            , id: "wiktionary"
+          // , { id: "wiktionary"
+          //   , icon: "img/wiktionary.png" 
+          //   , class: "red"
+          //   }
+          , { id: "wiktionary"
+            , icon: "img/wiktionary.png" 
             , src: "https://www.wiktionary.org/"
+            , init: function(panel) {
+                Session.register({
+                  method: function getFrameHeight(key, value) {
+                    var height = value["wiktionary.org"]
+                    this.element.find("iframe").height(height)
+                    this.element.find("div")[0].scrollLeft = 160
+                  }
+                , key: "iFrameHeights"
+                , scope: panel
+                , immediate: false
+                })   
+              }
             }
           ]
         , default: this.options.default
@@ -412,13 +720,17 @@
       }
     }
   )
-})()
+})(jQuery)
 
 
 
 ;(function ready(){
+  "use strict"
+
+  var activePanel = Session.get("activePanel")
+
   $("body").notebook({
     separation: 200
-  , default: 2
+  , default: activePanel
   })
 })()

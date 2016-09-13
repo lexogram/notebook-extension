@@ -11,6 +11,8 @@ height: 100%;
 margin: 0;
 }
 
+/* Panels and tabs */
+
 .lxo-panels {
 position:absolute;
 width:100%;
@@ -23,38 +25,24 @@ overflow: hidden;
 .lxo-panel {
 position:absolute;
 width:100%;
-height:0;
-bottom:0;
-transition: height 0.5s;
+height: calc(100% - 48px);
+top: 100%;
+transition: top 0.5s;
 }
 
-.lxo-panel.active {
-z-index: 1;
+.lxo-tab {
+position:absolute;
+width:calc(100% - 24px);
+height:calc(100% - 25px);
+top: 24px;
+right: 100%;
+transition: right 0.5s;
+box-sizing: border-box;
 }
 
-.lxo-panel.active {
-height:calc(100% - 24px);
-}
-
-div.lxo-panel {
-background-color: #333;
-}
-
-div.red {
-background-color: #300;
-}
-
-div.green {
-background-color: #030;
-}
-
-div.blue {
-background-color: #003;
-}
-
+.lxo-tab .icon,
 .lxo-panel .icon {
 position: absolute;
-top: -24px;
 width: 48px;
 height: 48px;
 z-index: 2;
@@ -65,13 +53,42 @@ user-select: none;
 user-drag: none;
 }
 
+.lxo-panel > .icon {
+top: -24px;
+}
+
+.lxo-tab > .icon {
+right: -24px;
+}
+
+.lxo-tab.active,
+.lxo-panel.active {
+z-index: 1;
+}
+
+.lxo-tab.active {
+right: 24px;
+}
+
+.lxo-panel.active {
+top: 24px;
+}
+
+div.lxo-panel {
+background-color: #ccc;
+}
+
+.lxo-tab.active .icon
 .lxo-panel.active .icon {
 cursor: default;
 }
 
+.lxo-tab:not(.active) > img,
 .lxo-panel:not(.active) > img {
 -webkit-filter: brightness(0.5);
 }
+
+/* Translator */
 
 .lxo-translator {
 position: relative;
@@ -98,6 +115,9 @@ cursor: pointer;
 }
 #sync-scroll:checked + label::before{
 background-image: url("../img/sync_scroll.png");
+}
+#sync-scroll[disabled]{
+background-image: url("../img/disabled_scroll.png");
 }
 
 .lxo-translator > div {
@@ -172,6 +192,12 @@ background-position: center;
 display: none;
 cursor: pointer;
 }
+div#output button[disabled] {
+background-image: url("../img/google-disabled.png");
+}
+
+
+/* Resizing */
 
 .lxo-translator hr {
 position: absolute;
@@ -180,11 +206,71 @@ margin-bottom: 0;
 cursor: row-resize;
 }
 
+/* Wiktionary */
+
 iframe {
-position: absolute;
-top: 0;
-left: 0;
 border: none;
 width: 100%;
 height: 100%;
+}
+
+#wiktionary iframe{
+min-width: 800px;
+}
+
+#wiktionary, 
+#wiktionary div {
+width: 100%;
+}
+
+#wiktionary div {
+overflow: auto;
+height: 100%;
+pointer-events: auto;
+}
+
+/* Language selector */
+
+div.half {
+position: relative;
+top: 36px;
+height: calc(100% - 36px);
+width: calc(50% - 36px);
+display: inline-block;
+border-radius: 0;
+background-color: #ccc
+box-sizing: content-box;
+}
+
+div.half:first-of-type {
+padding-left: 36px;
+}
+
+select {
+height: calc(100% - 70px);
+width: 100%;
+overflow: auto;
+text-align: center;
+}
+
+option {
+height: 16px;
+}
+
+option:checked {
+font-weight: bold;
+}
+
+/* TESTING */
+
+div.red {
+background-color: #300;
+}
+
+div.green {
+background-color: #030;
+}
+
+div.blue {
+background-color: #003;
 }
