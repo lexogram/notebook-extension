@@ -12,8 +12,15 @@
   var wiktionary = {
     port: null
 
+  , inIFrame: false 
+
   , initialize: function initialize() {
       var self = this
+      
+      this.inIFrame = (window.self !== window.top)
+      if (!this.inIFrame) {
+        return
+      }
 
       chrome.runtime.sendMessage(
         { method: "iFrameSetHeight"
@@ -60,7 +67,7 @@
         }
       })()
 
-      ;(function (){
+      ;(function iFrameSetWidth(){
         var right = 0
         var width = document.body.style.width
         var treeWalker = document.createTreeWalker(
