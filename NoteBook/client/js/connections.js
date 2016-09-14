@@ -14,16 +14,18 @@
 
 
 var tellBackground
+var iFrameGetScrollTop
   
 ;(function startUpWithoutMeteor(){
   var extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
   // Use your own extension id ^
+  var connectInfo = { name: "notebook" }
 
   var connections = {
     port: null
 
   , initialize: function initialize() {
-      this.port = chrome.runtime.connect(extensionId)
+      this.port = chrome.runtime.connect(extensionId, connectInfo)
       this.port.onMessage.addListener(treatMessage)
 
       tellBackground = function (message) {
@@ -51,16 +53,16 @@ var tellBackground
       this.port.postMessage(message)
     }
 
-  , iFrameHeight: function iFrameHeight(message) {
-      var domain = message.host.match(/[^.]\w+\.\w+$/)[0]
-      var heights = Session.get("iFrameHeights")
-      if (!heights) {
-        heights = {}
+  , iFrameSetHeight: function iFrameSetHeight(message) {
+      Session.set("iFrameHeight", message.height)
+    }
+
+  , iFrameGetScrollTop: function iFrameGetScrollTop(message) {
+      if (!message.scrollTop) {
+        tellBackground(message)
+      } else {
+        Session.set("iFrameScrollTop", message.scrollTop)
       }
-
-      heights[domain] = message.height
-
-      Session.set("iFrameHeights", heights)
     }
 
   , showGoogleTranslation: function showGoogleTranslation(request) {
@@ -79,7 +81,7 @@ var tellBackground
 
   function treatMessage(request) {
     var method = connections[request.method]
-    if (typeof method === "function") {
+    if (method instanceof Function) {
       method.call(connections, request)
     }
   }
@@ -89,4 +91,11 @@ var tellBackground
   }
 
   window.onbeforeunload = disableExtension
+
+  iFrameGetScrollTop = function (anchorId) {
+  connections.iFrameGetScrollTop({
+    method: "iFrameGetScrollTop"
+  , anchorId: anchorId
+  })
+}
 })() // remove iife () when Meteor.startup() is restored

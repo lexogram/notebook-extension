@@ -105,7 +105,7 @@ var Session
         listeners.push(listener)
       }
 
-      if (listener.immediate !== true) {
+      if (listener.immediate !== false) {
         this.trigger(listener, key, this.map[key])
       }
 

@@ -30,6 +30,15 @@
 , "externally_connectable": {
     "matches": [
       "http://localhost:*/*"
+      // No wildcards are allowed in (sub)domain names
+    // , "https://en.wiktionary.org/*"
+    // , "https://fi.wiktionary.org/*"
+    // , "https://fr.wiktionary.org/*"
+    // , "https://ja.wiktionary.org/*"
+    // , "https://ru.wiktionary.org/*"
+    // , "https://th.wiktionary.org/*"
+    // , "https://zh.wiktionary.org/*"
+    // , "https://www.wiktionary.org/*"
     ]
   }
 
@@ -46,13 +55,10 @@
     }
   , {
       "matches": [
-        "<all_urls>"
-      ]
-    , "exclude_matches": [
-        "http://localhost:*/*"
+        "https://*.wiktionary.org/*"
       ]
     , "js": [
-        "js/iframe.js"
+        "js/wiktionary_frame.js"
       ]
     , "all_frames": true
     }

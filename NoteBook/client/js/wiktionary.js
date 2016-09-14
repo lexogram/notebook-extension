@@ -7,28 +7,49 @@
 * 
 */
 
+
 ;(function wiktionary(){
   "use strict"
 
-  var panelName = "wiktionary"
-  var panel = document.getElementById(panelName)
-  var wikiURL = ["https://"
-  , ".wiktionary.org/w/index.php?title="
-  , "&printable=no"
-  ]
-  var iFrame
-  var lastRequest
+  var wiktionary = {
+    panelId: "wiktionary"
+  , wikiURL: ["https://"
+    , ".wiktionary.org/w/index.php?title="
+    , "&printable=no"
+    ]
+  , panel: 0
+  , iFrame: 0
+  , lastRequest: 0
 
-  Session.register({
-    method: activate
-  , key: "activePanel"
-  })
-  Session.register({
-    method: newSelection
-  , key: "meaning"
-  })
+  , initialize: function initialize() {
+      var self = this
+      this.panel = document.getElementById(this.panelId)
 
-  /**
+      Session.register({
+        method: self.activate
+      , key: "activePanel"
+      , scope: self
+      })
+      Session.register({
+        method: self.newSelection
+      , key: "meaning"
+      , scope: self
+      })
+      Session.register({
+        method: self.setHeight
+      , key: "iFrameHeight"
+      , scope: self
+      , immediate: false
+      })
+      Session.register({
+        method: self.setScrollTop
+      , key: "iFrameScrollTop"
+      , scope: self
+      , immediate: false
+      })
+    }
+
+   /**
    * Listener for when the wiktionary panel is activated
    * SOURCE: Called by Session.register() when this method is
    *         registered and Session.broadcast() following a call to
@@ -38,21 +59,21 @@
    * @param  {string} key     will be "activePanel"
    * @param  {string} panelId may be "wiktionary", or any other value
    */
-  function activate(key, panelId) {
-    if (panelId !== panelName) {
-      return
+  , activate: function activate(key, panelId) {
+      if (panelId !== this.panelId) {
+        return
+      }
+
+      if (!this.iFrame) {
+        this.iFrame = this.panel.querySelector("iframe")
+      }
+
+      if (this.iFrame && this.lastRequest) {
+        this.updateFrame(this.lastRequest)
+      }
     }
 
-    if (!iFrame) {
-      iFrame = panel.querySelector("iframe")
-    }
-
-    if (iFrame && lastRequest) {
-      updateFrame(lastRequest)
-    }
-  }
-  
-  /**
+   /**
    * Listener for changes to Session.map.meaning
    * Session.set("meaning", { word: <string>, lang: <ISO code > }) is
    * called by requestMeaning() in selection.js
@@ -63,17 +84,17 @@
    *                       { word: <string>, lang: <ISO code string> }
    *                       data.lang is currently ignored
    */
-  function newSelection(key, data) {
-    if (data && data.text) {
-      if (panel.classList.contains("active")) {
-        updateFrame(data)
-      } else {
-        lastRequest = data
+  , newSelection: function newSelection(key, data) {
+      if (data && data.text) {
+        if (this.panel.classList.contains("active")) {
+          this.updateFrame(data)
+        } else {
+          this.lastRequest = data
+        }
       }
     }
-  }
 
-  /**
+   /**
    * SOURCE: Triggerd by newSelection() if the Wiktionary panel is
    *         active and by activate() if a prior request has been 
    *         saved
@@ -81,16 +102,30 @@
    *                       { word: <string>, lang: <ISO code string> }
    *                       data.lang is currently ignored
    */
-  function updateFrame(data) {
-    var code = Session.get("nativeCode")   
-    var url = wikiURL[0] + code + wikiURL[1] + data.text + wikiURL[2]
+  , updateFrame: function updateFrame(data) {
+      var code = Session.get("nativeCode")
+      var array = this.wikiURL  
+      var url = array[0] + code + array[1] + data.text + array[2]
 
-    if (iFrame) {
-      iFrame.src = url
-    } else {
-      console.log("Wiktionary iframe not defined in newSelection")
+      if (this.iFrame) {
+        this.iFrame.src = url
+      } else {
+        console.log("Wiktionary iframe not defined in newSelection")
+      }
+      
+      this.lastRequest = undefined
     }
-    
-    lastRequest = undefined
-  }
+
+  , setHeight: function setHeight(key, value) {
+      this.iFrame.style.height = value
+      if (value === "auto") {
+        tellBackground({ method: "iFrameSetHeight" })
+      }
+      // otherwise, wait for the window to resize before calling back
+    }
+
+  , setScrollTop: function setScrollTop(key, value) {
+      this.iFrame.parentNode.scrollTop = value
+    }
+  }.initialize()
 })()

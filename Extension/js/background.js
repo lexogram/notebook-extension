@@ -16,7 +16,7 @@
 // // TESTING>
 
   var extension = {
-    port: null
+    ports: {}
 //, meteorURL: "http://localhost:3000/"
   , meteorURL: "http://localhost/NoteBook/main.html"
   // use your own local URL ^
@@ -48,8 +48,8 @@
 
     /** Set up connection with NoteBook's connection script */
   , openConnection: function openConnection(externalPort) {
-      this.port = externalPort
-      this.port.onMessage.addListener(treatMessage)
+      this.ports[externalPort.name] = externalPort
+      externalPort.onMessage.addListener(treatMessage)
 
       if (this.googleTabId) {
         this.activateGooglePage(this.googleTabId)
@@ -84,14 +84,14 @@
      *                          , data: <string selected text>}
      */
   , changeSelection: function changeSelection(request) {
-      if (!this.port) {
+      if (!this.ports.notebook) {
         console.log("NoteBook inactive. Request not treated:",request)
         return
       }
 
       this.selection = request.data
       
-      this.port.postMessage(request)
+      this.ports.notebook.postMessage(request)
       this.showInGoogleTab()
     }
 
@@ -124,8 +124,8 @@
     }
 
   , disableExtension: function disableExtension() {
-      this.port.disconnect()
-      this.port = null
+      this.ports.notebook.disconnect()
+      delete this.ports.notebook
       chrome.tabs.query({}, callAllTabs)
 
       function callAllTabs(tabs) {
@@ -171,7 +171,7 @@
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
   , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
-      if (this.port) {
+      if (this.ports.notebook) {
         return
       }
 
@@ -303,15 +303,32 @@
     }
 
   , showGoogleTranslation: function showGoogleTranslation(result) {
-      if (this.port) {
-        this.port.postMessage(result)
+      if (this.ports.notebook) {
+        this.ports.notebook.postMessage(result)
       }
     }
 
     // IFRAMES // IFRAMES // IFRAMES // IFRAMES // IFRAMES // IFRAMES
      
-  , iFrameHeight: function iFrameHeight(message) {
-      this.port.postMessage(message) 
+  , iFrameSetHeight: function setHeight(message, options) {
+      var self = this
+  
+      if (message.height) {
+        self.iFrameId = options.tab.id
+        this.ports.notebook.postMessage(message)
+      } else {
+        chrome.tabs.sendMessage(self.iFrameId, message)
+      }
+    }
+
+  , iFrameGetScrollTop: function iFrameGetScrollTop(message) {
+      var self = this
+      
+      if (message.scrollTop) {
+        this.ports.notebook.postMessage(message)
+      } else {
+        chrome.tabs.sendMessage(self.iFrameId, message)
+      }
     }
 
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
