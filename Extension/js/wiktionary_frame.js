@@ -13,13 +13,84 @@
     port: null
 
   , initialize: function initialize() {
-      // this.port = chrome.runtime.connect(extensionId, connectInfo)
-      // this.port.onMessage.addListener(treatMessage)
+      var self = this
+
       chrome.runtime.sendMessage(
         { method: "iFrameSetHeight"
         , height: "auto"
         }
       )
+
+      ;(function interceptAnchorLinks(){
+        var url = window.location.href
+        var path = window.location.pathName
+        var search = window.location.search
+        var links = document.links
+        var ii = links.length
+        var link
+          , href
+          , split
+          , local
+          , hasHash
+          , id
+
+        // url += path ? path : ""
+        // url += search ? search : ""
+        
+        while (ii--) {
+          link = links[ii]
+          href = link.href
+          split = href.split("#")
+          local = split[0] === url
+
+          if (local) {
+            hasHash = split.length > 1
+    
+            if (local) {
+              link.onclick = function (event) {
+                self.iFrameScrollToAnchor.call(self, event)
+              }
+            }
+
+          } else {
+            link.onclick = function (event) {
+              self.openInSeparateTab.call(self, event)
+            }
+          }
+        }
+      })()
+
+      ;(function (){
+        var right = 0
+        var width = document.body.style.width
+        var treeWalker = document.createTreeWalker(
+          document.body
+        , NodeFilter.SHOW_ELEMENT
+        )
+        var element
+          , rect
+
+        document.body.style.width = "0"
+
+        while (element = treeWalker.nextNode()) {
+          rect = element.getBoundingClientRect()
+          if (right < rect.right) {
+            right = rect.right
+          }
+        }
+
+        if (width) {
+          document.body.style.width = width
+        } else {
+          document.body.style.removeProperty("width")
+        }
+
+        chrome.runtime.sendMessage(
+          { method: "iFrameSetWidth"
+          , width: right + 16 + "px" // <HACK: why is right wrong?>
+          }
+        )
+      })()
 
       return this
     }
@@ -37,14 +108,31 @@
 
   , iFrameGetScrollTop: function iFrameGetScrollTop(request) {
       var element = document.getElementById(request.anchorId)
-      var bodyRect = document.body.getBoundingClientRect()
       var anchorRect = element.getBoundingClientRect()
 
-      request.scrollTop = anchorRect.top - bodyRect.top
+      request.scrollTop = anchorRect.top 
 
       chrome.runtime.sendMessage( request )
     }
 
+  , iFrameScrollToAnchor: function iFrameScrollToAnchor(event) {
+      event.preventDefault()
+      var id = event.currentTarget.href.split("#")[1]
+      var element = document.getElementById(id)
+      var rect = element.getBoundingClientRect()
+      var request = { 
+        method: "iFrameGetScrollTop"
+      , scrollTop: rect.top
+      }
+
+      chrome.runtime.sendMessage( request )
+    }
+
+  , openInSeparateTab: function openInSeparateTab(event) {
+      event.preventDefault()
+      var href = event.currentTarget.href
+      window.open(href, "lxo")
+    }
   }.initialize()
 
   function treatMessage(request) {

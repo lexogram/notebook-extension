@@ -49,20 +49,20 @@ var iFrameGetScrollTop
       Session.set("selection", request.data)
     }
 
-  , tellBackground: function tellBackround(message) {
-      this.port.postMessage(message)
+  , tellBackground: function tellBackround(request) {
+      this.port.postMessage(request)
     }
 
-  , iFrameSetHeight: function iFrameSetHeight(message) {
-      Session.set("iFrameHeight", message.height)
+  , iFrameSetWidth: function iFrameSetWidth(request) {
+      Session.set("iFrameWidth", request.width)
     }
 
-  , iFrameGetScrollTop: function iFrameGetScrollTop(message) {
-      if (!message.scrollTop) {
-        tellBackground(message)
-      } else {
-        Session.set("iFrameScrollTop", message.scrollTop)
-      }
+  , iFrameSetHeight: function iFrameSetHeight(request) {
+      Session.set("iFrameHeight", request.height)
+    }
+
+  , iFrameGetScrollTop: function iFrameGetScrollTop(request) {
+      Session.set("iFrameScrollTop", request.scrollTop)
     }
 
   , showGoogleTranslation: function showGoogleTranslation(request) {

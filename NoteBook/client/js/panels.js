@@ -567,6 +567,7 @@
           var formerNative = Session.get("nativeCode")
           var currentTarget = Session.get("targetCode")
           var nativeCode = this.value
+          var anchorId
 
           Session.set("nativeCode", nativeCode)
           L10n.setSelector(self.$target, nativeCode, currentTarget) 
@@ -582,6 +583,9 @@
             , refresh: true
             })
           }
+
+          anchorId = L10n.getAnchorId(nativeCode, currentTarget)
+          Session.set("anchorId", anchorId)
 
           tellBackground({
             method: "setLanguages"
@@ -599,6 +603,7 @@
           var formerTarget = Session.get("targetCode")
           var currentNative = Session.get("nativeCode")
           var targetCode = this.value
+          var anchorId
 
           Session.set("targetCode", targetCode)
 
@@ -612,7 +617,10 @@
               value: formerTarget
             , refresh: true
             })
-          } 
+          }
+
+          anchorId = L10n.getAnchorId(currentNative, targetCode)
+          Session.set("anchorId", anchorId)
 
           tellBackground({
             method: "setLanguages"

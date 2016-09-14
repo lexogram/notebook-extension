@@ -36,6 +36,12 @@
       , scope: self
       })
       Session.register({
+        method: self.setWidth
+      , key: "iFrameWidth"
+      , scope: self
+      , immediate: false
+      })
+      Session.register({
         method: self.setHeight
       , key: "iFrameHeight"
       , scope: self
@@ -116,10 +122,20 @@
       this.lastRequest = undefined
     }
 
+  , setWidth: function setWidth(key, value) {
+      this.iFrame.style.width = value
+    }
+
   , setHeight: function setHeight(key, value) {
       this.iFrame.style.height = value
+      this.iFrame.parentNode.scrollLeft = 160
+
       if (value === "auto") {
         tellBackground({ method: "iFrameSetHeight" })
+        tellBackground({ 
+          method: "iFrameGetScrollTop"
+        , anchorId: Session.get("anchorId")
+        })
       }
       // otherwise, wait for the window to resize before calling back
     }

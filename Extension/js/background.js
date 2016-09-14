@@ -175,7 +175,7 @@
         return
       }
 
-      var width = 300
+      var width = 360
       var top = 0
 
       var options = {
@@ -323,12 +323,16 @@
 
   , iFrameGetScrollTop: function iFrameGetScrollTop(message) {
       var self = this
-      
+
       if (message.scrollTop) {
         this.ports.notebook.postMessage(message)
       } else {
         chrome.tabs.sendMessage(self.iFrameId, message)
       }
+    }
+
+  , iFrameSetWidth: function iFrameSetWidth(request) {
+      this.ports.notebook.postMessage(request)
     }
 
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //

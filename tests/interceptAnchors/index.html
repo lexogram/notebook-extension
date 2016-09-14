@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    nav {
+      position: absolute;
+      top: 0;
+      width: 100px;
+      height: 100%;
+      background-color: #eee;
+    }
+    main {
+      position: absolute;
+      top: 0;
+      left: 100px;
+      width: calc(100% - 100px);
+      min-width: 100px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    p {
+      margin-top: 0;
+    }
+    div {
+      height: 300px;
+    }
+    div:nth-child(even) {
+      background-color: #fee
+    }
+    div:nth-child(odd) {
+      background-color: #eef
+    }
+  </style>  
+</head>
+<body>
+<nav>
+<ul>
+<li><a href="#one">One</a></li>
+<li><a href="#two">Two</a></li>
+<li><a href="#three">Three</a></li>
+<li><a href="#four">Four</a></li>
+<li><a href="#five">Five</a></li>
+</ul>
+</nav>
+
+<main>
+<a href="http://example.com">Example</a>
+
+<div>
+  <h1 id="one">One</h1 id="one">
+</div>
+<div>
+  <h1 id="two">Two</h1 id="one">
+</div>
+<div>
+  <h1 id="three">Three</h1 id="one">
+</div>
+<div>
+  <h1 id="four">Four</h1 id="one">
+</div>
+<div>
+  <h1 id="five">Five</h1 id="one">
+</div>
+</main>
+  
+<script src="js/anchor.js"></script>
+</body>
+</html>
