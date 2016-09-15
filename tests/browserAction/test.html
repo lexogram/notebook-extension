@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset="utf-8">
+  <title>Test lang elements</title>
+  <style>
+    [lang=ru] {
+      background-color: #fcc;
+    }
+    [lang=th] {
+      background-color: #fcf;
+    }
+    [lang=fr] {
+      background-color: #ccf;
+    }
+    [lang=en] {
+      background-color: #efe;
+    }
+    p[lang|=en] {
+      background-color: #cfc;
+    }
+  </style> 
+</head>
+<body>
+<h1 lang="ru">Русский</h1>
+<h1 lang="th">ไทย</h1>
+<div lang="fr"</div>
+  <h1>Français</h1>
+  <p>Des éléments imbriqués dans un &lt;div&gt; en français</p>
+</div>
+<p lang="en-US">Some local US color</p>
+<p lang="en-CA">As Canadian as possible under the circumstances</p>
+<p lang="en-GB">GB or not GB, that is question</p>
+<p lang="fr">Un peu plus de francais</p>
+<p>This text is in the page's default language</p>
+</body>
+</html>

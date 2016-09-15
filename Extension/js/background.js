@@ -145,8 +145,8 @@
       request.id = sender.tab.id
 
       ;(function postMessageWhenPortIsOpen(){
-        if (extension.port) {
-          extension.port.postMessage(request)
+        if (extension.ports.notebook) {
+          extension.ports.notebook.postMessage(request)
         } else {
           setTimeout(postMessageWhenPortIsOpen, 10)
         }
@@ -302,12 +302,6 @@
       )
     }
 
-  , showGoogleTranslation: function showGoogleTranslation(result) {
-      if (this.ports.notebook) {
-        this.ports.notebook.postMessage(result)
-      }
-    }
-
     // IFRAMES // IFRAMES // IFRAMES // IFRAMES // IFRAMES // IFRAMES
      
   , iFrameSetHeight: function setHeight(message, options) {
@@ -331,15 +325,18 @@
       }
     }
 
-  , iFrameSetWidth: function iFrameSetWidth(request) {
-      this.ports.notebook.postMessage(request)
-    }
-
     // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
 
   , checkUrlForMatch: function checkUrlForMatch(url) {
       var regex = /http:\/\/lexogram\.github\.io\/openbook\//
       return !!regex.exec(url)
+    }
+
+  , forward: function forward(request, sender, sendResponse) {
+      // iFrameSetWidth, showTranslation
+      if (this.ports.notebook) {
+        this.ports.notebook.postMessage(request, sender, sendResponse)
+      }
     }
   }.initialize()
 
@@ -361,6 +358,8 @@
     var method = extension[request.method]
     if (typeof method === "function") {
       method.call(extension, request, sender, sendResponse)
+    } else {
+      extension.forward.call(extension, request, sender, sendResponse)
     }
   }
   

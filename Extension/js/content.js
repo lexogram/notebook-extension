@@ -358,7 +358,7 @@
         timeOut = 0
 
         chrome.runtime.sendMessage({ 
-          method: "showGoogleTranslation"
+          method: "showTranslation"
         , data: result_box.innerHTML
         })
       }

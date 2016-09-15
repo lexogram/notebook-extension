@@ -8,10 +8,12 @@
 */
 
 
+var Wiktionary
+
 ;(function wiktionary(){
   "use strict"
 
-  var wiktionary = {
+  Wiktionary = {
     panelId: "wiktionary"
   , wikiURL: ["https://"
     , ".wiktionary.org/w/index.php?title="
@@ -22,6 +24,19 @@
   , lastRequest: 0
 
   , initialize: function initialize() {
+      var self = this
+
+      Session.register({
+        method: this.waitForStartUp
+      , key: "ready"
+      , scope: self
+      , immediate: false
+      })
+
+      return this
+    }
+
+   , waitForStartUp: function(key, value) {
       var self = this
       this.panel = document.getElementById(this.panelId)
 
@@ -55,16 +70,16 @@
       })
     }
 
-   /**
-   * Listener for when the wiktionary panel is activated
-   * SOURCE: Called by Session.register() when this method is
-   *         registered and Session.broadcast() following a call to
-   *         Session.set("activePanel") in panelset toggleActive()
-   * ACTION: If panelId is "wiktionary" and lastRequest is set,
-   *         updates the src of the iFrame. 
-   * @param  {string} key     will be "activePanel"
-   * @param  {string} panelId may be "wiktionary", or any other value
-   */
+    /*
+    * Listener for when the wiktionary panel is activated
+    * SOURCE: Called by Session.register() when this method is
+    *         registered and Session.broadcast() following a call to
+    *         Session.set("activePanel") in panelset toggleActive()
+    * ACTION: If panelId is "wiktionary" and lastRequest is set,
+    *         updates the src of the iFrame. 
+    * @param  {string} key     will be "activePanel"
+    * @param  {string} panelId may be "wiktionary", or any other value
+    */
   , activate: function activate(key, panelId) {
       if (panelId !== this.panelId) {
         return
@@ -90,6 +105,7 @@
    *                       { word: <string>, lang: <ISO code string> }
    *                       data.lang is currently ignored
    */
+ 
   , newSelection: function newSelection(key, data) {
       if (data && data.text) {
         if (this.panel.classList.contains("active")) {
@@ -108,6 +124,7 @@
    *                       { word: <string>, lang: <ISO code string> }
    *                       data.lang is currently ignored
    */
+  
   , updateFrame: function updateFrame(data) {
       var code = Session.get("nativeCode")
       var array = this.wikiURL  
@@ -123,7 +140,7 @@
     }
 
   , setWidth: function setWidth(key, value) {
-      this.iFrame.style.width = value
+      this.iFrame.style.minWidth = value
     }
 
   , setHeight: function setHeight(key, value) {
@@ -142,6 +159,26 @@
 
   , setScrollTop: function setScrollTop(key, value) {
       this.iFrame.parentNode.scrollTop = value
+    }
+
+  , getOptions: function getOptions() {
+      return {
+        id: "wiktionary"
+      , icon: "img/wiktionary.png" 
+      , src: "https://www.wiktionary.org/"
+      , init: function(panel) {
+          Session.register({
+            method: function getFrameHeight(key, value) {
+              var height = value["wiktionary.org"]
+              this.element.find("iframe").height(height)
+              this.element.find("div")[0].scrollLeft = 160
+            }
+          , key: "iFrameHeights"
+          , scope: panel
+          , immediate: false
+          })   
+        }
+      }
     }
   }.initialize()
 })()

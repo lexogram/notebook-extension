@@ -14,7 +14,6 @@
 
 
 var tellBackground
-var iFrameGetScrollTop
   
 ;(function startUpWithoutMeteor(){
   var extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
@@ -65,7 +64,7 @@ var iFrameGetScrollTop
       Session.set("iFrameScrollTop", request.scrollTop)
     }
 
-  , showGoogleTranslation: function showGoogleTranslation(request) {
+  , showTranslation: function showTranslation(request) {
       Session.set("translation", request.data)
     }
 
@@ -91,11 +90,5 @@ var iFrameGetScrollTop
   }
 
   window.onbeforeunload = disableExtension
-
-  iFrameGetScrollTop = function (anchorId) {
-  connections.iFrameGetScrollTop({
-    method: "iFrameGetScrollTop"
-  , anchorId: anchorId
-  })
-}
+  Session.set("ready", true, true)
 })() // remove iife () when Meteor.startup() is restored
