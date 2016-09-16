@@ -6,7 +6,7 @@
 , "description": "Highlights browserAction for pages that contain  text in a given language. Shows full-colour icon when extension in activated. Provides popup menu for selecting target language."
 
 , "browser_action": {
-    "default_icon": "img/B&W19.png"
+    "default_icon": "img/19/inactive.png"
   , "default_popup": "popup.html"
   }
 

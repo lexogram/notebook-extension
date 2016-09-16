@@ -1,3 +1,33 @@
+/** DETECT LANGUAGE **
+ *
+ * When a content page is first opened, this script checks what 
+ * languages are defined in < lang="xx"> tag attributes, and counts
+ * how many non-whitespace characters are used for each language.
+ * This information is reported to the background script, which can
+ * then set the browserAction icon and badge text as appropriate.
+ * Format:
+ * 
+ *  { en: { 
+ *      US: <char count> 
+ *    , CA: <char count>
+ *    , GB: <char count>
+ *    , all: <char count>
+ *    }
+ *  , ...
+ *  , all: <char count>
+ *  }
+ *
+ * TODO: Use tlds (www.example.ru/), subdomains (ru.example.com/) and
+ *       top-level directories (www.example.com/ru/) when lang
+ *       attributes are absent for all or most of the text
+ *       OR
+ *       Send the HTML to the server for analysis, through
+ *       content > background > notebook window > server > notebook
+ *       window > background 
+ *       or
+ *       content > background > ajax-to-server > background
+ */
+
 ;(function detect_languages(){
   "use strict"
 
@@ -15,17 +45,6 @@
     , node
     , text    
     , count
-
-  /*
-    { en: { 
-        US: <char count> 
-      , CA: <char count>
-      , GB: <char count>
-      , all: <char count>
-      }
-    , ...
-    }
-   */
   
   languages = [].slice.call(document.querySelectorAll("[lang]"))
   for (ii = 0, total = languages.length; ii < total; ii += 1) {
@@ -71,7 +90,10 @@
       languageData[languageCode][countryCode] += count
     }
 
-    languageData[languageCode].all += count
+    if (languageCode) {
+      languageData[languageCode].all += count
+    }
+    
     languageData.all += count
   }
 

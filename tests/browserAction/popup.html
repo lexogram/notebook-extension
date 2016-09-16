@@ -1,6 +1,50 @@
 <!DOCTYPE html>
+<head>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
 <body>
-<h1>Popup</h1>
-<p>More stuff can go here</p>
+  <h1>Lexogram</h1>
+
+  <details>
+    <summary>Live a new language</summary>
+    <p>Consult language references and take notes as you find interesting content in the languages you are learning.</p>
+  </details>
+
+  <input type="checkbox" id="active" checked 
+  ><label for="active"></label>
+
+  <div>
+    <input type="checkbox" id="always"
+    ><label for="always">Always activate for this page</label>
+    <!-- <ul>
+      <li>
+        <input type="radio" name="always" id="page" checked>
+        <label for="page">This page</label>
+      </li>
+      <li>
+        <input type="radio" name="always" id="site">
+        <label for="site">All pages on this site</label>
+      </li>
+    </ul> -->
+  </div>
+
+  <div>
+    <input type="checkbox" id="colourize" disabled
+    ><label for="colourize">Colourize text</label>
+    <ul>
+      <li>
+        <input type="radio" name="colourize" id="frequency" checked>
+        <label for="frequency">By word frequency</label>
+      </li>
+      <li>
+        <input type="radio" name="colourize" id="familiarity" >
+        <label for="familiarity">By familiarity</label>
+      </li>
+    </ul>
+  </div>
+
+  <script src="js/popup.js"></script>
+
 </body>
 </html>

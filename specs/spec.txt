@@ -136,3 +136,19 @@ For the first tutorial, we need to create:
 ——————
 
 Set the text of the main page to grey, then, as each word is selected, get information on it from the server, and set its colour to black. There will be no memory of the page ever having been seen before, so it will start over all grey the next time.
+
+———————
+
+We want to remember the latest request to Wiktionary
+* word
+* ISO code
+
+If the native language changes then Wiktionary should be called again
+If the Wiktionary panel is not active, then it should be called when the panel is opened
+
+Selection.set("lastRequest", {
+  lang: <ISO code>
+, text: <string>
+}
+Session.set("lastRequestTreated", true|false)
+})
