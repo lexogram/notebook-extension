@@ -167,3 +167,42 @@ Save as {
 }
 
 If user switches off always activate for a site, or shifts to page ...?
+
+———————
+
+By default an anonymous user is created, with no username or password. The userId is sent directly to the server (perhaps encrypted), in order to create the connection to the database. The server session uses the given userId. 
+
+The database uses the userId to identify all actions by that user. The userId is stored in the user's localStorage. It's also stored in the database as a throwaway id with the last connection time. If the connection gets too old, all personal data associated with the userId will be deleted; the next time the user logs in, it will be like starting over with a blank slate.
+
+When the user registers, a username and password (and contact details) are associated with the userId. Connecting with this userName tells the database which userId to use for the session.
+
+On the local machine, we can save users as:
+{ users: {
+    <userName>: <password or 0>
+  , ...
+  , "anon": <userId>
+  }
+, default: <userName>
+, autologin: false
+}
+
+The "anonymous" name can include (say) a backspace character, so that it cannot possibly be typed by a user: "anon" We'll still need to check that no-one deliberately tries to paste it as a username: username already taken.
+
+When an unregistered user 
+
+
+———————
+
+If no user is registered, then the div.user should appear:
+* open
+* in orange
+If the user closes it for the current session, it should remain orange
+
+When a user registers or logs in from this device, it will become blue
+
+This means that:
+* Background needs to know
+  - if there are users
+  - if the tab was closed
+
+

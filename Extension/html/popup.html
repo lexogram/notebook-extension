@@ -6,42 +6,96 @@
 <body>
   <h1>Lexogram</h1>
 
-  <details>
-    <summary>Live a new language</summary>
-    <p>Consult language references and take notes as you find interesting content in the languages you are learning.</p>
-  </details>
+  <div id="settings" class="active panel">
+    <details>
+      <summary>Live a new language</summary>
+      <p>Consult language references and take notes as you find interesting content in the languages you are learning.</p>
+    </details>
 
-  <input type="checkbox" id="active" checked 
-  ><label for="active"></label>
+    <input type="checkbox" id="active" checked 
+    ><label for="active"></label>
 
-  <div>
-    <input type="checkbox" id="always"
-    ><label for="always">Always activate for this page</label>
-    <!-- <ul>
-      <li>
-        <input type="radio" name="always" id="page" checked>
-        <label for="page">This page</label>
-      </li>
-      <li>
-        <input type="radio" name="always" id="site">
-        <label for="site">All pages on this site</label>
-      </li>
-    </ul> -->
+    <div>
+      <input type="checkbox" id="always"
+      ><label for="always">Always activate for this page</label>
+      <!-- <ul>
+        <li>
+          <input type="radio" name="always" id="page" checked>
+          <label for="page">This page</label>
+        </li>
+        <li>
+          <input type="radio" name="always" id="site">
+          <label for="site">All pages on this site</label>
+        </li>
+      </ul> -->
+    </div>
+
+    <div>
+      <input type="checkbox" id="colourize" disabled
+      ><label for="colourize">Colourize text</label>
+      <ul>
+        <li>
+          <input type="radio" name="colourize" id="frequency" checked>
+          <label for="frequency">By word frequency</label>
+        </li>
+        <li>
+          <input type="radio" name="colourize" id="familiarity" disabled>
+          <label for="familiarity">By familiarity</label>
+        </li>
+      </ul>
+    </div>
+
+    <!-- <div class="user">
+      <span class="register">AnthropomorphicBunny</span
+      ><button type="button" class="log">Log out</button>
+    </div> -->
   </div>
 
-  <div>
-    <input type="checkbox" id="colourize" disabled
-    ><label for="colourize">Colourize text</label>
+  <div id="connect" class="panel">
+    <h2 class="register">Register</h2>
+    <h2 class="login">Log in</h2>
+
     <ul>
       <li>
-        <input type="radio" name="colourize" id="frequency" checked>
-        <label for="frequency">By word frequency</label>
+        <label for="user">Username:</label>
+        <input type="text" id="user" value="" placeholder="username">
       </li>
       <li>
-        <input type="radio" name="colourize" id="familiarity" >
-        <label for="familiarity">By familiarity</label>
+        <label for="pass">Password:</label>
+        <input type="password" id="pass" class="pass">
+        <input type="checkbox" id="eye" class="eye">
+        <label for="eye"></label>
+      </li>
+
+      <li class="register">
+        <label for="confirm">Confirm password:</label>
+        <input type="password" id="confirm" class="register pass">
       </li>
     </ul>
+
+    <p id="error" class="feedback">Passwords do not match<br/>Username already exists<br/>You must agree to the terms and conditions<br/>Username or password incorrect</p>
+
+    <input type="checkbox" id="terms" class="register">
+    <label for="terms" class="register">
+      I agree to the <a href="#">terms and conditions</a>
+    </label>
+
+    <button type="button" class="open settings">Cancel</button>
+  </div>
+
+  <div id="account" class="unregistered">
+    <details>
+      <summary>
+        <button type="button" class="connect register">Register</button>
+      </summary>
+      <p>After you register, you'll be able to:</p>
+      <ul>
+       <li>Preserve your progress</li>
+       <li>Access your notes from multiple devices</li>
+       <li>Log into multiple accounts from a single device</li>
+       </ul>
+    </details>
+    <button type="button" class="connect login">Log in</button>
   </div>
 
   <script src="../js/popup.js"></script>

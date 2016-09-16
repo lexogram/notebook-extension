@@ -1,22 +1,30 @@
 html, body {
 margin: 0;
 background-color: #000;
-
+font-family: "Helvetica Neue";
+font-size: 12px;
 }
 body {
 width: 18em;
 background-color: #fff;
-padding-bottom: 1em;
 }
 h1 {
 font-size: 1.2em;
-font-style: oblique
-font-weight: bold
 width: 100%;
 padding: 0.25em;
 margin: 0;
 background-color: #00559f;
 color: #fff;
+box-sizing: border-box;
+}
+div {
+display: none;
+padding-bottom: 0.25em;
+}
+div.active,
+div.active div,
+div#account {
+display: block;
 }
 summary {
 outline: none;
@@ -40,16 +48,18 @@ input:disabled + label {
 opacity: 0.25;
 cursor: default;
 }
-ul {
+ul { 
 margin: 0 0.25em 0 -0.35em;
 list-style: none;
 padding-left: 1.8em;
+}
+div#settings ul {
 display: none;
 }
 ul input {
 margin: 0.5em 0 0 0.5em;
 }
-input:checked ~ ul {
+div#settings input:checked ~ ul {
 display: block;
 }
 #active + label::before {
@@ -65,17 +75,126 @@ opacity: 0.25;
 pointer-events: none;
 cursor: default;
 }
-#active:checked ~ div {
+#active:checked ~ div,
+#active ~ div:last-of-type {
 opacity: 1;
 pointer-events: auto;
 }
-#active:checked ~ div li {
-opacity: 1;
+#active:checked ~ div li,
+button:not([disabled]),
+summary {
 cursor: pointer;
 }
-/*#always:checked + label::after {
-content: " for:";
-}*/
 #colourize:checked + label::after {
 content: ":";
+}
+
+#account {
+position: relative;
+text-align: right;
+margin-top: 0.5em;
+background-color: #7ab2dc;
+min-height: 2.25em
+}
+details {
+text-align: left;
+}
+summary button {
+margin-left: 0.4em;
+}
+details p,
+details ul {
+width: 14em;
+margin: 0.5em 0 0.25em 0.5em;
+list-style: disc;
+}
+details ul {
+padding-left: 40px;
+}
+details p {
+margin-left: 1em;
+}
+details ~ button {
+position: absolute;
+right: 0;
+top: 0.55em;
+}
+button {
+width: 33%;
+margin-right: 11%;
+}
+span + button {
+margin-top: 0.5em;
+}
+span {
+position: relative;
+top: 0.35em;
+width: 50%;
+display: inline-block;
+margin-right:3%;
+text-align: center;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+#account.unregistered {
+background-color: #f90;
+}
+
+#connect {
+position: relative;
+/* <positioning for Cancel button*/
+padding-bottom: 2em;
+}
+#connect button {
+position: absolute;
+bottom: 0;
+right: 0;
+}
+/* positioning> */
+#connect h2 {
+font-size: 1.2em;
+margin-left: 1.5em;
+}
+#connect li {
+position: relative;
+margin-top: 1em;
+}
+#connect input:not([type=checkbox]) {
+padding: 0.3em;
+width: 13em;
+}
+#eye {
+display: none;
+}
+#eye + label {
+position: absolute;
+background-image: url(../img/eye-off.png);
+right: 0px;
+bottom: 0;
+width: 24px;
+height: 24px;
+background-repeat: no-repeat;
+}
+#eye:checked + label {
+background-image: url(../img/eye-on.png);
+}
+#error {
+color: #c00;
+margin: 0.5em 2em;
+display: none;
+}
+#error.feedback {
+display: block;
+}
+#connect.login .register,
+#connect.register .login {
+display: none;
+}
+
+/* TEMPORARY HACK UNTIL FEATURE IS IMPLEMENTED */
+#login.active ~ #account button,
+#register.active ~ #account button {
+  opacity: 0.25;
+  pointer-events: none;
+  cursor: default;
 }

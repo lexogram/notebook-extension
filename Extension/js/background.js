@@ -21,7 +21,7 @@
   , selection: ""
   , word: ""
   , activeTabs: []
-
+  , users: {}
   , languages: { // <HARD-CODED for testing>
       "en": ["all"]
     , "ru": ["all"]
@@ -38,20 +38,12 @@
   
     /** Import injectedHTML for use in content pages */
   , initialize: function initialize() {
-      var xhr = new XMLHttpRequest()
-      xhr.open("GET", this.injectedHTML, true)
-      xhr.onreadystatechange = stateChanged
-      xhr.send()
+      this.users = this.getFromLocalStorage("users", {})
+      // TODO
 
       this.autoActivate = this.getFromLocalStorage("autoActivate", [])
 
       return this
-
-      function stateChanged() {
-        if (xhr.readyState === 4) {
-          extension.injectedHTML = xhr.responseText
-        }
-      }
     }
 
     /**
@@ -94,26 +86,9 @@
         this.activateGooglePage(this.googleTabId)
       }
     }
-  
-    /** Called when browserAction button is clicked */
- 
-  // , useExtension: function useExtension() {
-  //     this.ensureNoteBookWindowIsOpen()
-
-  //     // Toolbar is not currently needed, but it might be useful in
-  //     // the future to add it for unregistered users
-  //     chrome.tabs.query(
-  //       { active: true
-  //       , currentWindow: true
-  //       }
-  //     , function (tabs) {
-  //         extension.showToolbarIfRequired.call(extension, tabs)
-  //       }
-  //     )
-  //   }
 
     // treatMessage // treatMessage // treatMessage // treatMessage //
-
+    
     /**
      * SOURCE: Called by the checkSelection method of the toolbar 
      *         object in the extension's content.js script
@@ -144,44 +119,6 @@
      *         page is set to open the extension automatically.
      *         Calls back with the response true | false | undefined
      */
-  , getExtensionStatus: function getExtensionStatus(request, sender, sendResponse) {
-      var id = sender.tab.id
-      // var extensionIsActive = this.tabMap[id]
-      var extensionIsActive = (this.activeTabs.indexOf(id) > -1)
-
-      if (!extensionIsActive) {
-        extensionIsActive = this.checkUrlForMatch(sender.url)
-      }
-
-      if (extensionIsActive) {
-        this.ensureNoteBookWindowIsOpen()
-        // this.insertCSS(id)
-        // this.insertToolbar(id)
-        // this.tabMap[id] = true
-        Tools.addToArray(this.activeTabs, id)
-        // if added by checkUrlForMatch()
-      } else {
-        // ensure that tabMap[id] is undefined for when 
-        // showToolbarIfRequired() is called next     
-        // delete this.tabMap[id]
-        Tools.deleteFromArray(this.activeTabs, id)
-      }
-
-      sendResponse({ extensionIsActive: extensionIsActive })
-    }
-
-    /**
-     * SOURCE: Called by removeToolbar in content.js
-     * ACTION: Sets tabMap(tabId) to false to indicate that the
-     *         toolbar was open but is not open any more
-     * @param  {[type]} request [description]
-     * @param  {[type]} sender  [description]
-     * @return {[type]}         [description]
-     */
-  , forgetExtension: function forgetExtension(request, sender) {
-      // this.tabMap[sender.tab.id] = false
-      Tools.deleteFromArray(this.activeTabs, sender.tab.id)
-    }
 
   , disableExtension: function disableExtension() {
       this.ports.notebook.disconnect()
@@ -189,10 +126,15 @@
 
       var message = { method: "closeExtension" }
       var ii = this.activeTabs.length
+      var tabId
 
       while (ii--) {
-        chrome.tabs.sendMessage(this.activeTabs[ii], message)
+        tabId = this.activeTabs[ii]
+        chrome.tabs.sendMessage(tabId, message)
+        updateIcon(tabId)
       }
+
+      this.activeTabs.length = 0
     }
 
     // COLOURATION // COLOURATION // COLOURATION // COLOURATION //
@@ -251,40 +193,6 @@
       chrome.windows.create(options)
     }
 
-  //  , showToolbarIfRequired: function showToolbarIfRequired(tabs) {
-  //     var id = tabs[0].id
-  //     var extensionIsActive = this.tabMap[id] // true|false|
-
-  //     switch (extensionIsActive) {
-  //       default: // undefined
-  //         this.insertCSS(id)
-  //         // fall throught to injectToolbar()
-  //       case false:
-  //         this.insertToolbar(id)
-  //         this.tabMap[id] = true
-  //         // no need to break: nothing else happens
-  //       case true:
-  //         // do nothing: the Toolbar is already active
-  //     }
-  //   }
-
-  // , insertCSS: function insertCSS(id) {  
-  //     var cssDetails = {
-  //       file: this.injectedCSSFile
-  //     , runAt: "document_start"
-  //     }
-  //     chrome.tabs.insertCSS(id, cssDetails)
-  //   }
-
-  // , insertToolbar: function insertToolbar(id) {
-  //     var message = { 
-  //       method: "insertToolbar"
-  //     , html: this.injectedHTML
-  //     }
-
-  //     chrome.tabs.sendMessage(id, message)
-  //   }
-
     // TRANSLATION // TRANSLATION // TRANSLATION // TRANSLATION //
 
     /** 
@@ -302,7 +210,7 @@
      *             ... if call triggered by chrome.tabs.onUpdate   
      * @param  {undefined|object} tab     used to check if tab closed
      */
-  , tabChanged: function tabChanged(tabId, changedInfo, tab) { // NEW
+  , tabChanged: function tabChanged(tabId, changedInfo, tab) {
       if (tabId === this.googleTabId) {
         if (!tab) {
         // The Google Translate tab is closing
@@ -325,7 +233,7 @@
      *         tab to find the HTML element that contains the
      *         translation.
      */
-  , showInGoogleTab: function showInGoogleTab() { // NEW
+  , showInGoogleTab: function showInGoogleTab() {
       var options = {}
 
       if (!this.selection) {
@@ -419,7 +327,6 @@
 
     // BROWSERACTION //BROWSERACTION //BROWSERACTION //BROWSERACTION 
 
-
     /**
      * SOURCE: Sent by activateExtension and state_changed, where the 
      *         call comes from the browserAction popup and the current
@@ -492,21 +399,102 @@
      *                          , ...
      *                          }
      */
-  , shareLanguageData: function shareLanguageData(request, sender) {
+  , pageOpened: function pageOpened(request, sender, sendResponse) {
       var tab = sender.tab
       var url = sender.url
+      var id = tab.id
+      var extensionIsActive = (this.activeTabs.indexOf(id) > -1)
 
-      this.languageLUT[tab.id] = request.data
-      this.updateIcon(tab)
+      if (!extensionIsActive) {
+        extensionIsActive = this.checkUrlForMatch(sender.url)
+      }
+ 
+      this.languageLUT[tab.id] = request.languageData
+      this.toggleExtension(tab, extensionIsActive)
 
-      if (this.autoActivate.indexOf(url) > -1) {     
-        this.addToActiveTabs(tab)
+      sendResponse({ extensionIsActive: extensionIsActive })
+    }
+
+    /**
+     * SOURCE: Sent by:
+     *         * pageOpened, in which case state may be either true or
+     *           false depending on whether the extension is already
+     *           active in this tab, or whether this page is set to
+     *           auto-activate
+     *         and (via asyncTreatTab):
+     *         * activateExtension, when the popup window is opened,
+     *           in which case state is true and response is a
+     *           callback function
+     *         * state_changed, when the activate checkbox in the
+     *           popup window is toggled, in which case state may be
+     *           either true or false
+     * @param  {object} tab      { ...
+     *                           , tab: { ..., id: <integer>, ... }
+     *                           , url: <string>
+     *                           , ...
+     *                           }
+     * @param  {boolean} active  true if extension should be active
+     *                           for this tab
+     * @param  {[type]} response asynch callback function if call came
+     *                           from activateExtension when popup is
+     *                           opened.
+     */
+  , toggleExtension: function toggleExtension(tab, active, response) {
+      var tabId = tab.id
+      var url
+        , autoActivate
+        , colorize
+
+      if (response instanceof Function) {
+        // The activation call came from opening the popup window.
+        // browserAction badge text is already set
+        url = tab.url
+
+        autoActivate = this.autoActivate.indexOf(url) > -1
+        colorize = false // TODO
+
+        response({
+          autoActivate: autoActivate
+        , colorize: colorize
+       })
+
+      } else {
+        this.updateIcon(tabId) // sets badge; icon "inactive"|"ready"
+      }
+
+      if (active) {
+        Tools.addToArray(this.activeTabs, tabId)
+        this.ensureNoteBookWindowIsOpen()
+        this.setIcon(tabId, "active") // resets icon to "active"
+
+      } else {
+        Tools.deleteFromArray(this.activeTabs, tabId)
       }
     }
 
+    /**
+     * SOURCE: Called from state_changed via asyncTreatTab
+     * ACTION: Adds or removes tab.url from the array of urls that
+     *         trigger auto-activation. Saves the changed array to
+     *         localStorage
+     * @param {object}   tab      active tab object
+     * @param {function} response calback for popup.js
+     */
+  , toggleAutoActivate: function toggleAutoActivate(tab, state) {
+      if (state) {
+        Tools.addToArray(this.autoActivate, tab.url)
+      } else {
+        Tools.deleteFromArray(this.autoActivate, tab.url)
+      }
+
+      localStorage.setItem(
+        "autoActivate"
+      , JSON.stringify(this.autoActivate)
+      )
+    }
+
     /** 
-     * SOURCE: Sent by shareLanguageData and setIcon if the extension
-     *         is being deactivated
+     * SOURCE: Sent by pageOpened and toggleExtension
      * ACTION: Determines if any of the languages the user is learning
      *         is present on the page, and if so:
      *         * highlights the browserAction icon
@@ -519,8 +507,8 @@
      *         from black (all words familiar) to red (high proportion
      *         of unfamiliar words)
      */
-  , updateIcon: function updateIcon(tab) {
-      var pageLanguages = this.languageLUT[tab.id]
+  , updateIcon: function updateIcon(tabId) {
+      var pageLanguages = this.languageLUT[tabId]
       var languageMatch = findLanguageMatch(this.languages)
       var ratio
         , byte
@@ -531,18 +519,19 @@
         byte = 128 - Math.round(128 * ratio)
         colorArray = [byte, byte, byte, 255] // always opaque
         
-        this.setIcon(tab, "ready")
+        this.setIcon(tabId, "ready")
 
         chrome.browserAction.setBadgeBackgroundColor({
-          tabId: tab.id
+          tabId: tabId
         , color: colorArray
         })
         chrome.browserAction.setBadgeText({
-          tabId: tab.id
+          tabId: tabId
         , text: languageMatch
         })
+
       } else {
-        this.setIcon(tab, "inactive")
+        this.setIcon(tabId, "inactive")
       }
 
       /**
@@ -599,83 +588,17 @@
     }
 
     /**
-     * SOURCE: Called by shareLanguageData if the page is set to
-     *         autoActivate, and by activateExtension via
-     *         asyncTreatTab (originally starting from the
-     *         popup)
-     * ACTION: * Shows the active icon
-     *         * If the call came from the popup, replies with the
-     *           autoActivate status of this page, for the
-     *           "always" checkbox
-     *         * TODO: activates the extension for this tab
-     * @param {object}   tab      active tab object
-     * @param {function} response callback for popup.js, 
-     * NOTE:   During debugging, the response function may report that
-     *         it is no longer valid. If you avoid using the debugger
-     *         it should work asynchronously as advertised.
+     * SOURCE: Sent by updateIcon and toggleExtension
+     * @param {object}  tabId  id of tab to which this icon applies
+     * @param {string}  state  "inactive"|"ready"|"active"
      */
-  , addToActiveTabs: function addToActiveTabs(tab, response) {
-      var url
-        , autoActivate
-
-      this.setIcon(tab, "active")
-
-      if (response instanceof Function) {
-        url = tab.url
-        autoActivate = this.autoActivate.indexOf(url) > -1
-        response({ autoActivate: autoActivate })
-      }
-
-      this.ensureNoteBookWindowIsOpen()
-    }
-
-    /**
-     * SOURCE: Called from state_changed via asyncTreatTab
-     * ACTION: Adds or removes tab.url from the array of urls that
-     *         trigger auto-activation. Saves the changed array to
-     *         localStorage
-     * @param {object}   tab      active tab object
-     * @param {function} response calback for popup.js
-     */
-  , toggleAutoActivate: function toggleAutoActivate(tab, state) {
-      if (state) {
-        Tools.addToArray(this.autoActivate, tab.url)
-      } else {
-        Tools.deleteFromArray(this.autoActivate, tab.url)
-      }
-
-      localStorage.setItem(
-        "autoActivate"
-      , JSON.stringify(this.autoActivate)
-      )
-    }
-
-    /**
-     * SOURCE: Sent by state_changed (via asyncTreatTab), 
-     *         addToActiveTabs and updateIcon
-     * @param {object}  tab            tab to which this icon applies
-     * @param {string}  state          "inactive"|"ready"|"active"
-     * @param {boolean} checkForLanguages true if the extension has 
-     *                                 been disactivated in the popup,
-     *                                 in which case the "ready" state
-     *                                 may need to be applied in a
-     *                                 second pass
-     */
-  , setIcon: function setIcon(tab, state, confirm) {
+  , setIcon: function setIcon(tabId, state) {
       var message = {
-          tabId: tab.id
+          tabId: tabId
         , path: this.icons[state]
         }
 
       chrome.browserAction.setIcon(message)
-      // this.tabMap[tab.id] = state === "active"
-      if (state === "active") {
-        Tools.addToArray(this.activeTabs, tab.id)
-      } // DELETE IF NOT?
-
-      if (confirm) {
-        this.updateIcon(tab)
-      }
     }
    
     /**
@@ -692,8 +615,8 @@
      */
   , activateExtension: function activate(request, sender, response) {
       this.asyncTreatTab({
-        method: "addToActiveTabs"
-      , arguments: [response]
+        method: "toggleExtension"
+      , arguments: [true, response]
       }) 
     }
 
@@ -713,8 +636,8 @@
       switch (key) {
         case "active":
           this.asyncTreatTab({
-            method: "setIcon"
-          , arguments: [value ? "active" : "inactive", !value]
+            method: "toggleExtension"
+          , arguments: [value]
           })
         break
 
@@ -763,10 +686,6 @@
     extension.openConnection.call(extension, externalPort)
   }
 
-  // function useExtension() {
-  //   extension.useExtension.call(extension)
-  // }
-
   function tabChanged(tabId, changedInfo, tab) { // NEW
     extension.tabChanged.call(extension, tabId, changedInfo, tab)
   }
@@ -785,7 +704,6 @@
   }
   
   chrome.runtime.onConnectExternal.addListener(openConnection)
-  // chrome.browserAction.onClicked.addListener(useExtension)
   chrome.runtime.onMessage.addListener(treatMessage)
   chrome.tabs.onRemoved.addListener(tabChanged) // NEW
   chrome.tabs.onUpdated.addListener(tabChanged);
