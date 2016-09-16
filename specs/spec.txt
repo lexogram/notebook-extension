@@ -152,3 +152,18 @@ Selection.set("lastRequest", {
 }
 Session.set("lastRequestTreated", true|false)
 })
+
+———————
+
+Always activate ...
+* Get the the url for the current tab
+* If [site], then get origin.
+* If [page], then use entire url, except for hash
+Save as {
+  <origin>: {
+    "*"
+  , "path/name/"
+  }
+}
+
+If user switches off always activate for a site, or shifts to page ...?

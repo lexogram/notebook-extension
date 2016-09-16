@@ -2,17 +2,7 @@
 
 ;(function content(){
 
-  // alert ("content.js " + window.location.href)
-  // 
-// <TESTING
-  window.SPEAK = function SPEAK(message) {
-    var utterance = new SpeechSynthesisUtterance(message)
-    window.speechSynthesis.speak(utterance)
-    console.log(message)
-  }
-// TESTING>
-
-  var toolbar = {
+  var content = {
     selectedText: ""
   , extensionIsActive: false
   , parser: new DOMParser()
@@ -33,72 +23,72 @@
       return this
 
       function updateStatus(result) {
-        toolbar.extensionIsActive = result.extensionIsActive
+        content.extensionIsActive = result.extensionIsActive
       }
     } 
 
-  , insertToolbar: function insertToolbar(request) {
-      var body = document.body
-      var nodes = this.parseAsElements(request.html)
-      appendToBody(nodes)
-      body.classList.add("lxo-annotations")
+  // , insertToolbar: function insertToolbar(request) {
+  //     var body = document.body
+  //     var nodes = this.parseAsElements(request.html)
+  //     appendToBody(nodes)
+  //     body.classList.add("lxo-annotations")
 
-      this.populateFrequencyMap()
-      this.extensionIsActive = true
-      this.mode = "annotations"
+  //     this.populateFrequencyMap()
+  //     this.extensionIsActive = true
+  //     this.mode = "annotations"
 
-      //this.addSpansToTree(body)
+  //     //this.addSpansToTree(body)
  
-      function appendToBody(nodes) {
-        var node
+  //     function appendToBody(nodes) {
+  //       var node
         
-        for (var ii = 0, total = nodes.length; ii < total; ii += 1) {
-          node = nodes[0]
-          body.appendChild(node)
-          toolbar.ignore.push(node)
-        }
-      }
+  //       for (var ii = 0, total = nodes.length; ii < total; ii += 1) {
+  //         node = nodes[0]
+  //         body.appendChild(node)
+  //         content.ignore.push(node)
+  //       }
+  //     }
 
-      ;(function activateToolbarButtons() {
-        var close = document.querySelector(".lxo-toolbar a.close")
-        var toggleMode = document.querySelector(".lxo-toolbar button")
+  //     ;(function activateToolbarButtons() {
+  //       var close = document.querySelector(".lxo-toolbar a.close")
+  //       var toggleMode = document.querySelector(".lxo-toolbar button")
 
-        close.addEventListener("click", function () {
-          toolbar.removeToolbar.call(toolbar)
-        }, false)
+  //       close.addEventListener("click", function () {
+  //         content.removeToolbar.call(content)
+  //       }, false)
 
-        // CHANGE
-        toggleMode.removeAttribute("disabled")
-        toggleMode.addEventListener("click", function (event) {
-          toolbar.toggleMode.call(toolbar, event)
-        }, false)
-      })()
-    }
-
-  , toggleMode: function toggleMode(event) {
-      var button = event.target
-      var body = document.body
-      var hash = window.location.hash
-      button.textContent = "Show " + this.mode
- 
-      switch (this.mode) {
-        case "original":
-          this.addSpansToTree(body)
-          this.mode = "annotations"
-        break
-        case "annotations":        
-          this.removeSpansFromTree(body)
-          this.mode = "original"
-        break
-      }
-    }
+  //       // CHANGE
+  //       toggleMode.removeAttribute("disabled")
+  //       toggleMode.addEventListener("click", function (event) {
+  //         content.toggleMode.call(content, event)
+  //       }, false)
+  //     })()
+  //   }
+  // 
+  // , toggleMode: function toggleMode(event) {
+  //     var button = event.target
+  //     var body = document.body
+  //     var hash = window.location.hash
+  //     button.textContent = "Show " + this.mode
+  //
+  //     switch (this.mode) {
+  //       case "original":
+  //         this.addSpansToTree(body)
+  //         this.mode = "annotations"
+  //       break
+  //       case "annotations":        
+  //         this.removeSpansFromTree(body)
+  //         this.mode = "original"
+  //       break
+  //     }
+  //   }
 
   , parseAsElements: function parseAsElements(html) {
       var tempDoc = this.parser.parseFromString(html, "text/html")
       return tempDoc.body.childNodes
     }
 
-  , removeToolbar:function removeToolbar() {
+  , closeExtension: function closeExtension() {
       if (!this.extensionIsActive) {
         return
       }
@@ -108,14 +98,31 @@
         this.removeSpansFromTree(document.body)
       }
 
-      var toolbar = document.querySelector("section.lxo-toolbar")
-      toolbar.parentNode.removeChild(toolbar)
       document.body.classList.remove("lxo-annotations")
 
       chrome.runtime.sendMessage({ method: "forgetExtension" })
 
       this.extensionIsActive = false
     }
+
+  // , removeToolbar:function removeToolbar() {
+  //     if (!this.extensionIsActive) {
+  //       return
+  //     }
+
+  //     // CHANGE
+  //     if (this.mode === "annotations") {
+  //       this.removeSpansFromTree(document.body)
+  //     }
+
+  //     var toolbar = document.querySelector("section.lxo-toolbar")
+  //     toolbar.parentNode.removeChild(toolbar)
+  //     document.body.classList.remove("lxo-annotations")
+
+  //     chrome.runtime.sendMessage({ method: "forgetExtension" })
+
+  //     this.extensionIsActive = false
+  //   }
 
   , checkSelection: function checkSelection() {
       if (!this.extensionIsActive) {
@@ -134,6 +141,8 @@
         })
       }
     }
+
+    // TEXT COLOURATION // TEXT COLOURATION // TEXT COLOURATION //
 
   , addSpansToTree: function addSpansToTree(element) {
       var childNodes = element.childNodes
@@ -177,7 +186,7 @@
           , parentNode
           , div
 
-        while (result = toolbar.regex.exec(textContent)) {
+        while (result = content.regex.exec(textContent)) {
           // [ 0: <word>
           // , 1: <word>
           // , index: <integer>
@@ -190,7 +199,7 @@
           word = result[0]
           htmlString += textContent.substring(start, end)
           start = end + word.length
-          className = toolbar.frequencyMap[word.toLowerCase()]
+          className = content.frequencyMap[word.toLowerCase()]
                    || "lxo-w15"
           //className = "lxo-w" + (odd = (odd + 1) % 2 )
           htmlString += "<span class='"+className+"'>"+word+"</span>"
@@ -205,7 +214,7 @@
           // such as a link, and the text that follows.
           htmlString = "<br/>" + htmlString
           // HACK>
-          elements = toolbar.parseAsElements(htmlString)
+          elements = content.parseAsElements(htmlString)
           index = elements.length - 1
 
           parentNode = element.parentNode
@@ -317,14 +326,30 @@
         }
       }
     }
+
+    // GOOGLE // GOOGLE // GOOGLE // GOOGLE // GOOGLE // GOOGLE //
   
+    /**
+     * SOURCE: Sent by activateGooglePage() in background.js, itself
+     *         called by openConnection when the Google tab opens
+     * ACTION: Detects the HTML element in the translate.google.com
+     *         page, and sets up a listener for changes to the text
+     *         of this element, in order to send the latest updates
+     *         to p#translation in the NoteBook window.
+     *         Google's translation streams in packet by packet, so
+     *         debounce() is used to wait until it has (almost) all
+     *         arrived.
+     * @param  {[type]} request      [description]
+     * @param  {[type]} sender       [description]
+     * @param  {[type]} sendResponse [description]
+     */
   , activateTranslationSpan: function activateTranslationSpan(request, sender, sendResponse) {
       sendResponse(true)
       var translationSpan
       var debounceDelay = 10
       var timeOut
 
-      if (!toolbar.googleActivated) {
+      if (!content.googleActivated) {
         setTranslationSpan()
       }
       
@@ -342,7 +367,7 @@
         , false
         )
 
-        toolbar.googleActivated = true
+        content.googleActivated = true
 
         debounceTranslation()
       }
@@ -369,18 +394,22 @@
   // LISTENERS // LISTENERS // LISTENERS // LISTENERS // LISTENERS // 
 
   function checkSelection(event) {
-    toolbar.checkSelection.call(toolbar)
+    content.checkSelection.call(content)
   }
 
   document.body.addEventListener("mouseup", checkSelection, false)
   document.body.addEventListener("keyup", checkSelection, false)
 
   function treatMessage(request, sender, sendResponse) {
-    var method = toolbar[request.method]
+    var method = content[request.method]
 
     if (typeof method === "function") {
-      method.call(toolbar, request, sender, sendResponse)
-    } 
+      method.call(content, request, sender, sendResponse)
+    }
+
+    if (request.async) {
+      return true
+    }
   }
 
   chrome.extension.onMessage.addListener(treatMessage)

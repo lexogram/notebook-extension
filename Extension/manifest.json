@@ -6,7 +6,8 @@
 , "description": "Helps you save and share notes about web pages."
 
 , "browser_action": {
-    "default_icon": "img/icon19.png"
+    "default_icon": "img/19/inactive.png"
+  , "default_popup": "html/popup.html"
   }
 
 , "permissions": [
@@ -23,22 +24,14 @@
 
 , "background": {
     "scripts": [
-      "js/background.js"
+      "js/tools.js"
+    , "js/background.js"
     ]
   }
 
 , "externally_connectable": {
     "matches": [
       "http://localhost:*/*"
-      // No wildcards are allowed in (sub)domain names
-    // , "https://en.wiktionary.org/*"
-    // , "https://fi.wiktionary.org/*"
-    // , "https://fr.wiktionary.org/*"
-    // , "https://ja.wiktionary.org/*"
-    // , "https://ru.wiktionary.org/*"
-    // , "https://th.wiktionary.org/*"
-    // , "https://zh.wiktionary.org/*"
-    // , "https://www.wiktionary.org/*"
     ]
   }
 
@@ -51,6 +44,7 @@
       ]
     , "js": [
         "js/content.js"
+      , "js/languages.js"
       ]
     }
   , {

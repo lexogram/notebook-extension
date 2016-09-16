@@ -1,0 +1,81 @@
+html, body {
+margin: 0;
+background-color: #000;
+
+}
+body {
+width: 18em;
+background-color: #fff;
+padding-bottom: 1em;
+}
+h1 {
+font-size: 1.2em;
+font-style: oblique
+font-weight: bold
+width: 100%;
+padding: 0.25em;
+margin: 0;
+background-color: #00559f;
+color: #fff;
+}
+summary {
+outline: none;
+padding: 0.5em 0 0 0.5em;
+}
+details p {
+margin: 0;
+padding: 0.25em 0 0 1.6em;
+}
+input {
+margin: 1.25em 0 0.25em 0.5em;
+padding: 0.75em;
+}
+label {
+padding: 0 0 0 0.5em;
+}
+li, input:not(:disabled), label {
+cursor: pointer;
+}
+input:disabled + label {
+opacity: 0.25;
+cursor: default;
+}
+ul {
+margin: 0 0.25em 0 -0.35em;
+list-style: none;
+padding-left: 1.8em;
+display: none;
+}
+ul input {
+margin: 0.5em 0 0 0.5em;
+}
+input:checked ~ ul {
+display: block;
+}
+#active + label::before {
+content: "Activate extension for this tab";
+}
+#active:checked + label::before {
+content: "Extension activated for this tab";
+font-weight: bold;
+color: #00559f;
+}
+#active ~ div {
+opacity: 0.25;
+pointer-events: none;
+cursor: default;
+}
+#active:checked ~ div {
+opacity: 1;
+pointer-events: auto;
+}
+#active:checked ~ div li {
+opacity: 1;
+cursor: pointer;
+}
+/*#always:checked + label::after {
+content: " for:";
+}*/
+#colourize:checked + label::after {
+content: ":";
+}
