@@ -25,18 +25,23 @@
 
   var popup = {
     panels: []
+  , connect: 0
   , details: 0
+  , feedback: 0
 
   , initialize: function initialize() {
       var self = this
       this.panels = [].slice.call(document.querySelectorAll(".panel"))
+      this.connect = document.getElementById("connect")
       this.details = document.querySelector("#account details")
+      this.feedback = document.getElementById("error")
 
       // Prepare to handle user input
       document.getElementById("settings").onchange = function(event) {
         self.inputValueChanged.call(self, event)
       }
 
+      // Prepare for registration or log in
       document.body.onclick = function (event) {
         self.treatAccounts.call(self, event)
       }
@@ -82,22 +87,23 @@
     }
 
   , treatAccounts: function treatAccounts(event) {
+      var self = this
       var target = event.target
       var className = target.className
       var id = className.match(/settings|connect|eye/)
-      var panels = this.panels
-      var total = panels.length
-      var ii
-        , panel
+      var action = className.match(/register|login/)
 
       if (id) {
         id = id[0]
+        action = action ? action[0] : 0
       } else {
         return
       }
 
       if (id === "eye") {
         togglePassword(true)
+      } else if (this.connect.classList.contains(action)) {
+        this[action]()
       } else {
         showActivePane()
       }
@@ -124,13 +130,20 @@
       }
 
       function showActivePane() {
+        var total = self.panels.length
+        var ii
+          , panel
+
         className.replace(/connect/, "panel")
 
         for (ii = 0; ii < total; ii += 1) {
-          panel = panels[ii]
+          panel = self.panels[ii]
           if (panel.id === id) {
             if (id === "connect") {
               panel.className = className
+            } else {
+              // Reset the div#connect class
+              self.connect.className = "panel"
             }
             panel.classList.add("active")
 
@@ -138,10 +151,23 @@
             panel.classList.remove("active")
           }
         }
+
+        self.details.removeAttribute("open")
+        self.feedback.classList.remove("feedback")
       }
+    }
 
-      this.details.removeAttribute("open")
+  , register: function register() {
+      this.showFeedback("Register not implemented yet")
+    }
 
+  , login: function login() {
+      this.showFeedback("Login not yet implemented")
+    }
+
+  , showFeedback: function showFeedback(message) {
+      this.feedback.textContent = message
+      this.feedback.classList.add("feedback")
     }
   }.initialize()
 })()

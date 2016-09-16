@@ -131,7 +131,7 @@
       while (ii--) {
         tabId = this.activeTabs[ii]
         chrome.tabs.sendMessage(tabId, message)
-        updateIcon(tabId)
+        this.updateIcon(tabId)
       }
 
       this.activeTabs.length = 0
@@ -444,6 +444,7 @@
       var url
         , autoActivate
         , colorize
+        , message
 
       if (response instanceof Function) {
         // The activation call came from opening the popup window.
@@ -467,9 +468,17 @@
         this.ensureNoteBookWindowIsOpen()
         this.setIcon(tabId, "active") // resets icon to "active"
 
+        var message = {
+            method: "setExtensionStatus"
+          , extensionIsActive: true
+          }
+
       } else {
         Tools.deleteFromArray(this.activeTabs, tabId)
+        var message = { method: "closeExtension" }
       }
+
+      chrome.tabs.sendMessage(tabId, message)
     }
 
     /**

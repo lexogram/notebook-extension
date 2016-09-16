@@ -31,11 +31,11 @@
     </div>
 
     <div>
-      <input type="checkbox" id="colourize" disabled
+      <input type="checkbox" id="colourize" checked disabled
       ><label for="colourize">Colourize text</label>
       <ul>
         <li>
-          <input type="radio" name="colourize" id="frequency" checked>
+          <input type="radio" name="colourize" id="frequency" checked disabled>
           <label for="frequency">By word frequency</label>
         </li>
         <li>
@@ -73,11 +73,11 @@
       </li>
     </ul>
 
-    <p id="error" class="feedback">Passwords do not match<br/>Username already exists<br/>You must agree to the terms and conditions<br/>Username or password incorrect</p>
+    <p id="error">Passwords do not match<br/>Username already exists<br/>You must agree to the terms and conditions<br/>Username or password incorrect</p>
 
     <input type="checkbox" id="terms" class="register">
     <label for="terms" class="register">
-      I agree to the <a href="#">terms and conditions</a>
+      I agree to the <a href="http://lexogram.com" target="terms">terms and conditions</a>
     </label>
 
     <button type="button" class="open settings">Cancel</button>

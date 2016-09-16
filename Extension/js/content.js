@@ -27,9 +27,13 @@
       return this
 
       function updateStatus(result) {
-        content.extensionIsActive = result.extensionIsActive
+        content.setExtensionStatus.call(content, result)
       }
-    } 
+    }
+
+  , setExtensionStatus: function setExtensionStatus(message) {
+      this.extensionIsActive = message.extensionIsActive
+    }
 
   , toggleMode: function toggleMode(mode) {
       if (mode === "none") {       
