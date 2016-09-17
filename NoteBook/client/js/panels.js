@@ -21,6 +21,8 @@
 * - connection.js is required for tellBackground
 */
 
+
+
 ;(function create_panel($){
   "use strict"
 
@@ -140,27 +142,15 @@
       }
 
   //, panels: []
+  //, activeIndex
     
-    , _create: function panelset_create () {
-        var activeIndex = (function getActiveIndex(panels, id) {
-          var activeIndex = -1
-          var panelOptions = panels.find(function(panel) {
-            activeIndex += 1
-            return panel.id === id
-          })
-          
-          if (!panelOptions) {
-            activeIndex = 0
-          }
-
-          return activeIndex
-        })(this.options.panels, this.options.default)
-
+    , _create: function panelset_create () { 
         this.panels = [] // local to this instance
         this._modifyDOM() 
         this._setUserActions()
+
         // this.panels is now populated
-        this.toggleActive(this.panels[activeIndex], true)
+        this.openPanelByName(this.options.default)
       } 
 
     , _modifyDOM: function panelset_modifyDOM () {
@@ -206,23 +196,31 @@
                       || panel.data("lxo-tab")
             var $element = $panel.element
             var $icon = $panel.$icon
-            var $other
+            //var $other
 
             $panel.$icon.on("mouseup", function openPanel() {
-              for (var ii = 0; ii < total; ii += 1) {
-                $other = panels[ii]
-                $other = $other.data("lxo-panel")
-                      || $other.data("lxo-tabset")
-                      || $other.data("lxo-tab")
-                
-                if ($other.element !== $panel.element) {
-                  self.toggleActive($other.element, false)
-                }
-              }
+              var panelIndex = -1
+              self.panels.find(function (panel) {
+                panelIndex += 1
+                return (panel[0] === $element[0])
+              })
 
-              if(!$panel.element.hasClass("active")) {
-                self.toggleActive($panel.element, true)
-              }
+              self.openPanelByIndex(panelIndex)
+
+              // for (var ii = 0; ii < total; ii += 1) {
+              //   $other = panels[ii]
+              //   $other = $other.data("lxo-panel")
+              //         || $other.data("lxo-tabset")
+              //         || $other.data("lxo-tab")
+                
+              //   if ($other.element !== $panel.element) {
+              //     self.toggleActive($other.element, false)
+              //   }
+              // }
+
+              // if(!$panel.element.hasClass("active")) {
+              //   self.toggleActive($panel.element, true)
+              // }
              
               // HACK required. When a tab widget slides horizontally
               // to the left, the icon is trimmed at the right rather
@@ -238,7 +236,57 @@
         }       
       }
 
-    , toggleActive:  function toggleActive($panel, makeActive) {
+    , openPanelByName: function openPanelByName(panelName) { 
+        var activeIndex = this.getActiveIndex(
+          this.options.panels
+        , panelName
+        )
+
+        this.openPanelByIndex(activeIndex)
+      }
+
+    , openPanelByIndex: function openPanelByIndex(panelIndex) {
+        var total = this.panels.length
+        var ii
+
+        if (this.activeIndex !== panelIndex) {          
+          for (ii = 0; ii < total; ii += 1) {
+            this.toggleActive(ii, ii === panelIndex)
+          }
+
+          this.activeIndex = panelIndex
+        }
+      }
+
+      /**
+      * [getActiveIndex description]
+      * @param  {array} panels [ { id: <string> 
+      *                          , ...}
+      *                        , ...
+      *                        ]
+      * @param  {string} id    should be the value of the id
+      *                        property of one of the objecs in
+      *                        the panels array
+      * @return {integer}      the index of the object with the
+      *                        given id
+      */
+    , getActiveIndex: function getActiveIndex(panels, id) {
+        var activeIndex = -1
+        var panelOptions = panels.find(function(panel) {
+          activeIndex += 1
+          return panel.id === id
+        })
+        
+        if (!panelOptions) {
+          activeIndex = 0
+        }
+
+        return activeIndex
+      }
+
+    , toggleActive:  function toggleActive(panelIndex, makeActive) {
+        var $panel = this.panels[panelIndex]
+
         if (makeActive) {
           $panel.addClass("active")
           Session.set("activePanel", $panel[0].id)
@@ -356,7 +404,14 @@
   var activePanel = Session.get("activePanel")
 
   $("body").notebook({
-    separation: 200
+    separation: 320
   , default: activePanel
   })
 })()
+
+
+
+function OpenNoteBookPanel(panelName) {
+  var $panelset = $(document.querySelector(".lxo-panels"))
+  $panelset.panelset("openPanelByName", panelName)
+}

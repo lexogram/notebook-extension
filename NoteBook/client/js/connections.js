@@ -16,7 +16,7 @@
 var tellBackground
   
 ;(function startUpWithoutMeteor(){
-  var extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
+  var extensionId = "icnhianhaeklbpkhfpikphlopdmcekaf"
   // Use your own extension id ^
   var connectInfo = { name: "notebook" }
 
@@ -45,7 +45,7 @@ var tellBackground
     }
 
   , changeSelection: function changeSelection(request) {
-      Session.set("selection", request.data)
+      Session.set("selection", request.data, true)
     }
 
   , tellBackground: function tellBackround(request) {
@@ -53,19 +53,19 @@ var tellBackground
     }
 
   , iFrameSetWidth: function iFrameSetWidth(request) {
-      Session.set("iFrameWidth", request.width)
+      Session.set("iFrameWidth", request.width, true)
     }
 
   , iFrameSetHeight: function iFrameSetHeight(request) {
-      Session.set("iFrameHeight", request.height)
+      Session.set("iFrameHeight", request.height, true)
     }
 
   , iFrameGetScrollTop: function iFrameGetScrollTop(request) {
-      Session.set("iFrameScrollTop", request.scrollTop)
+      Session.set("iFrameScrollTop", request.scrollTop, true)
     }
 
   , showTranslation: function showTranslation(request) {
-      Session.set("translation", request.data)
+      Session.set("translation", request.data, true)
     }
 
   , disableExtension: function disableExtension() {

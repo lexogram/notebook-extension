@@ -37,15 +37,41 @@ var Session
 
   Session = {
     defaults: { 
-      nativeCode: "en"
-    , targetCode: "fr"
+      nativeCode: "ru"
+    , targetCode: "en"
     , showTranslation: true
-    , anchorId: "French"
+    , anchorId: ".D0.90.D0.BD.D0.B3.D0.BB.D0.B8.D0.B9.D1.81.D0.BA.D0.B8.D0.B9"
     }
 
   , map: {}
+  , storage: {}
 
   , listeners: {}
+
+    /**
+     * Reads the latests values for this.map from localStorage on
+     * startup. Applies any default values if they are not yet set.
+     */
+  , initialize: function initialize() {
+      var key
+      var value
+
+      try {
+        this.map = JSON.parse(localStorage.getItem("session")) || {}
+      } catch (error) {
+        this.map = {}
+      }
+
+      for (key in this.defaults) {
+        if (this.get(key) === undefined) {
+          this.set(key, this.defaults[key])
+        }
+      }
+
+      this.storage = JSON.parse(JSON.stringify(this.map))
+
+      return this
+    }
 
   , get: function get (key) {
       return this.map[key]
@@ -67,7 +93,8 @@ var Session
 
       this.map[key] = value
       if (!dontSave) {
-        localStorage.setItem("session", JSON.stringify(this.map))
+        this.storage[key] = value
+        localStorage.setItem("session", JSON.stringify(this.storage))
       }
       this.broadcast(key)
       return value
@@ -151,29 +178,6 @@ var Session
       } else {
         method(key, value)
       }
-    }
-
-    /**
-     * Reads the latests values for this.map from localStorage on
-     * startup. Applies any default values if they are not yet set.
-     */
-  , initialize: function initialize() {
-      var key
-      var value
-
-      try {
-        this.map = JSON.parse(localStorage.getItem("session")) || {}
-      } catch (error) {
-        this.map = {}
-      }
-
-      for (key in this.defaults) {
-        if (this.get(key) === undefined) {
-          this.set(key, this.defaults[key])
-        }
-      }
-
-      return this
     }
   }.initialize()
 })()

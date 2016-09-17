@@ -689,6 +689,7 @@ ASYNC = {
     // Ignore word if it is all whitespace
     word = word.match(lastWordRegex)
     if (word) {
+      OpenNoteBookPanel("wiktionary")
       Session.set("meaning", { text: word[0], lang: lang }, "noSave")
     }
   }

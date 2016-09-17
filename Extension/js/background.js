@@ -9,7 +9,8 @@
   var extension = {
     ports: {}
 //, meteorURL: "http://localhost:3000/"
-  , meteorURL: "http://localhost/NoteBook/main.html"
+//, meteorURL: "http://localhost/NoteBook/main.html"
+  , meteorURL: "http://dev.lexogram.com/extension/main.html"
   // use your own local URL ^
   , injectedHTML: chrome.extension.getURL("html/inject.html")
   , injectedCSSFile: "css/inject.css"

@@ -115,8 +115,14 @@
 
   , iFrameGetScrollTop: function iFrameGetScrollTop(request) {
       var element = document.getElementById(request.anchorId)
-      var anchorRect = element.getBoundingClientRect()
+      var anchorRect
 
+      if (!element) {
+        // There's no element with the given anchorId on this page
+        return
+      }
+
+      anchorRect = element.getBoundingClientRect()
       request.scrollTop = anchorRect.top 
 
       chrome.runtime.sendMessage( request )
