@@ -16,7 +16,7 @@
 var tellBackground
   
 ;(function startUpWithoutMeteor(){
-  var extensionId = "icnhianhaeklbpkhfpikphlopdmcekaf"
+  var extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
   // Use your own extension id ^
   var connectInfo = { name: "notebook" }
 
@@ -24,48 +24,45 @@ var tellBackground
     port: null
 
   , initialize: function initialize() {
+      self = this
       this.port = chrome.runtime.connect(extensionId, connectInfo)
       this.port.onMessage.addListener(treatMessage)
 
       tellBackground = function (message) {
-        connections.tellBackground.call(connections, message)
+        self.tellBackground.call(self, message)
       }
 
-      this.tellBackgroundOfInitialSettings()
+      this.tellBackground({ method: "getStoredSettings" })
 
       return this
-    }
-
-  , tellBackgroundOfInitialSettings: function () {
-      this.tellBackground({
-        method: "setLanguages"
-      , nativeCode: Session.get("nativeCode")
-      , targetCode: Session.get("targetCode")
-      })
-    }
-
-  , changeSelection: function changeSelection(request) {
-      Session.set("selection", request.data, true)
     }
 
   , tellBackground: function tellBackround(request) {
       this.port.postMessage(request)
     }
 
+  , getStoredSettings: function (request) {
+      Session.initialize(request.data)
+    }
+
+  , changeSelection: function changeSelection(request) {
+      Session.set("selection", request.data)
+    }
+
   , iFrameSetWidth: function iFrameSetWidth(request) {
-      Session.set("iFrameWidth", request.width, true)
+      Session.set("iFrameWidth", request.width)
     }
 
   , iFrameSetHeight: function iFrameSetHeight(request) {
-      Session.set("iFrameHeight", request.height, true)
+      Session.set("iFrameHeight", request.height)
     }
 
   , iFrameGetScrollTop: function iFrameGetScrollTop(request) {
-      Session.set("iFrameScrollTop", request.scrollTop, true)
+      Session.set("iFrameScrollTop", request.scrollTop)
     }
 
   , showTranslation: function showTranslation(request) {
-      Session.set("translation", request.data, true)
+      Session.set("translation", request.data)
     }
 
   , disableExtension: function disableExtension() {
@@ -90,5 +87,4 @@ var tellBackground
   }
 
   window.onbeforeunload = disableExtension
-  Session.set("ready", true, true)
 })() // remove iife () when Meteor.startup() is restored

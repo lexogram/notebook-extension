@@ -9,6 +9,7 @@
   , ignore: []
   , regex: /(\w+)/g
   , removex: /lxo-w\d+/
+  , _w: /[^\s!-\/:-@[-`{-~\u00A0-¾—-⁊\u200b]/
   , mode: "original"
   , frequencyMap: {}
   , translationSpan: null
@@ -82,14 +83,22 @@
 
       var selection = document.getSelection()
       var text = selection.toString()
+      var lang
 
-      if (this.selectedText !== text) {
-        this.selectedText = text
+      if (this._w.test(text)){ // text has at least one word character
+        lang = this.getLang(selection.getRangeAt(0).startContainer)
 
-        chrome.runtime.sendMessage({
-          method: "changeSelection"
-        , data: this.selectedText
-        })
+        if (this.selectedText !== text) {
+          this.selectedText = text
+
+          chrome.runtime.sendMessage({
+            method: "changeSelection"
+          , data: {
+              text: this.selectedText
+            , lang: lang
+            }
+          })
+        }
       }
     }
 
@@ -143,7 +152,7 @@
       )
 
       while (node = treeWalker.nextNode()) {
-        language = getLang(node)
+        language = this.getLang(node)
         text = node.textContent.replace(/\s/g, "")
         count = text.length
 
@@ -163,6 +172,7 @@
       }
 
       return languageData
+    }
 
       /**
        * @param  {textNode} node should be an HTML element or textNode
@@ -170,22 +180,21 @@
        *                    given node, or "" if no lang attribute is 
        *                    defined
        */
-      function getLang(node) {
-        var lang = ""
-        var element = node
+  , getLang: function getLang(node) {
+      var lang = ""
+      var element = node
 
-        while (!element.closest) {
-          element = element.parentNode
-        }
-
-        element = element.closest("[lang]")
-
-        if (element) {
-          lang = element.getAttribute("lang")
-        }
-
-        return lang
+      while (!element.closest) {
+        element = element.parentNode
       }
+
+      element = element.closest("[lang]")
+
+      if (element) {
+        lang = element.getAttribute("lang")
+      }
+
+      return lang
     }
 
     // TEXT COLOURATION // TEXT COLOURATION // TEXT COLOURATION //

@@ -11,6 +11,29 @@ height: 100%;
 margin: 0;
 }
 
+/* Splash */
+
+#background {
+position: absolute;
+height: 100%;
+width: 100%;
+background: linear-gradient(to right, #064483 0%,#3181bf 100%);
+opacity: 0;
+z-index: 0;
+transition: all 1s;
+}
+#background img {
+position: absolute;
+left: 5%;
+bottom: 2%;
+max-width: 383px;
+width: 90%;
+}
+#background.splash {
+opacity: 1;
+z-index: 1000;
+}
+
 /* Panels and tabs */
 
 .lxo-panels {

@@ -7,26 +7,10 @@
   "use strict"
 
   var extension = {
-    ports: {}
-//, meteorURL: "http://localhost:3000/"
-//, meteorURL: "http://localhost/NoteBook/main.html"
-  , meteorURL: "http://dev.lexogram.com/extension/main.html"
+    //meteorURL: "http://localhost:3000/"
+    meteorURL: "http://localhost/NoteBook/main.html"
+    //meteorURL: "http://dev.lexogram.com/extension/main.html"
   // use your own local URL ^
-  , injectedHTML: chrome.extension.getURL("html/inject.html")
-  , injectedCSSFile: "css/inject.css"
-  , tabMap: {}
-  , googleTabId: 0
-  , googleInitialized: false
-  , nativeCode: "fr"
-  , targetCode: "en"
-  , selection: ""
-  , word: ""
-  , activeTabs: []
-  , users: {}
-  , languages: { // <HARD-CODED for testing>
-      "en": ["all"]
-    , "ru": ["all"]
-    }
 
   , icons: { // <HARD-CODED>
       inactive: "img/19/inactive.png"
@@ -34,15 +18,48 @@
     , active: "img/19/active.png"
     }
 
-  , languageLUT: {}  // { tabId: languageMap, ... }
-  , autoActivate: [] // [ <url of auto-activated page>, ... ]
-  
-    /** Import injectedHTML for use in content pages */
-  , initialize: function initialize() {
-      this.users = this.getFromLocalStorage("users", {})
-      // TODO
+  , storedSettings: { 
+      users: {}
+    , nativeCode: "en"
+    , targetCode: "fr"
+    , target: { en: ["all"] } // TODO simplify
+    , showTranslation: true
+    , anchorId: ".D0.90.D0.BD.D0.B3.D0.BB.D0.B8.D0.B9.D1.81.D0.BA.D0.B8.D0.B9"
+    , autoActivate: []
+    , noteBookRect: { width: 360, top: 0, right: 0 }
+    }
+  , localStorageKey: "settings" 
 
-      this.autoActivate = this.getFromLocalStorage("autoActivate", [])
+  , ports: {}
+  , googleTabId: 0
+  , googleInitialized: false
+  , nativeCode: "fr"
+  , targetCode: "en"
+  , selection: ""
+  , activeTabs: []
+  , activeTabId: 0  
+  , autoActivate: [] // [ <url of auto-activated page>, ... ]
+  , users: {}
+  , target: {}
+  , noteBookRect: {}
+  , noteBookOptions: {}
+
+    // <HACK: Google translate uses custom code for Chinese> //
+  , googleLUT: { zh: "zh-CN" }
+  , languageLUT: {}  // { tabId: languageMap, ... }
+
+
+  
+  , initialize: function initialize() {
+      var settings = this.getFromLocalStorage(this.localStorageKey,{})
+      var value
+
+      for (var key in this.storedSettings) {
+        value = settings[key] || this.storedSettings[key]
+        this[key] = this.storedSettings[key] = value
+      }
+
+      this.setNoteBookOptions()
 
       return this
     }
@@ -73,6 +90,32 @@
       return item
     }
 
+  , saveToLocalStorage: function saveToLocalStorage(request) {
+      this.storedSettings[request.key] = request.value
+      var settings = JSON.stringify(this.storedSettings)
+      localStorage.setItem(this.localStorageKey, settings)
+    }
+
+    /**
+     * [setNoteBookOptions description]
+     */
+  , setNoteBookOptions: function setNoteBookOptions() {
+      var width = this.noteBookRect.width
+      var left = this.noteBookRect.left || screen.availWidth - width
+      var top = this.noteBookRect.top
+      var height = this.noteBookRect.height || screen.availHeight
+
+      this.noteBookOptions = {
+        url: this.meteorURL
+      , left: left
+      , top: top
+      , width: width
+      , height: height
+      , focused: true
+      , type: "popup"
+      }
+    }
+
     /**
      * SOURCE: Received after the NoteBook calls 
      *         chrome.runtime.connect( ... ) in order to open a
@@ -90,6 +133,11 @@
 
     // treatMessage // treatMessage // treatMessage // treatMessage //
     
+  , getStoredSettings: function getStoredSettings(request) {
+      request.data = this.storedSettings
+      this.ports.notebook.postMessage(request)
+    }
+
     /**
      * SOURCE: Called by the checkSelection method of the toolbar 
      *         object in the extension's content.js script
@@ -120,7 +168,6 @@
      *         page is set to open the extension automatically.
      *         Calls back with the response true | false | undefined
      */
-
   , disableExtension: function disableExtension() {
       this.ports.notebook.disconnect()
       delete this.ports.notebook
@@ -136,6 +183,7 @@
       }
 
       this.activeTabs.length = 0
+      this.activeTabId = 0
     }
 
     // COLOURATION // COLOURATION // COLOURATION // COLOURATION //
@@ -167,6 +215,17 @@
   , setLanguages: function setLanguages(languageMap) { // NEW
       this.nativeCode = languageMap.nativeCode
       this.targetCode = languageMap.targetCode
+      this.target = {}
+      this.target[this.targetCode] = ["all"]
+      this.saveToLocalStorage({
+        key: "target"
+      , value: this.target
+      })
+
+      for (var tabId in this.languageLUT) { // string
+        tabId = parseInt(tabId, 10)
+        this.updateIcon(tabId)
+      }
       
       this.showInGoogleTab()
     }
@@ -174,24 +233,15 @@
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
   , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
+      var width
+        , height
+        , options
+
       if (this.ports.notebook) {
         return
+      } else {
+        chrome.windows.create(this.noteBookOptions)
       }
-
-      var width = 360
-      var top = 0
-
-      var options = {
-        url: this.meteorURL
-      , left: screen.availWidth - width
-      , top: top
-      , width: width
-      , height: screen.availHeight - top
-      , focused: false
-      , type: "popup"
-      }
-
-      chrome.windows.create(options)
     }
 
     // TRANSLATION // TRANSLATION // TRANSLATION // TRANSLATION //
@@ -228,6 +278,19 @@
     }
 
     /**
+     * @param  {[type]} tabInfo { tabId: <integer>
+     *                          , windowId: <integer>
+     *                          }
+     */
+  , tabActivated: function tabActivated(tabInfo) {
+      var tabId = tabInfo.tabId
+      if (this.activeTabs.indexOf(tabId) > -1) {
+        this.activeTabId = tabId
+        this.updateIcon(tabId)
+      }
+    }
+
+    /**
      * SOURCE: Sent by changeSelection and setLanguages
      * ACTION: Opens or updates a tab pointing at translate.google.com
      *         When the tab is ready, tells the content script in that
@@ -236,6 +299,7 @@
      */
   , showInGoogleTab: function showInGoogleTab() {
       var options = {}
+      var lang
 
       if (!this.selection) {
         return
@@ -243,9 +307,16 @@
 
       this.activateGooglePage(this.googleTabId)
 
+      lang = this.selection.lang || this.targetCode
+      // <HACK: Google translate uses custom code for Chinese
+      if (this.googleLUT[lang]) {
+        lang = this.googleLUT[lang]
+      }
+      // HACK> //
+
       options.url = "https://translate.google.com/#"
-      options.url += this.targetCode + "/" + this.nativeCode + "/"
-      options.url += encodeURIComponent(this.selection)
+      options.url += lang + "/" + this.nativeCode + "/"
+      options.url += encodeURIComponent(this.selection.text)
 
       if (this.googleTabId) {
          chrome.tabs.update(this.googleTabId, options) //, setURL)
@@ -403,14 +474,14 @@
   , pageOpened: function pageOpened(request, sender, sendResponse) {
       var tab = sender.tab
       var url = sender.url
-      var id = tab.id
-      var extensionIsActive = (this.activeTabs.indexOf(id) > -1)
+      var tabId = this.activeTabId = tab.id
+      var extensionIsActive = (this.activeTabs.indexOf(tabId) > -1)
 
       if (!extensionIsActive) {
         extensionIsActive = this.checkUrlForMatch(sender.url)
       }
  
-      this.languageLUT[tab.id] = request.languageData
+      this.languageLUT[tabId] = request.languageData
       this.toggleExtension(tab, extensionIsActive)
 
       sendResponse({ extensionIsActive: extensionIsActive })
@@ -497,10 +568,10 @@
         Tools.deleteFromArray(this.autoActivate, tab.url)
       }
 
-      localStorage.setItem(
-        "autoActivate"
-      , JSON.stringify(this.autoActivate)
-      )
+      this.saveToLocalStorage({
+        key: "autoActivate"
+      , value: this.autoActivate
+      })
     }
 
     /** 
@@ -519,14 +590,14 @@
      */
   , updateIcon: function updateIcon(tabId) {
       var pageLanguages = this.languageLUT[tabId]
-      var languageMatch = findLanguageMatch(this.languages)
+      var languageMatch = findLanguageMatch(this.target)
       var ratio
         , byte
         , colorArray
 
       if (languageMatch) {
         ratio = pageLanguages[languageMatch].all / pageLanguages.all
-        byte = 128 - Math.round(128 * ratio)
+        byte = 208 - Math.round(208 * ratio)
         colorArray = [byte, byte, byte, 255] // always opaque
         
         this.setIcon(tabId, "ready")
@@ -542,6 +613,10 @@
 
       } else {
         this.setIcon(tabId, "inactive")
+        chrome.browserAction.setBadgeText({
+          tabId: tabId
+        , text: ""
+        })
       }
 
       /**
@@ -700,6 +775,10 @@
     extension.tabChanged.call(extension, tabId, changedInfo, tab)
   }
 
+  function tabActivated(tabInfo) { // NEW
+    extension.tabActivated.call(extension, tabInfo)
+  }
+
   function treatMessage(request, sender, sendResponse) {
     var method = extension[request.method]
     if (typeof method === "function") {
@@ -715,7 +794,8 @@
   
   chrome.runtime.onConnectExternal.addListener(openConnection)
   chrome.runtime.onMessage.addListener(treatMessage)
-  chrome.tabs.onRemoved.addListener(tabChanged) // NEW
-  chrome.tabs.onUpdated.addListener(tabChanged);
+  chrome.tabs.onRemoved.addListener(tabChanged)
+  chrome.tabs.onUpdated.addListener(tabChanged)
+  //chrome.tabs.onActivated.addListener(tabActivated)
 })()
 

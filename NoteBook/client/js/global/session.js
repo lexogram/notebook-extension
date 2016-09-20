@@ -36,44 +36,26 @@ var Session
   "use strict"
 
   Session = {
-    defaults: { 
-      nativeCode: "ru"
-    , targetCode: "en"
-    , showTranslation: true
-    , anchorId: ".D0.90.D0.BD.D0.B3.D0.BB.D0.B8.D0.B9.D1.81.D0.BA.D0.B8.D0.B9"
+    map: {
+      status: "loading"
+    , seconds: + new Date()
     }
-
-  , map: {}
-  , storage: {}
 
   , listeners: {}
 
     /**
-     * Reads the latests values for this.map from localStorage on
-     * startup. Applies any default values if they are not yet set.
+     * Receives the latest values for this.map from the background on
+     * startup.
      */
-  , initialize: function initialize() {
-      var key
-      var value
-
-      try {
-        this.map = JSON.parse(localStorage.getItem("session")) || {}
-      } catch (error) {
-        this.map = {}
+  , initialize: function initialize(storedSettings) {
+      for (var key in storedSettings) {
+        this.set(key, storedSettings[key])
       }
 
-      for (key in this.defaults) {
-        if (this.get(key) === undefined) {
-          this.set(key, this.defaults[key])
-        }
-      }
-
-      this.storage = JSON.parse(JSON.stringify(this.map))
-
-      return this
+      this.set("ready", true)
     }
 
-  , get: function get (key) {
+  , get: function get(key) {
       return this.map[key]
     }
 
@@ -83,19 +65,24 @@ var Session
      *         any listeners for changes to the value of key
      * @param {string} key   string key to save
      * @param {any} value    value to save for key
-     * @param {any} dontSave if truthy, localStorage will not be 
+     * @param {any} save     if truthy, localStorage will not be 
      *                        updated
      */
-  , set: function set (key, value, dontSave) {
+  , set: function set (key, value, save) {
       if (typeof key !== "string") {
         return
       }
 
       this.map[key] = value
-      if (!dontSave) {
-        this.storage[key] = value
-        localStorage.setItem("session", JSON.stringify(this.storage))
+
+      if (save) {
+        tellBackground({
+          method: "saveToLocalStorage"
+        , key: key
+        , value: value
+        })
       }
+
       this.broadcast(key)
       return value
     }
@@ -179,5 +166,5 @@ var Session
         method(key, value)
       }
     }
-  }.initialize()
+  }
 })()

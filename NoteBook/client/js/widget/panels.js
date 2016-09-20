@@ -118,6 +118,8 @@
 
     , _create: function tab_create() {
         this._modifyDOM("top")
+        this._initialize()
+        this._setUserActions()
       }
     }
   )
@@ -163,7 +165,8 @@
         var icon
         var offset
         
-        $parent.addClass(options.className)
+        $parent.attr("id", options.id)
+               .addClass(options.className)
                .css({ top: options.top })
 
         for (var ii = 0, total = panels.length; ii < total; ii ++) {
@@ -289,7 +292,7 @@
 
         if (makeActive) {
           $panel.addClass("active")
-          Session.set("activePanel", $panel[0].id)
+          Session.set("activePanel", $panel[0].id, true)
         } else {
           $panel.removeClass("active")
         }
@@ -401,12 +404,27 @@
 ;(function ready(){
   "use strict"
 
-  var activePanel = Session.get("activePanel")
-
-  $("body").notebook({
-    separation: 320
-  , default: activePanel
+  Session.register({
+    method: waitForPageToLoad
+  , key: "status"
+  , scope: self
+  , immediate: false
   })
+
+  function waitForPageToLoad(key, value) {
+    if (value !== "loaded") {
+      return
+    }
+
+    var activePanel = Session.get("activePanel")
+
+    $("body").notebook({
+      separation: 320
+    , default: activePanel
+    })
+
+    Session.set("status", "ready")
+  }
 })()
 
 

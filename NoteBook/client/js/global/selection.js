@@ -1,6 +1,6 @@
 /** SELECTION **
 *
-* Listens to the p#selection element for changes to the selection 
+* Listens to a give selectionElement for changes to the selection 
 * (through click-and-drag, double-click) and for when the left and
 * right arrow keys are pressed. Selects hyphenated words whole.
 *
@@ -21,7 +21,7 @@
 */
 
 // Placeholder
-ASYNC = { 
+var ASYNC = { 
   call: function(methodName) {
     var args = [].slice.call(arguments)
     args.shift()
@@ -29,9 +29,9 @@ ASYNC = {
   }
 }
 
-;(function selection(){
+function CustomSelection(selectionElement) {
   "use strict"
-
+  
   var selection = window.getSelection()
   var _W = "\\s!-\\/:-@[-`{-~\\u00A0-¾—-⁊\\u200b"
   var startRegex = new RegExp("([^" + _W + "]+'?-?)+['-]$", "g")
@@ -51,19 +51,18 @@ ASYNC = {
     , container
     , selectionUpdated
 
-  var box = document.querySelector("p#selection") // HARD-CODED
   var wordsCache = {}
   var wordsMap = { th: {} }
   var observer = new MutationObserver(checkForAlteredTextNodes)
 
-  observer.observe(box, { 
+  observer.observe(selectionElement, { 
     childList: true
   , attributes: true
   , subtree: true
   })
 
-  box.onmouseup = requestMeaning
-  box.ondblclick = selectHyphenatedWords
+  selectionElement.onmouseup = treatSelection
+  selectionElement.ondblclick = selectHyphenatedWords
   document.body.onkeydown = jumpToNextWord
 
   function selectHyphenatedWords(event) {
@@ -92,7 +91,7 @@ ASYNC = {
     }
 
     scrollIntoView(range)
-    requestMeaning()
+    treatSelection()
     
     // NESTED FUNCTIONS //
 
@@ -175,7 +174,7 @@ ASYNC = {
       return
     } else if (!(range = selection.getRangeAt(0))) {
       return
-    } else if (!box.contains(range.startContainer)) {
+    } else if (!selectionElement.contains(range.startContainer)) {
       return
     }
 
@@ -191,7 +190,7 @@ ASYNC = {
       return
     }
 
-    if (!box.contains(container)) {
+    if (!selectionElement.contains(container)) {
       return
     }
 
@@ -216,7 +215,7 @@ ASYNC = {
     selection.removeAllRanges()
     selection.addRange(range)
     scrollIntoView(range)
-    requestMeaning()
+    treatSelection()
   }
 
   function jumpLeft() {
@@ -681,7 +680,7 @@ ASYNC = {
     console.log(JSON.stringify(wordsMap))
   }
 
-  function requestMeaning() {
+  function treatSelection() {
     var word = selection.toString()
     var lang = getLang(selection.getRangeAt(0).startContainer)
     var data
@@ -689,8 +688,7 @@ ASYNC = {
     // Ignore word if it is all whitespace
     word = word.match(lastWordRegex)
     if (word) {
-      OpenNoteBookPanel("wiktionary")
-      Session.set("meaning", { text: word[0], lang: lang }, "noSave")
+      Session.set("meaning", { text: word[0], lang: lang })
     }
   }
-})()
+}
