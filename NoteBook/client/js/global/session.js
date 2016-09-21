@@ -37,7 +37,7 @@ var Session
 
   Session = {
     map: {
-      status: "loading"
+      status: "loading" // initialized | connected | ready
     , seconds: + new Date()
     }
 
@@ -52,7 +52,7 @@ var Session
         this.set(key, storedSettings[key])
       }
 
-      this.set("ready", true)
+      this.set("status", "connected")
     }
 
   , get: function get(key) {
@@ -82,6 +82,8 @@ var Session
         , value: value
         })
       }
+
+      //console.log(key, value, save)
 
       this.broadcast(key)
       return value

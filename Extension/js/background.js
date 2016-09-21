@@ -26,7 +26,7 @@
     , showTranslation: true
     , anchorId: ".D0.90.D0.BD.D0.B3.D0.BB.D0.B8.D0.B9.D1.81.D0.BA.D0.B8.D0.B9"
     , autoActivate: []
-    , noteBookRect: { width: 360, top: 0, right: 0 }
+    , noteBookRect: { width: 360, top: 0 }
     }
   , localStorageKey: "settings" 
 
@@ -51,16 +51,6 @@
 
   
   , initialize: function initialize() {
-      var settings = this.getFromLocalStorage(this.localStorageKey,{})
-      var value
-
-      for (var key in this.storedSettings) {
-        value = settings[key] || this.storedSettings[key]
-        this[key] = this.storedSettings[key] = value
-      }
-
-      this.setNoteBookOptions()
-
       return this
     }
 
@@ -100,12 +90,15 @@
      * [setNoteBookOptions description]
      */
   , setNoteBookOptions: function setNoteBookOptions() {
+      // TODO: Ensure that the notebook is completely on-screen if
+      // the screen rect has changed. (Allow user to place it partly
+      // off-screen, so long as screen rect doesn't change.)
       var width = this.noteBookRect.width
       var left = this.noteBookRect.left || screen.availWidth - width
       var top = this.noteBookRect.top
       var height = this.noteBookRect.height || screen.availHeight
 
-      this.noteBookOptions = {
+      var noteBookOptions = {
         url: this.meteorURL
       , left: left
       , top: top
@@ -114,6 +107,8 @@
       , focused: true
       , type: "popup"
       }
+
+      return noteBookOptions
     }
 
     /**
@@ -233,15 +228,25 @@
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
   , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
-      var width
-        , height
-        , options
-
+      var settings
+      var value
+      var key
+      var noteBookOptions
+     
       if (this.ports.notebook) {
         return
-      } else {
-        chrome.windows.create(this.noteBookOptions)
       }
+
+      var settings = this.getFromLocalStorage(this.localStorageKey,{})
+      var value
+
+      for (key in this.storedSettings) {
+        value = settings[key] || this.storedSettings[key]
+        this[key] = this.storedSettings[key] = value
+      }
+
+      noteBookOptions = this.setNoteBookOptions()
+      chrome.windows.create(noteBookOptions)
     }
 
     // TRANSLATION // TRANSLATION // TRANSLATION // TRANSLATION //
@@ -274,6 +279,8 @@
             extension.activateGooglePage(tabId)
           }
         }
+      } else if (!tab) {
+        Tools.removeFromArray(this.activeTabs, tabId)
       }
     }
 
@@ -546,7 +553,7 @@
           }
 
       } else {
-        Tools.deleteFromArray(this.activeTabs, tabId)
+        Tools.removeFromArray(this.activeTabs, tabId)
         var message = { method: "closeExtension" }
       }
 
@@ -565,7 +572,7 @@
       if (state) {
         Tools.addToArray(this.autoActivate, tab.url)
       } else {
-        Tools.deleteFromArray(this.autoActivate, tab.url)
+        Tools.removeFromArray(this.autoActivate, tab.url)
       }
 
       this.saveToLocalStorage({

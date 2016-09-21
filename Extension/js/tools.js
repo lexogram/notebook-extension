@@ -16,7 +16,7 @@ var Tools
       }
     }
 
-  , deleteFromArray: function deleteFromArray(array, item) {
+  , removeFromArray: function removeFromArray(array, item) {
       var index = array.indexOf(item)
       if (index < 0) {
         // item is not in the array

@@ -405,14 +405,14 @@
   "use strict"
 
   Session.register({
-    method: waitForPageToLoad
+    method: waitForInitialization
   , key: "status"
   , scope: self
   , immediate: false
   })
 
-  function waitForPageToLoad(key, value) {
-    if (value !== "loaded") {
+  function waitForInitialization(key, value) {
+    if (value !== "connected") {
       return
     }
 
@@ -423,7 +423,9 @@
     , default: activePanel
     })
 
-    Session.set("status", "ready")
+    //setTimeout(function () {
+      Session.set("status", "ready")
+    //}, 1)
   }
 })()
 

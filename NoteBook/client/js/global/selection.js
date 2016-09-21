@@ -677,7 +677,7 @@ function CustomSelection(selectionElement) {
       }
     }
 
-    console.log(JSON.stringify(wordsMap))
+    //console.log(JSON.stringify(wordsMap))
   }
 
   function treatSelection() {

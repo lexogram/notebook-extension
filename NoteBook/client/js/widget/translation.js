@@ -17,8 +17,8 @@
       var self = this
 
       Session.register({
-        method: this.waitForStartUp
-      , key: "ready"
+        method: this.waitForReady
+      , key: "status"
       , scope: self
       , immediate: false
       })
@@ -26,7 +26,11 @@
       return this
     }
 
-   , waitForStartUp: function(key, value) {
+   , waitForReady: function(key, value) {
+      if (value !== "ready") {
+        return
+      }
+
       var self = this
 
       this.pSelection = document.getElementById("selection")

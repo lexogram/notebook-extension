@@ -16,7 +16,7 @@
 var tellBackground
   
 ;(function startUpWithoutMeteor(){
-  var extensionId = "klhekknnkamgbfeckfdnkbjeelddikck"
+  var extensionId = "mdjbemaajccnhiegfiddiennphdjklmo"
   // Use your own extension id ^
   var connectInfo = { name: "notebook" }
 

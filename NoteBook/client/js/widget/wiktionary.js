@@ -28,7 +28,7 @@ var Wiktionary
 
       Session.register({
         method: this.waitForStartUp
-      , key: "ready"
+      , key: "status"
       , scope: self
       , immediate: false
       })
@@ -44,11 +44,13 @@ var Wiktionary
         method: self.activate
       , key: "activePanel"
       , scope: self
+      , immediate: false
       })
       Session.register({
         method: self.newSelection
       , key: "meaning"
       , scope: self
+      , immediate: false
       })
       Session.register({
         method: self.setWidth
@@ -142,21 +144,25 @@ var Wiktionary
     }
 
   , setWidth: function setWidth(key, value) {
-      this.iFrame.style.minWidth = value
+      if (this.iFrame) {
+        this.iFrame.style.minWidth = value
+      }
     }
 
   , setHeight: function setHeight(key, value) {
-      this.iFrame.style.height = value
-      this.iFrame.parentNode.scrollLeft = 160
+      if (this.iFrame) {
+        this.iFrame.style.height = value
+        this.iFrame.parentNode.scrollLeft = 160
 
-      if (value === "auto") {
-        tellBackground({ method: "iFrameSetHeight" })
-        tellBackground({ 
-          method: "iFrameGetScrollTop"
-        , anchorId: Session.get("anchorId")
-        })
+        if (value === "auto") {
+          tellBackground({ method: "iFrameSetHeight" })
+          tellBackground({ 
+            method: "iFrameGetScrollTop"
+          , anchorId: Session.get("anchorId")
+          })
+        }
+        // otherwise, wait for the window to resize before calling back
       }
-      // otherwise, wait for the window to resize before calling back
     }
 
   , setScrollTop: function setScrollTop(key, value) {
