@@ -2,7 +2,7 @@
   "manifest_version": 2
 
 , "name": "Annotations"
-, "version": "1.0"
+, "version": "0.1"
 , "description": "Helps you save and share notes about web pages."
 
 , "browser_action": {
