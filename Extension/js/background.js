@@ -43,6 +43,7 @@
   , target: {}
   , noteBookRect: {}
   , noteBookOptions: {}
+  , noteBookId: 0
 
     // <HACK: Google translate uses custom code for Chinese> //
   , googleLUT: { zh: "zh-CN" }
@@ -51,7 +52,20 @@
 
   
   , initialize: function initialize() {
+      this.readSettings()
+
       return this
+    }
+
+  , readSettings: function readSettings() {
+      var settings = this.getFromLocalStorage(this.localStorageKey,{})
+      var value
+      var key
+
+      for (key in this.storedSettings) {
+        value = settings[key] || this.storedSettings[key]
+        this[key] = this.storedSettings[key] = value
+      }
     }
 
     /**
@@ -228,25 +242,22 @@
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
   , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
-      var settings
-      var value
-      var key
+      var self = this
       var noteBookOptions
      
       if (this.ports.notebook) {
-        return
+        chrome.windows.update(this.noteBookId, { focused: true })
+        
+      } else {
+        this.readSettings()
+
+        noteBookOptions = this.setNoteBookOptions()
+        chrome.windows.create(noteBookOptions, setNoteBookWindowId)
       }
 
-      var settings = this.getFromLocalStorage(this.localStorageKey,{})
-      var value
-
-      for (key in this.storedSettings) {
-        value = settings[key] || this.storedSettings[key]
-        this[key] = this.storedSettings[key] = value
+      function setNoteBookWindowId(window) {
+        self.noteBookId = window.id
       }
-
-      noteBookOptions = this.setNoteBookOptions()
-      chrome.windows.create(noteBookOptions)
     }
 
     // TRANSLATION // TRANSLATION // TRANSLATION // TRANSLATION //

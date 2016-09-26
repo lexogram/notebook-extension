@@ -7,6 +7,9 @@
 ;(function initialize(){
   "use strict"
 
+  var screenX = window.screenX
+  var screenY = window.screenY
+
   window.onresize = saveWindowPosition
 
   Session.register({
@@ -18,7 +21,7 @@
   Session.set("status", "initialized")
 
   function saveWindowPosition(event) {
-    var window = event.target
+    // var window = event.target
     var rect = {
       left: window.screenLeft
     , top: window.screenTop
@@ -28,6 +31,19 @@
 
     Session.set("noteBookRect", rect, true)
   }
+
+  ;(function checkIfWindowMoved(){
+    setTimeout(checkIfWindowMoved, 500)
+
+    if (screenX === window.screenX && screenY === window.screenY){
+      return
+    }
+
+    saveWindowPosition()
+
+    screenX = window.screenX
+    screenY = window.screenY
+  })()
 
   function hideBackground(key, value) {
     if (value !== "ready") {
