@@ -28,6 +28,7 @@
   , connect: 0
   , details: 0
   , feedback: 0
+  , port: null
 
   , initialize: function initialize() {
       var self = this
@@ -45,6 +46,9 @@
       document.body.onclick = function (event) {
         self.treatAccounts.call(self, event)
       }
+
+      // Trick to discover when the popup window is about to close
+      this.port = chrome.runtime.connect({ name: "popupOpened" })
 
       // Automatically activate the extension and set the state of
       // the "always" checkbox, using a value retrieved from the

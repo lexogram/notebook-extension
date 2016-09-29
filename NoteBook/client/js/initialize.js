@@ -21,7 +21,7 @@
   Session.set("status", "initialized")
 
   function saveWindowPosition(event) {
-    // var window = event.target
+    var window = event.target
     var rect = {
       left: window.screenLeft
     , top: window.screenTop

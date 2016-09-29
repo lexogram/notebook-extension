@@ -42,5 +42,32 @@ var Tools
       window.speechSynthesis.speak(utterance)
       console.log(message)
     }
+
+  , getOpenTabs: function getOpenTabs() {
+      var tabMap = {}
+
+      chrome.windows.getAll({ populate:true }, iterateThroughWindows)
+
+      function iterateThroughWindows(windows) {
+        windows.forEach(addWindowTabsToMap)
+      }
+
+      function addWindowTabsToMap(window) {
+        window.tabs.forEach(function(tab) {
+          //collect all of the urls here, I will just log them instead
+          tabMap[tab.id] = tab.url
+        })
+      }
+
+      return tabMap
+    }
+  
+
+  , getUrlFromTabId: function getUrlFromTabId(tabId) {
+      var tabMap = this.getOpenTabs()
+      console.log(tabId, tabMap, tabMap[""+tabId])
+
+      return tabMap[tabId]
+    }
   }
 })()

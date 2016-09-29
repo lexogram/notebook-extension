@@ -2,11 +2,13 @@
  * 
  */
 
+var extension
 
 ;(function background(){
   "use strict"
 
-  var extension = {
+  //var 
+  extension = {
     //meteorURL: "http://localhost:3000/"
     meteorURL: "http://localhost/NoteBook/main.html"
     //meteorURL: "http://dev.lexogram.com/extension/main.html"
@@ -24,7 +26,7 @@
     , targetCode: "fr"
     , target: { en: ["all"] } // TODO simplify
     , showTranslation: true
-    , anchorId: ".D0.90.D0.BD.D0.B3.D0.BB.D0.B8.D0.B9.D1.81.D0.BA.D0.B8.D0.B9"
+    , anchorId: "French"
     , autoActivate: []
     , noteBookRect: { width: 360, top: 0 }
     }
@@ -57,6 +59,10 @@
       return this
     }
 
+    /**
+     * SOURCE: Sent by initialize and ensureNoteBookWindowIsOpen
+     * ACTION: Loads settings from LocalStorage
+     */
   , readSettings: function readSettings() {
       var settings = this.getFromLocalStorage(this.localStorageKey,{})
       var value
@@ -193,6 +199,7 @@
 
       this.activeTabs.length = 0
       this.activeTabId = 0
+      this.noteBookId = 0
     }
 
     // COLOURATION // COLOURATION // COLOURATION // COLOURATION //
@@ -242,13 +249,9 @@
     // INSTALLATION // INSTALLATION // INSTALLATION // INSTALLATION //
 
   , ensureNoteBookWindowIsOpen: function ensureNoteBookWindowIsOpen() {
-      var self = this
       var noteBookOptions
      
-      if (this.ports.notebook) {
-        chrome.windows.update(this.noteBookId, { focused: true })
-        
-      } else {
+      if (!this.noteBookId) {
         this.readSettings()
 
         noteBookOptions = this.setNoteBookOptions()
@@ -256,7 +259,7 @@
       }
 
       function setNoteBookWindowId(window) {
-        self.noteBookId = window.id
+        extension.noteBookId = window.id
       }
     }
 
@@ -278,20 +281,29 @@
      * @param  {undefined|object} tab     used to check if tab closed
      */
   , tabChanged: function tabChanged(tabId, changedInfo, tab) {
-      if (tabId === this.googleTabId) {
+      switch(tabId) {
+        case this.googleTabId:
+          treatGoogleTab()
+        break
+
+        default:
+          if (!tab) {
+            Tools.removeFromArray(this.activeTabs, tabId)
+          }
+      }
+      
+      function treatGoogleTab() {
         if (!tab) {
         // The Google Translate tab is closing
-          this.googleTabId = 0
-          this.googleInitialized = false
+          extension.googleTabId = 0
+          extension.googleInitialized = false
 
-        } else if (!this.googleInitialized) {
+        } else if (!extension.googleInitialized) {
           // Required the first time a translation is requested
           if (changedInfo.status === "complete") {
             extension.activateGooglePage(tabId)
           }
         }
-      } else if (!tab) {
-        Tools.removeFromArray(this.activeTabs, tabId)
       }
     }
 
@@ -439,7 +451,7 @@
       }
 
       chrome.tabs.query(
-        { active: true, currentWindow: true }
+        { active: true } //, currentWindow: true }// not while debugging
       , treatRequest
       )
 
@@ -503,6 +515,19 @@
       this.toggleExtension(tab, extensionIsActive)
 
       sendResponse({ extensionIsActive: extensionIsActive })
+    }
+
+    /**
+     * @param  {Port} externalPort
+     * @return {[type]}
+     */
+  , popupOpened: function popupOpened(externalPort) {
+      externalPort.onDisconnect.addListener(function () {
+        var id
+        if (id = extension.noteBookId) {
+          chrome.windows.update(id, { focused: true })
+        }
+      })
     }
 
     /**
@@ -769,8 +794,12 @@
       }
     }
 
-    // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
+  , unloadPopUp: function unloadPopup() {
+      console.log("unloadPopup", [].slice.call(arguments))
+    }
 
+    // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER // PLACEHOLDER //
+  
   , checkUrlForMatch: function checkUrlForMatch(url) {
       return this.autoActivate.indexOf(url) > -1
     }
@@ -798,7 +827,7 @@
   }
 
   function treatMessage(request, sender, sendResponse) {
-    var method = extension[request.method]
+    var method = extension[request.method || request.name]
     if (typeof method === "function") {
       method.call(extension, request, sender, sendResponse)
     } else {
@@ -811,6 +840,7 @@
   }
   
   chrome.runtime.onConnectExternal.addListener(openConnection)
+  chrome.runtime.onConnect.addListener(treatMessage)
   chrome.runtime.onMessage.addListener(treatMessage)
   chrome.tabs.onRemoved.addListener(tabChanged)
   chrome.tabs.onUpdated.addListener(tabChanged)
